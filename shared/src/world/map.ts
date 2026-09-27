@@ -37,7 +37,10 @@ export interface SpawnArea extends z.infer<typeof SpawnAreaProps> {
   height: number;
 }
 
-/** จุดพิเศษใน object layer `markers` เช่น player_start (อนาคต: NPC, ทางเข้าดันเจี้ยน, จุดฟื้นฟู) */
+/**
+ * จุดพิเศษใน object layer `markers`: player_start, recovery (จุดฟื้นฟู), npc (name = id ใน npcs.json ยืนขวางทาง)
+ * (อนาคต: ทางเข้าดันเจี้ยน)
+ */
 export interface MapMarker {
   objectId: number;
   type: string;
@@ -189,6 +192,11 @@ export function buildGameMap(id: string, tiled: TiledMap): { map?: GameMap; prob
     y: toTile(o.y),
     props: tiledProps(o.properties),
   }));
+
+  // NPC ยืนอยู่ = เดินผ่านไม่ได้ (ใช้กติกาเดียวกันทั้ง client และ server)
+  for (const m of markers) {
+    if (m.type === "npc" && m.x >= 0 && m.y >= 0 && m.x < width && m.y < height) terrain[m.y * width + m.x] = TERRAIN_CODES.indexOf("blocked");
+  }
 
   // property ของ tile: gid → { prop, propWidth, propSize }
   const tileProps = new Map<number, Record<string, string | number | boolean>>();

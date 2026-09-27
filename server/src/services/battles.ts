@@ -36,7 +36,7 @@ export class BattleService {
       .orderBy(asc(monsters.teamSlot))
       .all()
       .slice(0, registry.balance.battle.teamSize)
-      .map((m) => ({ id: m.uid, speciesId: m.speciesId, level: m.level, form: m.form, hp: m.hp, moves: m.moves }));
+      .map((m) => ({ id: m.uid, speciesId: m.speciesId, level: m.level, form: m.form, hp: m.hp, moves: m.moves, equipment: m.equipment }));
   }
 
   /** ทีมมี HP ไม่เต็มอยู่ไหม */
@@ -93,7 +93,9 @@ export class BattleService {
         for (const c of p.team) {
           const row = tx.select().from(monsters).where(eq(monsters.uid, c.id)).get();
           if (!row) continue;
-          const exp = p.fought.has(c.id) ? gain : benchExp(gain, b);
+          // เครื่องรางความรู้: EXP +% (หัวข้อ 9.1)
+          const base = p.fought.has(c.id) ? gain : benchExp(gain, b);
+          const exp = Math.floor(base * (1 + c.effects.expBoost / 100));
           const up = applyMonsterExp({ level: row.level, exp: row.exp }, exp, b);
           const moves = row.moves;
           const newMoves: string[] = [];

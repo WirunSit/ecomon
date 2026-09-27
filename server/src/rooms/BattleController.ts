@@ -2,6 +2,7 @@ import type { Client, Delayed } from "@colyseus/core";
 import {
   BattleActionMessage,
   BattleAnswerMessage,
+  HelperRequest,
   MSG,
   type BattleEndMessage,
   type BattleResultMessage,
@@ -11,6 +12,8 @@ import {
   type NoticeMessage,
 } from "@ecomon/shared";
 import { randomUUID } from "node:crypto";
+import { GameError } from "../services/errors";
+import { itemCount, takeItem } from "../services/inventory";
 import { BattleError, BattleSession, makeCombatant, makeParticipant, type TurnOutcome } from "../battle/BattleSession";
 import { registry } from "../content";
 import { services } from "../context";
@@ -99,6 +102,7 @@ export class BattleController {
         return;
       }
       if (a.type === "switch") return this.afterTurn(b, b.session.switchTo(b.playerId, a.uid));
+      if (a.type === "item") return this.useItem(b, a.itemId, a.uid);
       b.session.chooseMove(b.playerId, a.moveId);
       this.ask(b);
     } catch (e) {
@@ -115,6 +119,41 @@ export class BattleController {
     const p = b.session.participant(b.playerId);
     if (p.questionId !== parsed.data.instanceId) return;
     this.resolveAnswer(b, { choice: parsed.data.choice, value: parsed.data.value });
+  }
+
+  /** ไอเท็มตัวช่วยตอบระหว่างคำถาม (หัวข้อ 9.2) — นาฬิกาทรายเลื่อนเวลาหมดของ server ด้วย */
+  helper(client: Client, raw: unknown) {
+    const b = this.battles.get(client.sessionId);
+    const parsed = HelperRequest.safeParse(raw);
+    if (!b || !parsed.success) return;
+    const p = b.session.participant(b.playerId);
+    if (p.questionId !== parsed.data.instanceId) return;
+    const { questions } = services();
+    try {
+      const result = questions.useHelper(parsed.data.instanceId, b.playerId, parsed.data.itemId);
+      if (result.addSeconds) {
+        const instance = questions.get(parsed.data.instanceId)!;
+        const deadline = questions.deadline(instance);
+        b.timer?.clear();
+        if (deadline !== null) b.timer = this.host.clock.setTimeout(() => this.resolveAnswer(b, null), deadline - Date.now());
+      }
+      client.send(MSG.battleHelper, result);
+    } catch (e) {
+      if (!(e instanceof GameError)) throw e;
+      client.send(MSG.notice, { text: e.message } satisfies NoticeMessage);
+    }
+  }
+
+  /** ไอเท็มฟื้นฟูในการต่อสู้ — ตรวจของในกระเป๋าก่อน ใช้สำเร็จแล้วจึงหักออก */
+  private useItem(b: ActiveBattle, itemId: string, uid: string) {
+    const item = registry.items.find(itemId);
+    if (item?.category !== "consumable" || !item.usableIn.includes("battle") || (item.effect.kind !== "heal" && item.effect.kind !== "revive"))
+      throw new BattleError("ไอเท็มนี้ใช้ในการต่อสู้ไม่ได้");
+    const { db } = services();
+    if (itemCount(db, b.playerId, itemId) <= 0) throw new BattleError(`ไม่มี${item.name}ในกระเป๋า`);
+    const outcome = b.session.useItem(b.playerId, itemId, uid, item.effect.kind, item.effect.percent);
+    takeItem(db, b.playerId, itemId, "");
+    this.afterTurn(b, outcome);
   }
 
   resync(client: Client) {
@@ -156,7 +195,7 @@ export class BattleController {
     if (!p.questionId || this.battles.get(b.sessionId) !== b) return;
     b.timer?.clear();
     b.timer = undefined;
-    const outcome = services().questions.answer(p.questionId, b.playerId, submitted);
+    const outcome = services().questions.answer(p.questionId, b.playerId, submitted, Date.now(), b.session.active(p).effects.quickWindowSec);
     if (!outcome) return;
     this.send(b, MSG.battleResult, {
       instanceId: outcome.instance.id,

@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import {
   MSG,
+  type BagResponse,
   type BattleEndMessage,
   type BattleEvent,
   type BattleResultMessage,
@@ -16,6 +17,9 @@ import { BattleCards } from "../ui/battle/BattleCards";
 import { BattleDock } from "../ui/battle/BattleDock";
 import { showEndPanel } from "../ui/battle/EndPanel";
 import { QuestionPanel } from "../ui/battle/QuestionPanel";
+import { api } from "../net/api";
+import { itemIcon } from "../ui/itemIcon";
+import { showPicker } from "../ui/Picker";
 import { UI } from "../ui/strings";
 import { Toast } from "../ui/Toast";
 
@@ -53,6 +57,7 @@ export class BattleScene extends Phaser.Scene {
   private sprites!: Record<Side, Phaser.GameObjects.Image>;
   private holders!: Record<Side, Phaser.GameObjects.Container>;
   private tasks: (() => Promise<void>)[] = [];
+  private stock = new Map<string, number>();
   private running = false;
   private closed = false;
 
@@ -106,7 +111,17 @@ export class BattleScene extends Phaser.Scene {
 
     this.cards = new BattleCards();
     this.dock = new BattleDock();
-    this.question = new QuestionPanel(this.dock);
+    this.question = new QuestionPanel(this.dock, {
+      stock: () => this.stock,
+      use: (instanceId, itemId) => this.room.send(MSG.battleHelper, { instanceId, itemId }),
+    });
+    // จำนวนไอเท็มในกระเป๋า (สำหรับตัวช่วยตอบ/ไอเท็มฟื้นฟู) — server ตรวจของจริงอีกครั้งตอนใช้
+    this.stock = new Map();
+    void api<BagResponse>("/bag")
+      .then((bag) => {
+        for (const it of bag.items) if (it.tier === "") this.stock.set(it.itemId, it.qty);
+      })
+      .catch(() => undefined);
     this.toast = new Toast();
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       this.closed = true;
@@ -130,6 +145,10 @@ export class BattleScene extends Phaser.Scene {
     switch (m.type) {
       case "notice":
         this.toast.show(m.text);
+        return;
+      case "helper":
+        this.stock.set(m.msg.itemId, m.msg.left);
+        this.question.applyHelper(m.msg);
         return;
       case "state":
         return this.enqueue(async () => {
@@ -202,11 +221,47 @@ export class BattleScene extends Phaser.Scene {
         move: (moveId) => this.room.send(MSG.battleAction, { type: "move", moveId }),
         switchTo: (uid) => this.room.send(MSG.battleAction, { type: "switch", uid }),
         flee: () => this.room.send(MSG.battleAction, { type: "flee" }),
+        item: () => this.pickBattleItem(state),
       });
     } else if (state.phase === "awaiting_answer" && state.question) {
       const q = state.question;
       this.question.show(q, (a) => this.room.send(MSG.battleAnswer, { instanceId: q.instanceId, ...a }));
     }
+  }
+
+  /** ไอเท็มฟื้นฟูในการต่อสู้: เลือกไอเท็ม → เลือกมอนในทีม → ส่งให้ server (เสีย 1 เทิร์น) */
+  private pickBattleItem(state: BattleStateView) {
+    const items = registry.items.all.filter(
+      (it) => it.category === "consumable" && it.usableIn.includes("battle") && (it.effect.kind === "heal" || it.effect.kind === "revive"),
+    );
+    showPicker(
+      UI.battleItem.title,
+      items.map((it) => {
+        const qty = this.stock.get(it.id) ?? 0;
+        return {
+          icon: itemIcon(it.id, "", 30),
+          label: `${it.name} ${UI.bag.qty(qty)}`,
+          sub: it.description,
+          disabled: qty <= 0,
+          onPick: () => {
+            const revive = it.category === "consumable" && it.effect.kind === "revive";
+            showPicker(
+              UI.battleItem.pickTarget(it.name),
+              state.team.map((c) => ({
+                label: `${speciesName(c.speciesId, c.form)} ${UI.level(c.level)}`,
+                sub: `HP ${c.hp}/${c.maxHp}`,
+                disabled: revive ? c.hp > 0 : c.hp <= 0 || c.hp >= c.maxHp,
+                onPick: () => {
+                  this.dock.message(UI.battle.waiting);
+                  this.room.send(MSG.battleAction, { type: "item", itemId: it.id, uid: c.id });
+                },
+              })),
+            );
+          },
+        };
+      }),
+      UI.battleItem.none,
+    );
   }
 
   private async intro() {
@@ -256,6 +311,13 @@ export class BattleScene extends Phaser.Scene {
       case "attack":
         return this.playAttack(e);
       case "heal": {
+        if (e.source === "item" && e.itemId) {
+          const target = this.combatant(e.target);
+          const name = registry.items.find(e.itemId)?.name ?? e.itemId;
+          this.stock.set(e.itemId, Math.max(0, (this.stock.get(e.itemId) ?? 1) - 1));
+          this.dock.message(UI.battleItem.used(name, target ? speciesName(target.speciesId, target.form) : ""));
+          await this.wait(400);
+        }
         const c = this.combatant(e.target);
         if (c) c.hp = e.hp;
         const side = this.sideOf(e.target);

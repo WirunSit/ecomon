@@ -1,6 +1,8 @@
-import type { BattleQuestionMessage, BattleResultMessage } from "@ecomon/shared";
+import type { BattleQuestionMessage, BattleResultMessage, HelperResult } from "@ecomon/shared";
 import { balance, registry } from "../../content";
+import { itemIcon } from "../itemIcon";
 import { h } from "../overlay";
+import { showPicker } from "../Picker";
 import { UI } from "../strings";
 import type { BattleDock } from "./BattleDock";
 
@@ -16,6 +18,19 @@ interface Asked {
   input?: HTMLInputElement;
   body: HTMLElement;
   answered: boolean;
+  /** เวลาหมด (performance.now) และเวลาทั้งหมด (ms) — นาฬิกาทรายเลื่อนได้ */
+  endAt?: number;
+  total?: number;
+  /** ชนิดตัวช่วยที่ใช้กับข้อนี้แล้ว */
+  used: Set<string>;
+  hintEl?: HTMLElement;
+  inputs?: HTMLElement;
+}
+
+/** ไอเท็มตัวช่วยตอบ: จำนวนในกระเป๋า + ส่งคำขอใช้ให้ server (หัวข้อ 9.2) */
+export interface HelperSource {
+  stock(): Map<string, number>;
+  use(instanceId: string, itemId: string): void;
 }
 
 /**
@@ -27,14 +42,22 @@ export class QuestionPanel {
   private asked?: Asked;
   private tick?: number;
 
-  constructor(private readonly dock: BattleDock) {}
+  /**
+   * @param helpers ไอเท็มตัวช่วยตอบ (ไม่ส่ง = ปิดปุ่มไอเท็ม)
+   * @param battle ใช้ในการต่อสู้ (แสดง "ตอบให้ถูกเพื่อโจมตี" และโบนัสตอบไว) · false = บททดสอบอื่น
+   */
+  constructor(
+    private readonly dock: BattleDock,
+    private readonly helpers?: HelperSource,
+    private readonly battle = true,
+  ) {}
 
   show(msg: BattleQuestionMessage, submit: (a: SubmittedAnswer) => void) {
     this.stopTimer();
     const q = msg.question;
     const topic = registry.topics.find(q.topic);
     const body = h("div", { className: "q-body" });
-    const asked: Asked = { msg, buttons: [], body, answered: false };
+    const asked: Asked = { msg, buttons: [], body, answered: false, used: new Set() };
     this.asked = asked;
 
     const send = (a: SubmittedAnswer, chosen?: HTMLButtonElement) => {
@@ -80,9 +103,9 @@ export class QuestionPanel {
       setTimeout(() => input.focus(), 50);
     }
 
-    const item = this.dock.button(`🎒 ${UI.battle.item}`, () => undefined, "q-item");
-    item.disabled = true;
-    item.title = UI.battle.itemSoon;
+    const item = this.dock.button(`🎒 ${UI.battle.item}`, () => this.openHelpers(asked), "q-item");
+    item.disabled = !this.helpers;
+    asked.inputs = inputs;
 
     const timerBar = h("i");
     const timerText = h("span", { className: "q-time" });
@@ -91,7 +114,7 @@ export class QuestionPanel {
     body.append(
       h("div", { className: "q-head" }, [
         h("span", { className: "q-topic", text: topic?.name ?? q.topic }),
-        h("span", { className: "q-call", text: UI.battle.question }),
+        h("span", { className: "q-call", text: this.battle ? UI.battle.question : "" }),
         item,
       ]),
       ...(msg.timeLimitSec !== null ? [timer] : []),
@@ -100,12 +123,17 @@ export class QuestionPanel {
     );
     this.dock.set([body], "question");
 
+    // resync: ตัวช่วยที่ใช้ไปแล้วกับข้อนี้
+    if (msg.removed?.length) this.applyHelper({ instanceId: msg.instanceId, itemId: "", removed: msg.removed, left: 0 });
+    if (msg.hint) this.applyHelper({ instanceId: msg.instanceId, itemId: "", hint: msg.hint, left: 0 });
+
     if (msg.timeLimitSec !== null) {
-      const total = msg.timeLimitSec * 1000;
-      const start = performance.now();
+      asked.total = msg.timeLimitSec * 1000;
+      asked.endAt = performance.now() + asked.total;
       const update = () => {
-        const left = Math.max(0, total - (performance.now() - start));
-        timerBar.style.width = `${(left / total) * 100}%`;
+        const total = asked.total!;
+        const left = Math.max(0, asked.endAt! - performance.now());
+        timerBar.style.width = `${Math.min(100, (left / total) * 100)}%`;
         timerBar.className = left < 5000 ? "low" : left < total / 2 ? "mid" : "";
         timerText.textContent = left > 0 ? UI.battle.seconds(Math.ceil(left / 1000)) : UI.battle.timeUp;
         if (left <= 0) {
@@ -117,6 +145,61 @@ export class QuestionPanel {
       update();
       this.tick = window.setInterval(update, 200);
     }
+  }
+
+  /** รายการไอเท็มตัวช่วย (แว่นขยาย นาฬิกาทราย คัมภีร์ใบ้) */
+  private openHelpers(asked: Asked) {
+    if (!this.helpers || asked.answered) return;
+    const stock = this.helpers.stock();
+    const q = asked.msg.question;
+    const options = registry.items.all
+      .filter((it) => it.category === "consumable" && it.usableIn.includes("question"))
+      .map((it) => {
+        const effect = it.category === "consumable" ? it.effect : undefined;
+        const qty = stock.get(it.id) ?? 0;
+        let reason = "";
+        if (effect && asked.used.has(effect.kind)) reason = UI.helpers.used;
+        else if (effect?.kind === "remove_choices" && q.type !== "mcq" && q.type !== "image_mcq") reason = UI.helpers.onlyMcq;
+        else if (effect?.kind === "show_hint" && !q.hasHint) reason = UI.helpers.noHint;
+        else if (effect?.kind === "add_time" && asked.msg.timeLimitSec === null) reason = UI.helpers.noTimer;
+        return {
+          icon: itemIcon(it.id, "", 30),
+          label: `${it.name} ${UI.bag.qty(qty)}`,
+          sub: reason || it.description,
+          disabled: qty <= 0 || !!reason,
+          onPick: () => this.helpers!.use(asked.msg.instanceId, it.id),
+        };
+      });
+    showPicker(UI.helpers.title, options, UI.helpers.none);
+  }
+
+  /** ผลการใช้ตัวช่วยจาก server */
+  applyHelper(r: HelperResult) {
+    const asked = this.asked;
+    if (!asked || asked.msg.instanceId !== r.instanceId) return;
+    const effect = registry.items.find(r.itemId);
+    if (effect?.category === "consumable") asked.used.add(effect.effect.kind);
+    for (const i of r.removed ?? []) {
+      const b = asked.buttons[i];
+      if (!b) continue;
+      b.disabled = true;
+      b.classList.add("removed");
+    }
+    if (r.addSeconds && asked.endAt !== undefined && asked.total !== undefined) {
+      asked.endAt += r.addSeconds * 1000;
+      asked.total += r.addSeconds * 1000;
+      this.flash(UI.helpers.addTime(r.addSeconds));
+    }
+    if (r.hint && !asked.hintEl) {
+      asked.hintEl = h("p", { className: "q-hint", text: UI.helpers.hint(r.hint) });
+      asked.inputs?.before(asked.hintEl);
+    }
+  }
+
+  private flash(text: string) {
+    const note = h("span", { className: "q-flash", text });
+    this.asked?.body.querySelector(".q-head")?.append(note);
+    setTimeout(() => note.remove(), 2000);
   }
 
   /** เฉลย + คำอธิบาย แล้วรอให้กด "ต่อไป" (กดได้หลัง explanationSkipSec วินาที) */
@@ -147,7 +230,7 @@ export class QuestionPanel {
     const box = h("div", { className: `q-result ${r.correct ? "ok" : "bad"}` }, [
       h("div", { className: "q-result-head" }, [
         h("b", { text: `${r.correct ? "✔" : "✘"} ${title}` }),
-        ...(r.quick ? [h("span", { className: "q-quick", text: UI.battle.quick })] : []),
+        ...(r.quick && this.battle ? [h("span", { className: "q-quick", text: UI.battle.quick })] : []),
       ]),
       ...(reveal ? [h("p", { className: "q-reveal", text: reveal })] : []),
       h("p", { className: "q-explain" }, [h("small", { text: UI.battle.explanation }), r.explanation]),

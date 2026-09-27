@@ -5,6 +5,10 @@ import {
   LoginRequest,
   MonsterAction,
   ProfileStyleRequest,
+  UseItemRequest,
+  EvolutionAnswerRequest,
+  HelperRequest,
+  BuyRequest,
   ROOM_CODE_PATTERN,
   StarterRequest,
   WORLD_ROOM,
@@ -14,7 +18,7 @@ import {
 } from "@ecomon/shared";
 import { registry } from "../content";
 import type { Services } from "../context";
-import { playerInBattle, profileChanged } from "../rooms/hooks";
+import { playerInBattle, playerSpot, profileChanged } from "../rooms/hooks";
 import type { AuthData } from "../services/auth";
 import { GameError } from "../services/errors";
 
@@ -94,6 +98,54 @@ export function apiRouter(s: Services) {
     const playerId = req.auth!.playerId;
     const action = MonsterAction.parse(req.body);
     const result = s.collection.action(playerId, String(req.params.uid), action, playerInBattle(playerId));
+    profileChanged(playerId, result.profile);
+    res.json(result);
+  });
+
+  r.get("/bag", requireAuth, (req: AuthedRequest, res) => {
+    res.json(s.inventory.bag(req.auth!.playerId));
+  });
+
+  r.post("/items/use", requireAuth, (req: AuthedRequest, res) => {
+    const playerId = req.auth!.playerId;
+    const result = s.inventory.use(playerId, UseItemRequest.parse(req.body), playerInBattle(playerId));
+    profileChanged(playerId, result.profile);
+    res.json(result);
+  });
+
+  // ---------- พัฒนาร่าง (หัวข้อ 4.3) ----------
+
+  r.post("/monsters/:uid/evolve", requireAuth, (req: AuthedRequest, res) => {
+    const playerId = req.auth!.playerId;
+    res.json(s.evolution.start(playerId, String(req.params.uid), playerInBattle(playerId)));
+  });
+
+  r.post("/evolution/answer", requireAuth, (req: AuthedRequest, res) => {
+    const playerId = req.auth!.playerId;
+    const result = s.evolution.answer(playerId, EvolutionAnswerRequest.parse(req.body));
+    if (result.profile) profileChanged(playerId, result.profile);
+    res.json(result);
+  });
+
+  r.post("/evolution/helper", requireAuth, (req: AuthedRequest, res) => {
+    const body = HelperRequest.parse(req.body);
+    res.json(s.evolution.helper(req.auth!.playerId, body.instanceId, body.itemId));
+  });
+
+  r.post("/evolution/cancel", requireAuth, (req: AuthedRequest, res) => {
+    s.evolution.cancel(req.auth!.playerId);
+    res.json({ ok: true });
+  });
+
+  // ---------- ร้านค้า (หัวข้อ 9.2) ----------
+
+  r.get("/shop/:npc", requireAuth, (req: AuthedRequest, res) => {
+    res.json(s.shop.view(req.auth!.playerId, String(req.params.npc)));
+  });
+
+  r.post("/shop/:npc/buy", requireAuth, (req: AuthedRequest, res) => {
+    const playerId = req.auth!.playerId;
+    const result = s.shop.buy(playerId, String(req.params.npc), BuyRequest.parse(req.body), playerSpot(playerId));
     profileChanged(playerId, result.profile);
     res.json(result);
   });

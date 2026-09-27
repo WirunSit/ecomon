@@ -14,7 +14,8 @@
       "title": "เจ้าของร้านค้าหมู่บ้าน",
       "zone": "village",
       "sprite": "npc_shop_auntie",
-      "portrait": "npc_shop_auntie_portrait"
+      "portrait": "npc_shop_auntie_portrait",
+      "shop": true
     },
     {
       "id": "npc_lab_researcher",

@@ -43,7 +43,7 @@ export const QuestionsFileSchema = z.strictObject({
  * คำถามแบบที่ส่งให้ client: ตัดเฉลย คำอธิบาย และข้อมูลภายในออก (หัวข้อ 5.4)
  * เฉลย/คำอธิบายส่งแยกหลัง server ตรวจคำตอบแล้วเท่านั้น
  */
-export type ClientQuestion = { topic: string; stem: string; image: string | null } & (
+export type ClientQuestion = { topic: string; stem: string; image: string | null; hasHint: boolean } & (
   | { type: "mcq" | "image_mcq"; choices: string[] }
   | { type: "truefalse" }
   | { type: "numeric"; unit?: string }
@@ -51,7 +51,7 @@ export type ClientQuestion = { topic: string; stem: string; image: string | null
 
 /** @param order ลำดับตัวเลือกที่สลับแล้ว (order[ตำแหน่งที่แสดง] = index เดิม) */
 export function toClientQuestion(q: Question, order?: readonly number[]): ClientQuestion {
-  const base = { topic: q.topic, stem: q.stem, image: q.image };
+  const base = { topic: q.topic, stem: q.stem, image: q.image, hasHint: !!q.hint };
   switch (q.type) {
     case "mcq":
     case "image_mcq":

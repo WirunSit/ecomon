@@ -3,6 +3,11 @@ import {
   calcStats,
   coopHpMultiplier,
   defaultRng,
+  equipmentBonus,
+  equipmentEffects,
+  equippedList,
+  type EquipmentEffects,
+  type MonsterEquipment,
   pick,
   STAT_KEYS,
   type AnswerResult,
@@ -34,6 +39,8 @@ export interface Combatant {
   decay: number;
   decayPercent: number;
   passives: Passive[];
+  /** ผลพิเศษจากไอเท็มที่สวม (เครื่องรางธาตุ ความรู้ สายฟ้าแลบ) */
+  effects: EquipmentEffects;
 }
 
 export interface CombatantInput {
@@ -45,12 +52,15 @@ export interface CombatantInput {
   hp?: number | null;
   /** ท่าที่มี (ไม่ระบุ = ตามเลเวลและร่าง) */
   moves?: (string | null)[];
+  /** ไอเท็มที่สวม (หัวข้อ 9.1) */
+  equipment?: Partial<MonsterEquipment> | null;
 }
 
 /** สร้างผู้ต่อสู้จากข้อมูลมอนสเตอร์ ค่าพลังคำนวณสดจากสูตรใน shared (หัวข้อ 4.2) */
 export function makeCombatant(reg: Registry, input: CombatantInput, hpMultiplier = 1): Combatant {
   const species = reg.monsters.get(input.speciesId);
-  const stats = calcStats(species, input.level, input.form, reg.balance);
+  const equipped = equippedList(input.equipment);
+  const stats = calcStats(species, input.level, input.form, reg.balance, equipmentBonus(reg, equipped));
   const maxHp = Math.floor(stats.hp * hpMultiplier);
   const moves = (input.moves ?? reg.movesAtLevel(species.id, input.level, input.form)).filter((m): m is string => !!m && reg.moves.has(m));
   return {
@@ -68,10 +78,14 @@ export function makeCombatant(reg: Registry, input: CombatantInput, hpMultiplier
     decay: 0,
     decayPercent: 0,
     passives: reg.rolePassives(species.role),
+    effects: equipmentEffects(reg, equipped),
   };
 }
 
-export type PlayerAction = { kind: "attack"; moveId: string; answer: AnswerResult } | { kind: "switch"; to: number };
+export type PlayerAction =
+  | { kind: "attack"; moveId: string; answer: AnswerResult }
+  | { kind: "switch"; to: number }
+  | { kind: "item"; itemId: string; target: number; effect: "heal" | "revive"; percent: number };
 
 export interface Participant {
   playerId: string;
@@ -196,6 +210,23 @@ export class BattleSession {
     return this.tryResolve();
   }
 
+  /**
+   * ใช้ไอเท็มฟื้นฟูกับมอนในทีม — เสีย 1 เทิร์นเหมือนสลับตัว (ไม่มีคำถาม มอนป่ายังโจมตี)
+   * heal: ต้องยังไม่หมดแรงและ HP ไม่เต็ม · revive: ต้องหมดแรง
+   */
+  useItem(playerId: string, itemId: string, uid: string, effect: "heal" | "revive", percent: number): TurnOutcome | null {
+    const p = this.requirePhase(playerId, "awaiting_action");
+    const target = p.team.findIndex((m) => m.id === uid);
+    const c = p.team[target];
+    if (!c) throw new BattleError("ไม่พบมอนสเตอร์ตัวนี้ในทีม");
+    if (effect === "heal" && c.hp <= 0) throw new BattleError("มอนตัวนี้หมดแรงอยู่ ต้องใช้เมล็ดฟื้นคืน");
+    if (effect === "heal" && c.hp >= c.maxHp) throw new BattleError("HP เต็มอยู่แล้ว");
+    if (effect === "revive" && c.hp > 0) throw new BattleError("มอนตัวนี้ยังไม่หมดแรง");
+    p.action = { kind: "item", itemId, target, effect, percent };
+    p.phase = "ready";
+    return this.tryResolve();
+  }
+
   /** หนีจากมอนป่าได้เสมอ (บอสดันเจี้ยนหนีไม่ได้) */
   flee(playerId: string): boolean {
     const p = this.participant(playerId);
@@ -244,7 +275,14 @@ export class BattleSession {
       }
     }
 
-    // 2) สลับตัวทำก่อนการโจมตี
+    // 2) ใช้ไอเท็มและสลับตัวทำก่อนการโจมตี
+    for (const p of live) {
+      if (p.action?.kind !== "item") continue;
+      const c = p.team[p.action.target]!;
+      const amount = Math.min(c.maxHp - Math.max(0, c.hp), Math.max(1, Math.floor((c.maxHp * p.action.percent) / 100)));
+      c.hp = Math.max(0, c.hp) + amount;
+      events.push({ kind: "heal", side: "player", target: c.id, amount, hp: c.hp, source: "item", itemId: p.action.itemId });
+    }
     for (const p of live) {
       if (p.action?.kind !== "switch") continue;
       const from = this.active(p).id;
@@ -299,6 +337,8 @@ export class BattleSession {
     // ผู้บริโภค: ตอบถูกติดกันตั้งแต่ minStreak ข้อ ดาเมจเพิ่ม
     let extra = 1;
     for (const passive of me.passives) if (passive.kind === "streak_damage" && p.streak >= passive.minStreak) extra *= 1 + passive.bonus;
+    // เครื่องรางธาตุ: ท่าธาตุนั้นแรงขึ้น (หัวข้อ 9.1)
+    extra *= 1 + (me.effects.elementBoost[move.element] ?? 0) / 100;
     const hit = this.hit(me, this.wild, move.id, action.answer, extra);
     events.push({ kind: "attack", side: "player", attacker: me.id, target: this.wild.id, moveId: move.id, missed: false, damage: hit.damage, effectiveness: hit.effectiveness, targetHp: this.wild.hp });
     this.afterHit(me, this.wild, move.id, "player", events);

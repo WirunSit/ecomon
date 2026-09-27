@@ -111,6 +111,7 @@ export class WorldRoom extends Room<WorldState, { code: string; classroomId: str
     this.onMessage(MSG.battleAction, (client, raw) => this.battles.action(client, raw));
     this.onMessage(MSG.battleAnswer, (client, raw) => this.battles.answer(client, raw));
     this.onMessage(MSG.battleResync, (client) => this.battles.resync(client));
+    this.onMessage(MSG.battleHelper, (client, raw) => this.battles.helper(client, raw));
   }
 
   override onJoin(client: Client<ClientData, AuthData>, _options: unknown, auth: AuthData) {

@@ -2,6 +2,7 @@
 // ค่าพลังไม่เก็บ คำนวณสดจาก species + level + form + equipment (หัวข้อ 6.4)
 // เวลาเก็บเป็นมิลลิวินาที (epoch) ของ server
 import { index, integer, primaryKey, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+import type { MonsterEquipment } from "@ecomon/shared";
 
 export const classrooms = sqliteTable("classrooms", {
   id: text("id").primaryKey(),
@@ -73,9 +74,8 @@ export const monsters = sqliteTable(
     exp: integer("exp").notNull().default(0),
     form: integer("form").notNull().default(1),
     moves: text("moves", { mode: "json" }).$type<(string | null)[]>().notNull(),
-    equipment: text("equipment", { mode: "json" })
-      .$type<{ head: string | null; body: string | null; charm: string | null }>()
-      .notNull(),
+    /** ไอเท็มที่สวม 3 ช่อง { id, tier } (ไอเท็มออกจากกระเป๋าตอนสวม กลับเข้ากระเป๋าตอนถอด) */
+    equipment: text("equipment", { mode: "json" }).$type<MonsterEquipment>().notNull(),
     originType: text("origin_type").notNull(),
     originZone: text("origin_zone"),
     parents: text("parents", { mode: "json" }).$type<[string, string] | null>(),

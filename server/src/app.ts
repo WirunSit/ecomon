@@ -14,6 +14,9 @@ import { AuthService, ensureClassroom } from "./services/auth";
 import { BattleService } from "./services/battles";
 import { CatalogService } from "./services/catalog";
 import { CollectionService } from "./services/collection";
+import { EvolutionService } from "./services/evolution";
+import { InventoryService } from "./services/inventory";
+import { ShopService } from "./services/shop";
 import { PlayerService } from "./services/players";
 import { QuestionService } from "./services/questions";
 
@@ -32,15 +35,21 @@ export function createGameServer(overrides: Partial<ServerConfig> = {}): GameSer
   const db = openDatabase(config.databasePath);
   const catalog = new CatalogService(db);
   const players = new PlayerService(db, catalog);
+  const collection = new CollectionService(db, players);
+  const questions = new QuestionService(db, config);
+  const inventory = new InventoryService(db, players, collection);
   const s: Services = {
     config,
     db,
     auth: new AuthService(db, config),
     players,
-    questions: new QuestionService(db, config),
     battles: new BattleService(db, catalog),
     catalog,
-    collection: new CollectionService(db, players),
+    collection,
+    inventory,
+    shop: new ShopService(db, players, inventory),
+    questions,
+    evolution: new EvolutionService(db, questions, players, catalog),
   };
   setServices(s);
 

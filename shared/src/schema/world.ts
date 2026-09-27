@@ -107,6 +107,8 @@ export const NpcDef = z.strictObject({
   zone: Id,
   sprite: Id,
   portrait: Id,
+  /** เปิดร้านค้า (ขายไอเท็มที่มี price / pointsPrice ใน items.json) */
+  shop: z.boolean().default(false),
 });
 export type NpcDef = z.infer<typeof NpcDef>;
 export const NpcsFileSchema = z.strictObject({ npcs: z.array(NpcDef).min(1) });

@@ -334,12 +334,24 @@
      "width": 0,
      "x": 688,
      "y": 688
+    },
+    {
+     "height": 0,
+     "id": 6,
+     "name": "npc_shop_auntie",
+     "point": true,
+     "rotation": 0,
+     "type": "npc",
+     "visible": true,
+     "width": 0,
+     "x": 592,
+     "y": 656
     }
    ]
   }
  ],
  "nextlayerid": 7,
- "nextobjectid": 6,
+ "nextobjectid": 7,
  "orientation": "orthogonal",
  "properties": [
   {

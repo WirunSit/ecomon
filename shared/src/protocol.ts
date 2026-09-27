@@ -2,6 +2,7 @@
 import { z } from "zod";
 import { Id, type Stats } from "./schema/common";
 import type { ClientQuestion } from "./schema/question";
+import type { MonsterEquipment } from "./formulas/items";
 import { DIRECTIONS, type Direction } from "./world/movement";
 
 // ---------- login (หัวข้อ 2: รหัสห้องเรียน + ชื่อเล่น + PIN 4 หลัก) ----------
@@ -70,7 +71,7 @@ export interface PlayerProfile {
 /** มอนสเตอร์รายตัวพร้อมค่าพลังที่ server คำนวณสด (หัวข้อ 6.4) */
 export interface MonsterDetail extends MonsterSummary {
   moves: (string | null)[];
-  equipment: { head: string | null; body: string | null; charm: string | null };
+  equipment: MonsterEquipment;
   originType: string;
   originZone: string | null;
   parents: [string, string] | null;
@@ -113,6 +114,8 @@ export interface CatalogUnlock {
   coins: number;
 }
 
+export const EquipTierSchema = z.enum(["common", "good", "rare"]);
+
 /** คำสั่งจัดการมอนสเตอร์ 1 ตัวในคลัง (POST /api/monsters/:uid/action) */
 export const MonsterAction = z.discriminatedUnion("type", [
   z.object({ type: z.literal("partner") }),
@@ -122,6 +125,9 @@ export const MonsterAction = z.discriminatedUnion("type", [
   z.object({ type: z.literal("release") }),
   z.object({ type: z.literal("unbox") }),
   z.object({ type: z.literal("nickname"), nickname: z.string().max(64).nullable() }),
+  /** สวมไอเท็มจากกระเป๋า (ช่องตามชนิดไอเท็ม ของเดิมในช่องนั้นกลับเข้ากระเป๋า) */
+  z.object({ type: z.literal("equip"), itemId: Id, tier: EquipTierSchema }),
+  z.object({ type: z.literal("unequip"), slot: z.enum(["head", "body", "charm"]) }),
 ]);
 export type MonsterAction = z.infer<typeof MonsterAction>;
 
@@ -130,6 +136,110 @@ export interface MonsterActionResponse {
   collection: CollectionResponse;
   /** ปล่อยคืนธรรมชาติแล้วได้แต้มอนุรักษ์ */
   releasedPoints?: number;
+}
+
+// ---------- กระเป๋า ไอเท็ม ร้านค้า (หัวข้อ 9.1–9.2) ----------
+
+/** ไอเท็ม 1 กอง · tier = "" สำหรับไอเท็มที่ไม่ใช่ของสวมใส่ */
+export interface BagEntry {
+  itemId: string;
+  tier: string;
+  qty: number;
+}
+
+export interface BagResponse {
+  items: BagEntry[];
+  coins: number;
+  conservationPoints: number;
+}
+
+/** ใช้ไอเท็มนอกการต่อสู้ (POST /api/items/use) — ฟื้นฟู/ชุบ/ขนม ต้องระบุมอน (uid) · หีบสมบัติไม่ต้อง */
+export const UseItemRequest = z.object({ itemId: Id, uid: z.string().min(1).max(64).optional() });
+export type UseItemRequest = z.infer<typeof UseItemRequest>;
+
+export interface UseItemResponse {
+  profile: PlayerProfile;
+  bag: BagResponse;
+  collection: CollectionResponse;
+  /** ของที่ได้จากหีบสมบัติ */
+  drops?: { itemId: string; tier?: string; qty: number }[];
+  /** ขนมเพิ่มพลังทำให้เลเวลอัป */
+  levelUp?: LevelUpView;
+  /** HP ที่ฟื้น */
+  healed?: number;
+}
+
+export type ShopCurrency = "coins" | "points";
+
+export interface ShopEntry {
+  itemId: string;
+  /** ของสวมใส่ที่ขายเป็นขั้นธรรมดาเสมอ */
+  tier: string;
+  price: number;
+  currency: ShopCurrency;
+}
+
+export interface ShopResponse {
+  npc: string;
+  entries: ShopEntry[];
+  bag: BagResponse;
+}
+
+export const BuyRequest = z.object({ itemId: Id, qty: z.number().int().min(1).max(99), currency: z.enum(["coins", "points"]) });
+export type BuyRequest = z.infer<typeof BuyRequest>;
+
+export interface BuyResponse {
+  profile: PlayerProfile;
+  bag: BagResponse;
+}
+
+/** ไอเท็มตัวช่วยตอบในแผงคำถาม (แว่นขยาย นาฬิกาทราย คัมภีร์ใบ้) */
+export const HelperRequest = z.object({ instanceId: z.string().min(1).max(64), itemId: Id });
+export type HelperRequest = z.infer<typeof HelperRequest>;
+
+export interface HelperResult {
+  instanceId: string;
+  itemId: string;
+  /** ตำแหน่งตัวเลือกที่ถูกตัดออก (ตามลำดับที่แสดง) */
+  removed?: number[];
+  /** เวลาตอบที่เพิ่ม (วินาที) และเวลาที่เหลือทั้งหมดหลังเพิ่ม */
+  addSeconds?: number;
+  remainingSec?: number;
+  hint?: string;
+  /** จำนวนที่เหลือในกระเป๋า */
+  left: number;
+}
+
+// ---------- พัฒนาร่าง (หัวข้อ 4.3) ----------
+
+export interface EvolutionState {
+  uid: string;
+  /** ร่างที่จะได้ */
+  toForm: number;
+  /** ตอบถูกติดกันแล้วกี่ข้อ / ต้องถูกกี่ข้อ */
+  streak: number;
+  need: number;
+  /** หัวข้อที่ใช้ทดสอบ (หัวข้อที่อ่อนที่สุดของผู้เล่น) */
+  topic: string;
+  question: BattleQuestionMessage;
+}
+
+export const EvolutionAnswerRequest = z.object({
+  instanceId: z.string().min(1).max(64),
+  choice: z.number().int().min(0).max(3).optional(),
+  value: z.union([z.number().finite(), z.boolean()]).optional(),
+});
+export type EvolutionAnswerRequest = z.infer<typeof EvolutionAnswerRequest>;
+
+export interface EvolutionAnswerResponse {
+  result: BattleResultMessage;
+  streak: number;
+  need: number;
+  /** ยังไม่ครบ → คำถามข้อถัดไป */
+  next?: BattleQuestionMessage;
+  /** ครบแล้ว → พัฒนาร่างสำเร็จ */
+  evolved?: { uid: string; speciesId: string; fromForm: number; toForm: number; newMoves: string[]; catalogUnlocks: CatalogUnlock[] };
+  profile?: PlayerProfile;
 }
 
 /** เลือกฉายา/กรอบโปรไฟล์ (null = ไม่ใช้) — ต้องปลดล็อกแล้ว */
@@ -205,6 +315,8 @@ export const MSG = {
   battleEnd: "battle:end",
   /** client → server: ขอสถานะการต่อสู้ใหม่ (หลังกลับเข้าห้อง) */
   battleResync: "battle:resync",
+  /** client → server: ใช้ไอเท็มตัวช่วยตอบ · server → client: ผล (HelperResult) */
+  battleHelper: "battle:helper",
 } as const;
 
 export const MoveMessage = z.object({ dir: z.enum(DIRECTIONS) });
@@ -272,6 +384,8 @@ export interface BattleStateView {
 
 export const BattleActionMessage = z.discriminatedUnion("type", [
   z.object({ type: z.literal("move"), moveId: Id }),
+  /** ใช้ไอเท็มฟื้นฟูกับมอนในทีม (เสีย 1 เทิร์น) */
+  z.object({ type: z.literal("item"), itemId: Id, uid: z.string().min(1).max(64) }),
   z.object({ type: z.literal("switch"), uid: z.string().min(1).max(64) }),
   z.object({ type: z.literal("flee") }),
 ]);
@@ -282,6 +396,9 @@ export interface BattleQuestionMessage {
   question: ClientQuestion;
   /** เวลาตอบ (วินาที) null = ปิดตัวจับเวลา (โหมดฝึก) */
   timeLimitSec: number | null;
+  /** ตัวช่วยที่ใช้ไปแล้วกับข้อนี้ (ส่งมาอีกครั้งตอน resync) */
+  removed?: number[];
+  hint?: string;
 }
 
 export const BattleAnswerMessage = z.object({
@@ -315,7 +432,7 @@ export type BattleEvent =
       effectiveness: "super" | "normal" | "weak";
       targetHp: number;
     }
-  | { kind: "heal"; side: BattleSide; target: string; amount: number; hp: number; source: "move" | "passive" }
+  | { kind: "heal"; side: BattleSide; target: string; amount: number; hp: number; source: "move" | "passive" | "item"; itemId?: string }
   | { kind: "stat"; side: BattleSide; target: string; stat: "hp" | "atk" | "def" | "spd"; percent: number }
   | { kind: "decay"; target: string; stacks: number }
   | { kind: "faint"; side: BattleSide; target: string }

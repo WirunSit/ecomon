@@ -1,4 +1,4 @@
-import type { BattleEndMessage, BattleQuestionMessage, BattleResultMessage, BattleStateView, BattleTurnMessage } from "@ecomon/shared";
+import type { BattleEndMessage, BattleQuestionMessage, BattleResultMessage, BattleStateView, BattleTurnMessage, HelperResult } from "@ecomon/shared";
 
 export type BattleIncoming =
   | { type: "state"; msg: BattleStateView }
@@ -6,6 +6,7 @@ export type BattleIncoming =
   | { type: "result"; msg: BattleResultMessage }
   | { type: "turn"; msg: BattleTurnMessage }
   | { type: "end"; msg: BattleEndMessage }
+  | { type: "helper"; msg: HelperResult }
   | { type: "notice"; text: string };
 
 /**

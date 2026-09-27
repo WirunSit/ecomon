@@ -33,6 +33,8 @@ const ItemBase = {
   tintElement: Id.optional(),
   /** ราคาในร้านค้า (เหรียญนิเวศ) null = ไม่ขาย */
   price: z.number().int().positive().nullable().default(null),
+  /** ราคาแลกด้วยแต้มอนุรักษ์ (ร้านค้า) null = แลกไม่ได้ */
+  pointsPrice: z.number().int().positive().nullable().default(null),
   enabled: z.boolean().default(true),
 };
 

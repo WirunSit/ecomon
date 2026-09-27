@@ -180,6 +180,8 @@ export const BalanceSchema = z.strictObject({
     /** แผนที่ที่ผู้เล่นใหม่เริ่ม (id ใน content/maps) */
     startMap: z.string().min(1),
     /** ยืนห่างจุดฟื้นฟู (marker "recovery") ไม่เกินกี่ช่องจึงฟื้น HP มอนในทีม */
+    /** ระยะ (ช่อง) ที่คุยกับ NPC / ใช้ร้านค้าได้ */
+    interactRadius: PosInt,
     recoveryRadius: z.number().int().nonnegative(),
     /** เว้นระยะส่งแชทสำเร็จรูป (วินาที) กันสแปม */
     chatCooldownSec: NonNeg,

@@ -227,7 +227,8 @@
         }
       ],
       "description": "EXP ที่ได้ +20%",
-      "price": 400
+      "price": 400,
+      "pointsPrice": 12
     },
     {
       "id": "bolt_charm",
@@ -243,7 +244,8 @@
         }
       ],
       "description": "ช่วง \"ตอบไว\" ขยายจาก 10 เป็น 15 วินาที",
-      "price": 400
+      "price": 400,
+      "pointsPrice": 12
     },
     {
       "id": "honey_potion",
@@ -275,7 +277,8 @@
         "percent": 100
       },
       "description": "ฟื้น HP 100%",
-      "price": 200
+      "price": 200,
+      "pointsPrice": 3
     },
     {
       "id": "revival_seed",
@@ -291,7 +294,8 @@
         "percent": 50
       },
       "description": "ชุบมอนสเตอร์ที่ HP หมดให้กลับมา 50%",
-      "price": 150
+      "price": 150,
+      "pointsPrice": 3
     },
     {
       "id": "power_candy",
@@ -380,7 +384,8 @@
         "lootTable": "chest_basic"
       },
       "description": "เปิดแล้วสุ่มได้ไอเท็มตามตารางดรอป",
-      "price": null
+      "price": null,
+      "pointsPrice": 5
     },
     {
       "id": "dungeon_chest",

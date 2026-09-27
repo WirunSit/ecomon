@@ -1,6 +1,8 @@
 import { and, asc, count, eq, isNotNull } from "drizzle-orm";
 import {
   calcStats,
+  equipmentBonus,
+  equippedList,
   expToNext,
   rearrangeTeam,
   releasePoints,
@@ -15,6 +17,7 @@ import type { Db } from "../db/client";
 import { monsters, players } from "../db/schema";
 import { registry } from "../content";
 import { GameError } from "./errors";
+import { giveItem, takeItem } from "./inventory";
 import type { PlayerService } from "./players";
 
 type MonsterRow = typeof monsters.$inferSelect;
@@ -32,8 +35,7 @@ const TEAM_ERRORS: Record<string, string> = {
 /** ค่าพลังสด + ข้อมูลที่หน้าคลังต้องใช้ (หัวข้อ 6.1, 6.4) */
 export function monsterDetail(m: MonsterRow): MonsterDetail {
   const species = registry.monsters.get(m.speciesId);
-  // TODO(เฟส 7): รวมโบนัสไอเท็มที่สวม (equipmentBonus) เมื่อมีระบบสวมไอเท็ม
-  const stats = calcStats(species, m.level, m.form, registry.balance);
+  const stats = calcStats(species, m.level, m.form, registry.balance, equipmentBonus(registry, equippedList(m.equipment)));
   return {
     uid: m.uid,
     speciesId: m.speciesId,
@@ -115,6 +117,8 @@ export class CollectionService {
           const total = tx.select({ n: count() }).from(monsters).where(eq(monsters.playerId, playerId)).get()?.n ?? 0;
           if (total <= 1) throw new GameError("last_monster", "ต้องมีมอนสเตอร์อย่างน้อย 1 ตัว");
           releasedPoints = releasePoints(registry.monsters.get(m.speciesId).rarity, b);
+          // ไอเท็มที่สวมอยู่กลับเข้ากระเป๋า
+          for (const e of Object.values(m.equipment)) if (e) giveItem(tx as unknown as Db, playerId, e.id, e.tier, 1);
           tx.delete(monsters).where(eq(monsters.uid, uid)).run();
           const p = tx.select({ cp: players.conservationPoints }).from(players).where(eq(players.id, playerId)).get()!;
           tx.update(players).set({ conservationPoints: p.cp + releasedPoints }).where(eq(players.id, playerId)).run();
@@ -125,6 +129,24 @@ export class CollectionService {
           const stored = tx.select({ n: count() }).from(monsters).where(and(eq(monsters.playerId, playerId), eq(monsters.boxed, false))).get()?.n ?? 0;
           if (stored >= this.capacity(playerId)) throw new GameError("storage_full", "คลังเต็ม ปล่อยมอนบางตัวคืนธรรมชาติก่อน");
           set({ boxed: false });
+          return;
+        }
+        case "equip": {
+          if (inBattle) throw new GameError("in_battle", "ระหว่างต่อสู้เปลี่ยนไอเท็มไม่ได้");
+          const item = registry.items.find(action.itemId);
+          if (item?.category !== "equipment") throw new GameError("not_equipment", "ไอเท็มนี้สวมใส่ไม่ได้");
+          takeItem(tx as unknown as Db, playerId, item.id, action.tier);
+          const old = m.equipment[item.slot];
+          if (old) giveItem(tx as unknown as Db, playerId, old.id, old.tier, 1);
+          set({ equipment: { ...m.equipment, [item.slot]: { id: item.id, tier: action.tier } } });
+          return;
+        }
+        case "unequip": {
+          if (inBattle) throw new GameError("in_battle", "ระหว่างต่อสู้เปลี่ยนไอเท็มไม่ได้");
+          const old = m.equipment[action.slot];
+          if (!old) throw new GameError("empty_slot", "ช่องนี้ยังไม่ได้สวมอะไร");
+          giveItem(tx as unknown as Db, playerId, old.id, old.tier, 1);
+          set({ equipment: { ...m.equipment, [action.slot]: null } });
           return;
         }
         case "nickname": {

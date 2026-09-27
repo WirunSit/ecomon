@@ -1,8 +1,10 @@
-import type { CollectionResponse, MonsterAction, MonsterActionResponse, MonsterDetail } from "@ecomon/shared";
+import { maxFormForLevel, type BagResponse, type CollectionResponse, type EquipSlot, type MonsterAction, type MonsterActionResponse, type MonsterDetail } from "@ecomon/shared";
 import { registry, speciesName } from "../../content";
 import { api, ApiRequestError } from "../../net/api";
 import { profile } from "../../state/profile";
 import { FullPanel } from "../FullPanel";
+import { itemIcon } from "../itemIcon";
+import { showPicker } from "../Picker";
 import { monsterThumb } from "../monsterThumb";
 import { h } from "../overlay";
 import { UI } from "../strings";
@@ -53,7 +55,11 @@ export class CollectionPanel {
   private selected?: string;
   private busy = false;
 
-  constructor(private readonly toast: (text: string) => void) {}
+  /** @param evolve เปิดบททดสอบพัฒนาร่างของมอนตัวนี้ */
+  constructor(
+    private readonly toast: (text: string) => void,
+    private readonly evolve?: (m: MonsterDetail) => void,
+  ) {}
 
   get isOpen() {
     return !!this.panel && !this.panel.isClosed;
@@ -179,8 +185,14 @@ export class CollectionPanel {
         : [h("small", { text: T.emptyMove })]);
     });
     const equipment = (["head", "body", "charm"] as const).map((slot) => {
-      const id = m.equipment[slot];
-      return h("div", { className: "equip-slot" }, [h("small", { text: T.slots[slot] }), h("span", { text: id ? (registry.items.find(id)?.name ?? id) : T.noItem })]);
+      const e = m.equipment[slot];
+      const b = h("button", { className: `equip-slot${e ? " filled" : ""}` }, [
+        ...(e ? [itemIcon(e.id, e.tier, 26)] : []),
+        h("span", {}, [h("small", { text: T.slots[slot] }), h("span", { text: e ? (registry.items.find(e.id)?.name ?? e.id) : T.noItem })]),
+      ]);
+      b.type = "button";
+      b.addEventListener("click", () => void this.pickEquip(m, slot));
+      return b;
     });
     const zone = m.originZone ? registry.zones.find(m.originZone)?.name : undefined;
     const origin = m.originType === "starter" ? T.originStarter : m.originType === "wild" ? T.originWild(zone ?? "") : T.originOther;
@@ -227,17 +239,65 @@ export class CollectionPanel {
     const breed = button(T.breed, () => undefined);
     breed.disabled = true;
     breed.title = UI.soon(8);
-    const equip = button(T.equip, () => undefined);
-    equip.disabled = true;
-    equip.title = UI.soon(7);
+    // พัฒนาร่าง (หัวข้อ 4.3): ถึงเลเวลแล้วเปิดบททดสอบ
+    const sp = registry.monsters.get(m.speciesId);
+    const nextForm = m.form + 1;
+    const evolve = button(UI.evolution.button, () => this.evolve?.(m), "btn evolve");
+    if (nextForm > sp.forms.length) {
+      evolve.disabled = true;
+      evolve.title = UI.evolution.maxForm;
+    } else if (maxFormForLevel(m.level, registry.balance) < nextForm) {
+      evolve.disabled = true;
+      evolve.textContent = UI.evolution.notReady(registry.balance.evolution.formLevels[nextForm - 1]!);
+    }
     const lock = button(m.locked ? T.unlock : T.lock, () => void this.act(m, { type: "lock", locked: !m.locked }));
     const pts = registry.balance.collection.releasePoints[registry.monsters.get(m.speciesId).rarity];
     const release = button(T.release, () => this.confirmRelease(m, pts), "btn danger");
     release.disabled = m.locked || inTeam;
     release.title = m.locked ? T.releaseLocked : inTeam ? T.releaseTeam : "";
-    const list = [partner, team, breed, equip, lock, release];
+    const list = [evolve, partner, team, breed, lock, release];
     if (m.boxed) list.unshift(button(T.unbox, () => void this.act(m, { type: "unbox" }), "btn primary"));
     return list;
+  }
+
+  /** เลือกไอเท็มจากกระเป๋าใส่ช่องนี้ หรือถอดของเดิม */
+  private async pickEquip(m: MonsterDetail, slot: EquipSlot) {
+    let bag: BagResponse;
+    try {
+      bag = await api<BagResponse>("/bag");
+    } catch (e) {
+      return this.toast(e instanceof Error ? e.message : String(e));
+    }
+    const options = bag.items
+      .filter((it) => {
+        const item = registry.items.find(it.itemId);
+        return item?.category === "equipment" && item.slot === slot;
+      })
+      .map((it) => {
+        const item = registry.items.get(it.itemId);
+        return {
+          icon: itemIcon(it.itemId, it.tier, 32),
+          label: `${item.name} (${UI.catalog.tier[it.tier] ?? it.tier}) ${UI.bag.qty(it.qty)}`,
+          sub: item.description,
+          onPick: () => void this.act(m, { type: "equip", itemId: it.itemId, tier: it.tier as "common" }, UI.bag.equipped(item.name, displayName(m))),
+        };
+      });
+    const cur = m.equipment[slot];
+    if (cur) options.unshift({ icon: itemIcon(cur.id, cur.tier, 32), label: `${UI.equip.unequip} ${registry.items.find(cur.id)?.name ?? cur.id}`, sub: "", onPick: () => void this.act(m, { type: "unequip", slot }) });
+    showPicker(UI.equip.choose(T.slots[slot]!), options, UI.equip.none);
+  }
+
+  /** เปิดหน้ารายละเอียดของมอนตัวนี้ใหม่ (หลังพัฒนาร่าง) */
+  async reopen(uid: string) {
+    if (this.isOpen) {
+      try {
+        this.data = await api<CollectionResponse>("/monsters");
+      } catch {
+        return;
+      }
+      this.selected = uid;
+      this.render();
+    } else await this.open(uid);
   }
 
   /** ยืนยันก่อนปล่อย (เอาคืนไม่ได้) — แสดงในแถบปุ่มแทนกล่องของเบราว์เซอร์ */

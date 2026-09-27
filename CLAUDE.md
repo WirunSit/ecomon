@@ -95,6 +95,24 @@ tools/    validate.ts, make-placeholders.ts, make-test-map.ts (อนาคต: 
 - client: `ui/collection/` (CollectionPanel, CatalogPanel, TeamQuick) บน `FullPanel` · ภาพมอนใน HTML ตัดจาก atlas ด้วย
   `monsterThumb()` · เงาดำ = CSS class `silhouette` · คู่หูเดินตาม = `world/PartnerFollower.ts` (ผูกกับ PlayerAvatar)
 
+## ไอเท็ม ร้านค้า พัฒนาร่าง (เฟส 7)
+
+- กระเป๋า = ตาราง `player_items` (itemId, tier, qty) · tier "" = ไม่ใช่ของสวมใส่ · ใช้ `giveItem()`/`takeItem()` ใน
+  `server/src/services/inventory.ts` เท่านั้น · ช่องสวมของมอนเก็บ `{ id, tier }` (สวม = ออกจากกระเป๋า, ถอด/ปล่อยมอน = กลับเข้ากระเป๋า)
+- ผลของไอเท็มสวมใส่: ค่าพลังผ่าน `equipmentBonus()` · ผลพิเศษผ่าน `equipmentEffects()` (ธาตุ +% ในดาเมจ, EXP +% ตอนชนะ,
+  ช่วงตอบไวส่งเข้า `questions.answer(..., quickWindowSec)`) · % คูณตามขั้นไอเท็ม
+- REST: `GET /api/bag` · `POST /api/items/use` (ฟื้นฟู/ชุบ/ขนม/หีบสมบัติ `rollLoot()`) · `GET /api/shop/:npc` · `POST /api/shop/:npc/buy`
+  (ต้องยืนใกล้ NPC ร้าน ตรวจจากตำแหน่งในห้องผ่าน `playerSpot()` ใน rooms/hooks.ts) · ราคา = `price` (เหรียญ) / `pointsPrice` (แต้มอนุรักษ์) ใน items.json
+- ตัวช่วยตอบ `QuestionService.useHelper()` (ชนิดละครั้งต่อข้อ ใช้ไม่ได้ = ไม่เสียของ): ต่อสู้ผ่านข้อความ `battle:helper`
+  (นาฬิกาทรายเลื่อนเวลาหมดของ server ด้วย) · บททดสอบพัฒนาร่างผ่าน `POST /api/evolution/helper`
+- ไอเท็มฟื้นฟูในการต่อสู้ = `BattleActionMessage { type: "item" }` เสีย 1 เทิร์น (มอนป่ายังโจมตี)
+- พัฒนาร่าง `server/src/services/evolution.ts`: `POST /api/monsters/:uid/evolve` → `POST /api/evolution/answer` ซ้ำจนถูกติดกัน
+  `balance.evolution.trialStreak` ข้อ · คำถามจาก `QuestionService.weakestTopic()` (หัวข้อที่ตอบผิดบ่อยสุด) · สำเร็จ → ร่าง +1,
+  ท่าใหม่, `catalog.owned()`, แจ้งห้อง
+- client: `ui/collection/` BagPanel, ShopPanel, EvolutionPanel · `ui/Picker.ts` (เลือกมอน/ไอเท็ม) · `ui/itemIcon.ts`
+  (กรอบสีตามขั้น + ย้อมสีเครื่องรางธาตุด้วย canvas) · `QuestionPanel` รับ `HelperSource` สำหรับเมนูตัวช่วย
+- คำใบ้ (`hint`) ของคำถามต้องไม่บอกคำตอบตรง ๆ — เทสต์ใน shared/test/questions.test.ts ตรวจว่าคำใบ้ไม่ซ้ำกับข้อความที่ส่งให้ client
+
 ## ข้อตกลงของ content
 
 - id เป็น `a-z0-9_` ขึ้นต้นด้วยตัวอักษร ใช้เป็นชื่อไฟล์/โฟลเดอร์ asset ได้
@@ -114,7 +132,7 @@ tools/    validate.ts, make-placeholders.ts, make-test-map.ts (อนาคต: 
   - ภูมิประเทศตัดสินตามลำดับ collision > water_deep > water_shallow > land
   - `spawns`: สี่เหลี่ยม มี property `table`, `terrain`, `maxActive`, `respawnSec`, `wander` (หัวข้อ 10.3)
   - `markers`: จุด type `player_start`, `recovery` (จุดฟื้นฟู: เข้าใกล้ในรัศมี `recoveryRadius` แล้วทีมหายเหนื่อย แพ้แล้วกลับมาที่นี่)
-    (อนาคต: NPC, ทางเข้าดันเจี้ยน)
+    `npc` (name = id ใน npcs.json · ช่องนั้นเดินผ่านไม่ได้ · NPC ที่ `shop: true` เปิดร้านค้า) (อนาคต: ทางเข้าดันเจี้ยน)
 - map property `zone` = id โซนใน zones.json
 - property ของ tile ใน tileset: `material` (ชนิดพื้นที่วาด เช่น grass, sand — ดู asset-src/terrain.yaml)
   และสำหรับช่องชน `prop` (ภาพ assets/props, ใส่หลายแบบคั่น , ได้) `propWidth` `propSize` `propJitter`
@@ -144,6 +162,7 @@ tools/    validate.ts, make-placeholders.ts, make-test-map.ts (อนาคต: 
 - [x] เฟส 4 — จุดเกิดมอนสเตอร์ (server/src/world/SpawnManager.ts)
 - [x] เฟส 5 — คำถาม การต่อสู้ และการจับมอน (ดูหัวข้อ "การต่อสู้และคำถาม" ด้านบน)
 - [x] เฟส 6 — คลังของฉัน สมุดภาพ คู่หู (ดูหัวข้อ "คลังและสมุดภาพ" ด้านบน)
-- [ ] เฟส 7 เป็นต้นไป — ดู docs/GAME_PLAN.md หัวข้อ 13
+- [x] เฟส 7 — พัฒนาร่าง ไอเท็ม ร้านค้า (ดูหัวข้อ "ไอเท็ม ร้านค้า พัฒนาร่าง" ด้านบน)
+- [ ] เฟส 8 เป็นต้นไป — ดู docs/GAME_PLAN.md หัวข้อ 13
 - [~] เฟส 12 — ทำ pipeline ตัดภาพ (หัวข้อ 15) และใช้ภาพจริงกับมอนสเตอร์ ตัวละคร tileset หน้า login แล้ว
       ฉากต่อสู้ (S11–S12) และเอฟเฟกต์ธาตุ (S15) ใช้แล้วในเฟส 5 · ที่เหลือ: ภาพ NPC/ไอเท็ม/ไข่ จะผูกเข้าเกมตามเฟสที่ใช้

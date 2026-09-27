@@ -299,11 +299,13 @@ function makeMap() {
         objects: [
           { height: 0, id: 4, name: "start", point: true, rotation: 0, type: "player_start", visible: true, width: 0, x: 20 * T + 16, y: 23 * T + 16 },
           { height: 0, id: 5, name: "fountain", point: true, rotation: 0, type: "recovery", visible: true, width: 0, x: 21 * T + 16, y: 21 * T + 16 },
+          // ร้านค้าของป้าส้ม หน้าบ้านหลังซ้ายบน
+          { height: 0, id: 6, name: "npc_shop_auntie", point: true, rotation: 0, type: "npc", visible: true, width: 0, x: 18 * T + 16, y: 20 * T + 16 },
         ],
       },
     ],
     nextlayerid: 7,
-    nextobjectid: 6,
+    nextobjectid: 7,
     orientation: "orthogonal",
     properties: [prop("zone", "meadow")],
     renderorder: "right-down",

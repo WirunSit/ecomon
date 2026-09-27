@@ -22,8 +22,12 @@ import { InputController } from "../input/InputController";
 import { connection, type PlayerView, type WorldRoom } from "../net/connection";
 import { session } from "../net/session";
 import { profile } from "../state/profile";
+import { npcTextureKey } from "../assets";
+import { BagPanel } from "../ui/collection/BagPanel";
 import { CatalogPanel } from "../ui/collection/CatalogPanel";
 import { CollectionPanel } from "../ui/collection/CollectionPanel";
+import { ShopPanel } from "../ui/collection/ShopPanel";
+import { EvolutionPanel } from "../ui/collection/EvolutionPanel";
 import { TeamQuick } from "../ui/collection/TeamQuick";
 import { DevPanel } from "../ui/DevPanel";
 import { FullPanel } from "../ui/FullPanel";
@@ -70,6 +74,12 @@ export class WorldScene extends Phaser.Scene {
   private collection!: CollectionPanel;
   private catalog!: CatalogPanel;
   private teamQuick!: TeamQuick;
+  private evolution?: EvolutionPanel;
+  private shop!: ShopPanel;
+  /** NPC บนแผนที่ (ภาพ + ตำแหน่ง) และปุ่ม "คุย" เมื่อยืนใกล้ */
+  private npcs: { id: string; x: number; y: number; container: Phaser.GameObjects.Container }[] = [];
+  private npcPrompt?: HTMLButtonElement;
+  private nearNpc?: string;
   private dev?: DevPanel;
   private blocker?: HTMLElement;
   private unlocks = movementUnlocks([], registry.items.all);
@@ -107,6 +117,7 @@ export class WorldScene extends Phaser.Scene {
     this.loaded = loadedMap(room.state.mapId);
     const map = this.loaded.game;
     const view = new MapView(this, this.loaded);
+    this.npcs = this.createNpcs(map);
 
     const self = room.state.players.get(room.sessionId)!;
     this.player = new PlayerAvatar(this, map.tileSize, self.x, self.y, terrainAt(map, self.x, self.y), self.avatar);
@@ -121,15 +132,28 @@ export class WorldScene extends Phaser.Scene {
     this.controls = new InputController(this);
     this.toast = new Toast();
     const say = (text: string) => this.toast.show(text, 3000);
-    this.collection = new CollectionPanel(say);
+    // พัฒนาร่าง: ปิดหน้าคลังระหว่างทำบททดสอบ แล้วเปิดกลับมาที่มอนตัวเดิม
+    const evolution = new EvolutionPanel(say, (uid) => void this.collection.reopen(uid));
+    this.evolution = evolution;
+    this.collection = new CollectionPanel(say, (m) => {
+      this.collection.close();
+      void evolution.open(m);
+    });
     this.catalog = new CatalogPanel(say);
+    const bag = new BagPanel(say);
+    this.shop = new ShopPanel(say);
+    this.npcPrompt = h("button", { className: "npc-prompt interactive" });
+    this.npcPrompt.type = "button";
+    this.npcPrompt.style.display = "none";
+    this.npcPrompt.addEventListener("click", () => this.talk());
+    uiRoot().append(this.npcPrompt);
     this.teamQuick = new TeamQuick(() => void this.collection.open(), say);
     this.menu = new MenuPanel(
       [
         { label: UI.room.leave, run: () => void this.leaveTo("Lobby") },
         { label: UI.room.logout, run: () => void this.leaveTo("Login") },
       ],
-      { collection: () => void this.collection.open(), catalog: () => void this.catalog.open() },
+      { collection: () => void this.collection.open(), catalog: () => void this.catalog.open(), bag: () => void bag.open() },
     );
     this.chat = new QuickChatPanel((msg) => room.send(MSG.chat, msg));
     this.hud = new Hud({ onMenu: () => this.menu.toggle(), onChat: () => this.chat.toggle(), onPartner: () => this.teamQuick.toggle() });
@@ -185,6 +209,7 @@ export class WorldScene extends Phaser.Scene {
     room.onMessage(MSG.battleQuestion, (msg) => this.battle?.push({ type: "question", msg }));
     room.onMessage(MSG.battleResult, (msg) => this.battle?.push({ type: "result", msg }));
     room.onMessage(MSG.battleTurn, (msg) => this.battle?.push({ type: "turn", msg }));
+    room.onMessage(MSG.battleHelper, (msg) => this.battle?.push({ type: "helper", msg }));
     room.onMessage(MSG.battleEnd, (msg: BattleEndMessage) => {
       if (this.battle) this.battle.push({ type: "end", msg });
       else this.onBattleClosed(msg); // ไม่ควรเกิด แต่ต้องไม่พลาดข้อมูลผู้เล่น
@@ -193,8 +218,12 @@ export class WorldScene extends Phaser.Scene {
 
     const unsubscribe = profile.subscribe((p) => (this.unlocks = movementUnlocks(p.keyItems, registry.items.all)));
     const onKey = (e: KeyboardEvent) => {
-      if (FullPanel.isOpen || this.battle || e.target instanceof HTMLInputElement) return;
+      if (FullPanel.isOpen || this.evolution?.isOpen || this.battle || e.target instanceof HTMLInputElement) return;
       if (e.code === "Escape" || e.code === "KeyM") this.menu.toggle();
+      if ((e.code === "KeyE" || e.code === "Space" || e.code === "Enter") && this.nearNpc && !this.menu.isOpen) {
+        e.preventDefault();
+        this.talk();
+      }
     };
     window.addEventListener("keydown", onKey);
 
@@ -208,6 +237,9 @@ export class WorldScene extends Phaser.Scene {
       this.toast.destroy();
       FullPanel.closeAll();
       this.teamQuick.close();
+      this.evolution?.dispose();
+      this.npcPrompt?.remove();
+      this.npcs.forEach((n) => n.container.destroy());
       this.dev?.destroy();
       this.blocker?.remove();
       if (this.scene.isActive("Battle") || this.scene.isPaused("Battle")) this.scene.stop("Battle");
@@ -226,9 +258,10 @@ export class WorldScene extends Phaser.Scene {
     if (self) this.applyLooks(this.player, self);
     this.updateRemotes();
     this.sortByDepth();
+    this.updateNpcPrompt();
     if (this.blocker || this.battle || time < this.encounterUntil) return;
 
-    const dir = this.menu.isOpen || FullPanel.isOpen ? null : this.controls.direction();
+    const dir = this.menu.isOpen || FullPanel.isOpen || this.evolution?.isOpen ? null : this.controls.direction();
     if (dir) this.lastInputAt = time;
     if (this.player.isMoving) return;
     if (!dir) return this.reconcile(time);
@@ -328,6 +361,50 @@ export class WorldScene extends Phaser.Scene {
       if (r.avatar.follower) set(r.avatar.follower.container, 0.000005);
     }
     for (const w of this.wild.values()) set(w.container, 0);
+  }
+
+  // ---------- NPC ----------
+
+  /** วาง NPC ตาม marker type "npc" (ภาพจาก S07 + ชื่อ) */
+  private createNpcs(map: LoadedMap["game"]) {
+    const T = map.tileSize;
+    return map.markers.flatMap((m) => {
+      const npc = registry.npcs.find(m.name);
+      if (m.type !== "npc" || !npc) return [];
+      const key = npcTextureKey(npc.sprite);
+      const parts: Phaser.GameObjects.GameObject[] = [this.add.ellipse(0, 12, 26, 8, 0x000000, 0.22)];
+      if (this.textures.exists(key)) {
+        const img = this.add.image(0, 14, key).setOrigin(0.5, 1);
+        img.setScale(52 / img.height);
+        parts.push(img);
+      }
+      const label = this.add
+        .text(0, -42, npc.name, { fontFamily: "Kanit, sans-serif", fontSize: "12px", color: "#ffe28a", stroke: "#1b2130", strokeThickness: 3 })
+        .setOrigin(0.5, 1)
+        .setResolution(2);
+      if (npc.shop) label.setText(`🛒 ${npc.name}`);
+      parts.push(label);
+      const container = this.add.container(m.x * T + T / 2, m.y * T + T / 2, parts);
+      container.setDepth(depthForY(container.y, 0));
+      return [{ id: npc.id, x: m.x, y: m.y, container }];
+    });
+  }
+
+  /** ยืนใกล้ NPC (ระยะ interactRadius) → แสดงปุ่มคุย */
+  private updateNpcPrompt() {
+    const r = balance.world.interactRadius;
+    const busy = !!this.battle || this.menu.isOpen || FullPanel.isOpen || this.evolution?.isOpen;
+    const near = busy ? undefined : this.npcs.find((n) => Math.abs(n.x - this.player.tileX) <= r && Math.abs(n.y - this.player.tileY) <= r);
+    if (near?.id === this.nearNpc) return;
+    this.nearNpc = near?.id;
+    if (!this.npcPrompt) return;
+    this.npcPrompt.style.display = near ? "" : "none";
+    if (near) this.npcPrompt.textContent = `${UI.shop.talk(registry.npcs.get(near.id).name)} (E)`;
+  }
+
+  private talk() {
+    const npc = this.nearNpc ? registry.npcs.find(this.nearNpc) : undefined;
+    if (npc?.shop) void this.shop.open(npc.id);
   }
 
   /** คู่หูที่เดินตาม + ฉายา ตาม state จาก server */

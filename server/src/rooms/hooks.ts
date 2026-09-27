@@ -17,6 +17,13 @@ export function playerInBattle(playerId: string): boolean {
   return r ? r.room.isInBattle(r.sessionId) : false;
 }
 
+/** ตำแหน่งผู้เล่นในห้องตอนนี้ (ไม่ได้อยู่ในห้อง = undefined) */
+export function playerSpot(playerId: string): { mapId: string; x: number; y: number } | undefined {
+  const r = roomOf(playerId);
+  const p = r?.room.state.players.get(r.sessionId);
+  return r && p ? { mapId: r.room.state.mapId, x: p.x, y: p.y } : undefined;
+}
+
 /** ข้อมูลผู้เล่นเปลี่ยน → แจ้งห้องที่อยู่ (ถ้าออนไลน์) */
 export function profileChanged(playerId: string, profile: PlayerProfile) {
   const r = roomOf(playerId);

@@ -17,6 +17,9 @@ const uiImages = import.meta.glob<string>(["../../assets/ui/title.webp"], { eage
 // ฉากต่อสู้ (S11–S12) และเอฟเฟกต์ (S15) — โหลดตอนเริ่มต่อสู้ครั้งแรกเท่านั้น
 const backgroundImages = import.meta.glob<string>("../../assets/backgrounds/*.webp", { eager: true, query: "?url", import: "default" });
 const vfxImages = import.meta.glob<string>("../../assets/vfx/*.png", { eager: true, query: "?url", import: "default" });
+// ไอคอนไอเท็ม (S13) และ NPC (S07)
+const itemImages = import.meta.glob<string>("../../assets/items/*.png", { eager: true, query: "?url", import: "default" });
+const npcImages = import.meta.glob<string>("../../assets/npcs/*.png", { eager: true, query: "?url", import: "default" });
 
 export type Pose = "idle" | "attack";
 
@@ -125,6 +128,21 @@ export function vfxTextureKey(id: string): string {
 
 export function vfxImageUrl(id: string): string | undefined {
   return vfxImages[`../../assets/vfx/${id}.png`];
+}
+
+// ---------- ไอเท็ม / NPC ----------
+
+export function itemIconFileUrl(icon: string): string | undefined {
+  return itemImages[`../../assets/items/${icon}.png`];
+}
+
+export function npcTextureKey(sprite: string): string {
+  return `npc_${sprite}`;
+}
+
+/** ภาพ NPC ตัวเต็ม (sprite) หรือภาพหน้าอก (portrait) */
+export function npcImageUrl(id: string): string | undefined {
+  return npcImages[`../../assets/npcs/${id}.png`];
 }
 
 export { fallbackUrl };

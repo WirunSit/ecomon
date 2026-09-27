@@ -6,6 +6,8 @@ import {
   MONSTER_ATLAS,
   MONSTER_ATLAS_URL,
   mapGround,
+  npcImageUrl,
+  npcTextureKey,
   propImageUrl,
   propTextureKey,
   tileImageUrl,
@@ -45,6 +47,12 @@ export class BootScene extends Phaser.Scene {
       const url = propImageUrl(id);
       if (url) this.load.image(propTextureKey(id), url);
       else console.error(`ไม่พบภาพของประดับ assets/props/${id}.png`);
+    }
+    // NPC ที่ยืนอยู่บนแผนที่
+    for (const name of new Set(registry.maps.all.flatMap((m) => m.markers.filter((x) => x.type === "npc").map((x) => x.name)))) {
+      const npc = registry.npcs.find(name);
+      const url = npc && npcImageUrl(npc.sprite);
+      if (npc && url) this.load.image(npcTextureKey(npc.sprite), url);
     }
 
     const tilesetFiles = new Set(registry.maps.all.flatMap((m) => loadedMap(m.id).tilesetImages.map((t) => t.file)));

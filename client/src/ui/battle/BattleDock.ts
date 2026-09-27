@@ -7,6 +7,8 @@ export interface ActionHandlers {
   move(moveId: string): void;
   switchTo(uid: string): void;
   flee(): void;
+  /** ใช้ไอเท็มฟื้นฟู (เสีย 1 เทิร์น) — ไม่ส่ง = ไม่แสดงปุ่ม */
+  item?(): void;
 }
 
 /**
@@ -82,10 +84,12 @@ export class BattleDock {
       on.flee();
     }, "side-btn flee");
     fleeBtn.hidden = !state.canFlee;
+    const itemBtn = this.button(`🎒 ${UI.battleItem.button}`, () => on.item?.(), "side-btn");
+    itemBtn.hidden = !on.item;
 
     this.set([
       h("div", { className: "battle-prompt", text: UI.battle.choose }),
-      h("div", { className: "action-row" }, [h("div", { className: "move-grid" }, moves), h("div", { className: "side-btns" }, [switchBtn, fleeBtn])]),
+      h("div", { className: "action-row" }, [h("div", { className: "move-grid" }, moves), h("div", { className: "side-btns" }, [itemBtn, switchBtn, fleeBtn])]),
     ]);
   }
 
