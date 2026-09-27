@@ -90,7 +90,7 @@ export class WorldScene extends Phaser.Scene {
     const view = new MapView(this, this.loaded);
 
     const self = room.state.players.get(room.sessionId)!;
-    this.player = new PlayerAvatar(this, map.tileSize, self.x, self.y, terrainAt(map, self.x, self.y));
+    this.player = new PlayerAvatar(this, map.tileSize, self.x, self.y, terrainAt(map, self.x, self.y), self.avatar);
     this.player.face(self.facing);
     this.player.setLabel(self.nickname, "#ffe28a");
 
@@ -216,7 +216,7 @@ export class WorldScene extends Phaser.Scene {
 
   private addRemote(sessionId: string, view: PlayerView) {
     const map = this.loaded.game;
-    const avatar = new PlayerAvatar(this, map.tileSize, view.x, view.y, terrainAt(map, view.x, view.y));
+    const avatar = new PlayerAvatar(this, map.tileSize, view.x, view.y, terrainAt(map, view.x, view.y), view.avatar);
     avatar.face(view.facing);
     avatar.setLabel(view.nickname);
     avatar.setConnected(view.connected);

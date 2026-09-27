@@ -11,10 +11,13 @@ const T = 32;
 const W = 40;
 const H = 30;
 const MAP_PATH = join(CONTENT_DIR, "maps", "test_island.tmj");
-const TILESET_PATH = join(ASSETS_DIR, "tiles", "placeholder_tiles.png");
-const TILESET_NAME = "placeholder_tiles";
+// ใช้ tileset จากภาพจริง (npm run assets) ถ้ามี ไม่งั้นวาด tileset placeholder
+const REAL_TILESET = join(ASSETS_DIR, "tiles", "island_tiles.png");
+const useReal = existsSync(REAL_TILESET);
+const TILESET_NAME = useReal ? "island_tiles" : "placeholder_tiles";
+const TILESET_PATH = join(ASSETS_DIR, "tiles", `${TILESET_NAME}.png`);
 
-/** tile id (gid) ใน tileset placeholder — ลำดับตรงกับช่องในภาพ */
+/** tile id (gid) ใน tileset — ลำดับตรงกับช่องในภาพ และกับ _tilesets ใน asset-src/manifest.yaml */
 const TILE = {
   grass: 1,
   flowers: 2,
@@ -282,7 +285,7 @@ function makeMap() {
     tileheight: T,
     tilesets: [
       {
-        columns: COLS, firstgid: 1, image: "../../assets/tiles/placeholder_tiles.png",
+        columns: COLS, firstgid: 1, image: `../../assets/tiles/${TILESET_NAME}.png`,
         imageheight: Math.ceil(TILE_COUNT / COLS) * T, imagewidth: COLS * T, margin: 0, name: TILESET_NAME,
         spacing: 0, tilecount: TILE_COUNT, tileheight: T, tilewidth: T,
       },
@@ -315,5 +318,5 @@ function write(path: string, data: Buffer | string) {
   console.log(`✔ เขียน ${path}`);
 }
 
-write(TILESET_PATH, makeTileset());
+if (!useReal) write(TILESET_PATH, makeTileset());
 write(MAP_PATH, `${stringifyMap(makeMap())}\n`);

@@ -3,6 +3,8 @@ import { MapSchema, Schema, type } from "@colyseus/schema";
 /** ผู้เล่น 1 คนในห้อง (ตำแหน่งเป็นหน่วยช่อง) — ทุกคนในห้องเห็น */
 export class PlayerState extends Schema {
   @type("string") nickname = "";
+  /** รูปลักษณ์ตัวละคร (index ใน sheet S06) */
+  @type("number") avatar = 0;
   @type("number") x = 0;
   @type("number") y = 0;
   @type("string") facing = "down";

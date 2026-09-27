@@ -6,6 +6,7 @@ import { session } from "./session";
 /** มุมมองของ state ห้องฝั่ง client (ตรงกับ server/src/rooms/WorldState.ts) */
 export interface PlayerView {
   nickname: string;
+  avatar: number;
   x: number;
   y: number;
   facing: Direction;

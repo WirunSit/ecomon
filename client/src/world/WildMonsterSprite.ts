@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import type { Direction, TileTerrain } from "@ecomon/shared";
-import { FALLBACK_TEXTURE, monsterTextureKey } from "../assets";
+import { monsterTexture } from "../assets";
 
 /** ขนาดภาพมอนป่าบนแผนที่ (px) — มอนป่าเป็นร่าง 1 เสมอ */
 const MAP_SIZE = 52;
@@ -36,8 +36,8 @@ export class WildMonsterSprite {
     this.tileX = view.x;
     this.tileY = view.y;
     const inWater = terrain === "shallow" || terrain === "deep";
-    const key = monsterTextureKey(view.species, 1, "idle");
-    this.sprite = scene.add.image(0, 10, scene.textures.exists(key) ? key : FALLBACK_TEXTURE).setOrigin(0.5, 1);
+    const tex = monsterTexture(scene, view.species, 1, "idle");
+    this.sprite = scene.add.image(0, 10, tex.key, tex.frame).setOrigin(0.5, 1);
     const scale = MAP_SIZE / Math.max(this.sprite.width, this.sprite.height);
     this.sprite.setScale(scale);
 

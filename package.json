@@ -16,7 +16,8 @@
     "placeholders": "tsx tools/make-placeholders.ts",
     "typecheck": "tsc -p shared && tsc -p server && tsc -p client && tsc -p tools",
     "test": "vitest run",
-    "make-test-map": "tsx tools/make-test-map.ts"
+    "make-test-map": "tsx tools/make-test-map.ts",
+    "assets": "python3 tools/slice_sheets.py"
   },
   "devDependencies": {
     "@napi-rs/canvas": "^1.0.0",

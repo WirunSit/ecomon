@@ -72,6 +72,13 @@ describe("เข้าสู่ระบบ: รหัสห้องเรี�
 });
 
 describe("เลือกมอนตั้งต้น (1 ใน 3)", () => {
+  it("เลือกรูปลักษณ์ตัวละครได้ 4 แบบ (0–3)", async () => {
+    const { token } = await t.login("Avatar", "5555");
+    expect((await t.api("/me/starter", { token, body: { speciesId: "joomjim", avatar: 4 } })).status).toBe(400);
+    const r = await t.api<PlayerProfile>("/me/starter", { token, body: { speciesId: "joomjim", avatar: 3 } });
+    expect(r.body.avatar).toBe(3);
+  });
+
   it("เลือกได้เฉพาะ ปุยใบ ถ่านเหมียว จุ๋มจิ๋ม และเลือกได้ครั้งเดียว", async () => {
     const { token } = await t.login("Fah", "4444");
     expect((await t.api("/me/starter", { token, body: { speciesId: "praiwan" } })).status).toBe(400);
@@ -80,6 +87,7 @@ describe("เลือกมอนตั้งต้น (1 ใน 3)", () => {
     expect(r.body.needsStarter).toBe(false);
     expect(r.body.partner).toMatchObject({ speciesId: "tanmeow", level: 5, form: 1 });
     expect(r.body.team).toHaveLength(1);
+    expect(r.body.avatar).toBe(0);
     const again = await t.api("/me/starter", { token, body: { speciesId: "puibai" } });
     expect(again.status).toBe(400);
     expect((await t.api<PlayerProfile>("/me", { token })).body.monsterCount).toBe(1);

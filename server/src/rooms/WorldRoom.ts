@@ -110,6 +110,7 @@ export class WorldRoom extends Room<WorldState, { code: string; classroomId: str
 
     const p = new PlayerState();
     p.nickname = profile.nickname;
+    p.avatar = profile.avatar;
     p.x = start.x;
     p.y = start.y;
     p.facing = start.facing;

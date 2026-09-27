@@ -77,8 +77,8 @@ export function apiRouter(s: Services) {
   });
 
   r.post("/me/starter", requireAuth, (req: AuthedRequest, res) => {
-    const { speciesId } = StarterRequest.parse(req.body);
-    res.json(s.players.chooseStarter(req.auth!.playerId, speciesId));
+    const { speciesId, avatar } = StarterRequest.parse(req.body);
+    res.json(s.players.chooseStarter(req.auth!.playerId, speciesId, avatar));
   });
 
   r.get("/rooms/:code", requireAuth, (req: AuthedRequest, res, next) => {

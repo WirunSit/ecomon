@@ -343,11 +343,11 @@
   {
    "columns": 4,
    "firstgid": 1,
-   "image": "../../assets/tiles/placeholder_tiles.png",
+   "image": "../../assets/tiles/island_tiles.png",
    "imageheight": 96,
    "imagewidth": 128,
    "margin": 0,
-   "name": "placeholder_tiles",
+   "name": "island_tiles",
    "spacing": 0,
    "tilecount": 12,
    "tileheight": 32,

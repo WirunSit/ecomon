@@ -54,6 +54,7 @@ export class PlayerService {
     return {
       id: player.id,
       nickname: player.nickname,
+      avatar: player.avatar,
       classroomId: player.classroomId,
       classCode,
       level: player.level,
@@ -80,7 +81,7 @@ export class PlayerService {
   }
 
   /** เลือกมอนตั้งต้น 1 ใน balance.player.starters ได้ครั้งเดียว (ตอนยังไม่มีมอนสเตอร์) */
-  chooseStarter(playerId: string, speciesId: string, now = Date.now()): PlayerProfile {
+  chooseStarter(playerId: string, speciesId: string, avatar = 0, now = Date.now()): PlayerProfile {
     const { starters, starterLevel } = registry.balance.player;
     if (!starters.includes(speciesId)) throw new GameError("invalid_starter", "เลือกได้เฉพาะมอนตั้งต้นที่กำหนด");
     this.db.transaction((tx) => {
@@ -102,7 +103,7 @@ export class PlayerService {
           obtainedAt: now,
         })
         .run();
-      tx.update(players).set({ partnerUid: uid }).where(eq(players.id, playerId)).run();
+      tx.update(players).set({ partnerUid: uid, avatar }).where(eq(players.id, playerId)).run();
     });
     return this.profile(playerId);
   }

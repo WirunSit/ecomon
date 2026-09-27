@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { LoginRequest, type LoginResponse, type PlayerProfile } from "@ecomon/shared";
+import { uiImageUrl } from "../assets";
 import { api, ApiRequestError } from "../net/api";
 import { connection } from "../net/connection";
 import { session } from "../net/session";
@@ -68,7 +69,9 @@ export class LoginScene extends Phaser.Scene {
       submit.click();
     });
 
-    openScreen(this, [h("h1", { className: "logo", text: "EcoMon Quest" }), h("h2", { text: UI.login.title }), form]);
+    const screen = openScreen(this, [h("h1", { className: "logo", text: "EcoMon Quest" }), h("h2", { text: UI.login.title }), form], "title-bg");
+    const art = uiImageUrl("title");
+    if (art) screen.style.setProperty("--title-art", `url("${art}")`);
     (last ? pin : classCode).focus();
   }
 }

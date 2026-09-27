@@ -34,8 +34,8 @@ shared/   zod schema (shared/src/schema), parser/validator ของ content, re
           กติกาโลก (shared/src/world: ภูมิประเทศ + checkStep การเดิน)
           "@ecomon/shared" ใช้ได้ทุกที่ · "@ecomon/shared/node" ใช้ fs ได้เฉพาะ server/tools/test
 content/  ข้อมูลเกมทั้งหมด (JSON) — ดูหัวข้อ 12
-assets/   ภาพที่ใช้ในเกม · assets/monsters/<id>/f{1-3}_{idle|attack}.png (ชื่อตายตัว)
-asset-src/ sheet ดิบจาก GPT + manifest.yaml (เฟส 12)
+assets/   ภาพที่ตัดแล้ว (ชื่อตาม asset-src/manifest.yaml) · assets/monsters/<id>/f{1-3}_{idle|attack}.png (ชื่อตายตัว)
+asset-src/ sheet ดิบจาก GPT (S02–S17) + manifest.yaml · ตัดด้วย npm run assets (tools/slice_sheets.py)
 tools/    validate.ts, make-placeholders.ts, make-test-map.ts (อนาคต: import-questions, slice_sheets.py)
 ```
 
@@ -46,6 +46,7 @@ tools/    validate.ts, make-placeholders.ts, make-test-map.ts (อนาคต: 
 | `npm run dev` | เปิด server (:2567) + client (:5173) พร้อมกัน |
 | `npm run validate` | ตรวจ content ทั้งหมด (schema + อ้างอิงข้ามไฟล์ + ภาพ) error = ล้ม, `--strict` ให้ warning ล้มด้วย |
 | `npm run placeholders` | วาดภาพ placeholder มอนสเตอร์ทุกร่าง (ไม่เขียนทับภาพจริง ยกเว้น `--force`) |
+| `npm run assets` | ตัด sheet ใน asset-src/ → assets/ + atlas (client/public/atlas) + tileset + contact sheet ตรวจทาน |
 | `npm run make-test-map` | สร้างแผนที่ทดสอบ + tileset placeholder (ไม่เขียนทับ ยกเว้น `--force`) |
 | `npm test` | vitest |
 | `npm run typecheck` | tsc ทุก workspace |
@@ -85,6 +86,13 @@ tools/    validate.ts, make-placeholders.ts, make-test-map.ts (อนาคต: 
 - map property `zone` = id โซนใน zones.json
 - กติกาเดินได้/ไม่ได้อยู่ที่ `checkStep()` ใน shared เท่านั้น client ห้ามตัดสินจาก tile ของ Phaser
 
+## ภาพ
+
+- ภาพทั้งหมดมาจาก `npm run assets` ห้ามแก้ไฟล์ใน assets/ ด้วยมือ (จะถูกเขียนทับ) — แก้ที่ sheet หรือ manifest
+- มอนสเตอร์ใน Phaser ใช้ atlas `monsters` (frame `<id>/f<form>_<pose>`) ผ่าน `monsterTexture()` ใน client/src/assets.ts
+- client ใช้ `import.meta.glob` เฉพาะไฟล์ที่ใช้จริง (glob ทั้งโฟลเดอร์จะพาภาพที่ไม่ใช้ไปอยู่ใน build)
+- ภาพหันขวาทิศเดียว หันซ้ายใช้ `setFlipX` · ท่าเดิน/โจมตี/เงาดำ/บอสมลพิษ ทำด้วยโค้ด (หัวข้อ 14.1)
+
 ## ภาษา
 
 - ข้อความที่ผู้เล่นเห็นเป็นภาษาไทยและมาจาก content · comment ในโค้ดเป็นภาษาไทยได้
@@ -98,3 +106,5 @@ tools/    validate.ts, make-placeholders.ts, make-test-map.ts (อนาคต: 
 - [x] เฟส 3 — Server, ห้อง 5 คน, login, บันทึกข้อมูล
 - [x] เฟส 4 — จุดเกิดมอนสเตอร์ (server/src/world/SpawnManager.ts)
 - [ ] เฟส 5 เป็นต้นไป — ดู docs/GAME_PLAN.md หัวข้อ 13
+- [~] เฟส 12 — ทำ pipeline ตัดภาพ (หัวข้อ 15) และใช้ภาพจริงกับมอนสเตอร์ ตัวละคร tileset หน้า login แล้ว
+      ที่เหลือ: แอนิเมชันโจมตี/โดนตี, ภาพ NPC/ไอเท็ม/ฉากต่อสู้/ไข่ จะผูกเข้าเกมตามเฟสที่ใช้

@@ -1,7 +1,16 @@
 import Phaser from "phaser";
-import { FALLBACK_TEXTURE, fallbackUrl, monsterImageUrl, monsterTextureKey, tileImageUrl, tilesetTextureKey } from "../assets";
+import {
+  characterImages$,
+  FALLBACK_TEXTURE,
+  fallbackUrl,
+  MONSTER_ATLAS,
+  MONSTER_ATLAS_URL,
+  propImageUrl,
+  tileImageUrl,
+  tilesetTextureKey,
+} from "../assets";
 import { loadedMap, registry } from "../content";
-import { createPlaceholderTextures } from "../textures/placeholders";
+import { createPlaceholderTextures, TEX } from "../textures/placeholders";
 
 /** โหลดภาพทั้งหมดที่ต้องใช้ แล้วไปหน้า login (?scene=preview เพื่อเปิดหน้าตรวจ content ของเฟส 0) */
 export class BootScene extends Phaser.Scene {
@@ -16,13 +25,14 @@ export class BootScene extends Phaser.Scene {
     this.load.on("progress", (p: number) => (bar.width = 400 * p));
 
     this.load.image(FALLBACK_TEXTURE, fallbackUrl);
-    for (const m of registry.enabledMonsters()) {
-      for (const f of m.forms) {
-        for (const pose of ["idle", "attack"] as const) {
-          const url = monsterImageUrl(m.id, f.form, pose);
-          if (url) this.load.image(monsterTextureKey(m.id, f.form, pose), url);
-        }
-      }
+    this.load.multiatlas(MONSTER_ATLAS, `${MONSTER_ATLAS_URL}${MONSTER_ATLAS}.json`, MONSTER_ATLAS_URL);
+    for (const { key, url } of characterImages$()) this.load.image(key, url);
+    for (const [key, id] of [
+      [TEX.swimRing, "swim_ring"],
+      [TEX.leafBoat, "leaf_boat"],
+    ] as const) {
+      const url = propImageUrl(id);
+      if (url) this.load.image(key, url);
     }
 
     const tilesetFiles = new Set(registry.maps.all.flatMap((m) => loadedMap(m.id).tilesetImages.map((t) => t.file)));

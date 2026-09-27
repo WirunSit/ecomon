@@ -47,6 +47,7 @@ npm test              # unit test (vitest)
 npm run typecheck     # ตรวจชนิดข้อมูล TypeScript ทุกส่วน
 npm run placeholders  # วาดภาพ placeholder ใหม่ (ไม่เขียนทับภาพจริง)
 npm run make-test-map # สร้างแผนที่ทดสอบใหม่ (ไม่เขียนทับ ถ้าแก้ใน Tiled แล้ว)
+npm run assets        # ตัด sheet ภาพใน asset-src/ เป็นไฟล์แยก (ต้องมี Python: pip install -r tools/requirements.txt)
 npm run build         # validate + build client สำหรับ deploy
 ```
 

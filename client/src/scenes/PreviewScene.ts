@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import type { MonsterSpecies } from "@ecomon/shared";
-import { FALLBACK_TEXTURE, monsterTextureKey, type Pose } from "../assets";
+import { monsterTexture, type Pose } from "../assets";
 import { registry } from "../content";
 
 const monsters = registry.enabledMonsters();
@@ -33,9 +33,8 @@ export class PreviewScene extends Phaser.Scene {
     });
   }
 
-  private texture(id: string, form: number, pose: Pose): string {
-    const key = monsterTextureKey(id, form, pose);
-    return this.textures.exists(key) ? key : FALLBACK_TEXTURE;
+  private texture(id: string, form: number, pose: Pose) {
+    return monsterTexture(this, id, form, pose);
   }
 
   private buildGrid() {
@@ -51,7 +50,8 @@ export class PreviewScene extends Phaser.Scene {
 
       const sprites = m.forms.map((f, j) => {
         const size = [34, 42, 50][j] ?? 50;
-        const img = this.add.image(cx + (j - (m.forms.length - 1) / 2) * 48, cy + 6, this.texture(m.id, f.form, "idle"));
+        const tex = this.texture(m.id, f.form, "idle");
+        const img = this.add.image(cx + (j - (m.forms.length - 1) / 2) * 48, cy + 6, tex.key, tex.frame);
         img.setDisplaySize(size, size).setOrigin(0.5, 1);
         return { img, form: f.form, size };
       });
@@ -64,7 +64,10 @@ export class PreviewScene extends Phaser.Scene {
         .setOrigin(0.5, 0);
 
       const setPose = (pose: Pose) =>
-        sprites.forEach(({ img, form, size }) => img.setTexture(this.texture(m.id, form, pose)).setDisplaySize(size, size));
+        sprites.forEach(({ img, form, size }) => {
+          const tex = this.texture(m.id, form, pose);
+          img.setTexture(tex.key, tex.frame).setDisplaySize(size, size);
+        });
 
       bg.setInteractive({ useHandCursor: true })
         .on("pointerover", () => {

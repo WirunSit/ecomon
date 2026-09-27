@@ -26,6 +26,8 @@ export const players = sqliteTable(
     coins: integer("coins").notNull().default(0),
     conservationPoints: integer("conservation_points").notNull().default(0),
     partnerUid: text("partner_uid"),
+    /** รูปลักษณ์ตัวละคร (index ของนักเรียนใน sheet S06) */
+    avatar: integer("avatar").notNull().default(0),
     mapId: text("map_id"),
     x: integer("x"),
     y: integer("y"),

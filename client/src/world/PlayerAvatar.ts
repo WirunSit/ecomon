@@ -1,12 +1,16 @@
 import Phaser from "phaser";
 import type { Direction, TileTerrain } from "@ecomon/shared";
+import { characterTextureKey, type CharFrame } from "../assets";
 import { TEX } from "../textures/placeholders";
 
-const DEPTH_PLAYERS = 10;
+/** ความสูงตัวละครบนแผนที่ (px) */
+const BODY_HEIGHT = 46;
+const RING_WIDTH = 46;
+const BOAT_WIDTH = 60;
 
 /**
- * ตัวละครบนแผนที่ (ใช้ได้ทั้งผู้เล่นเองและผู้เล่นอื่นในเฟส 3)
- * เดินทีละช่องแบบ tween · ท่าเดินทำด้วยโค้ด (เด้ง + ยืดหด) · หันซ้าย = กลับด้านภาพหันขวา
+ * ตัวละครบนแผนที่ (ผู้เล่นเองและผู้เล่นอื่น) ใช้ภาพนักเรียนจาก sheet S06
+ * เดินทีละช่องแบบ tween · สลับภาพยืน/ก้าวเท้า + เด้งเล็กน้อย (ทำด้วยโค้ด) · หันซ้าย = กลับด้านภาพหันขวา
  * ในน้ำตื้นแสดงห่วงยาง ในน้ำลึกแสดงเรือใบไม้ (ประกอบ 2 ภาพ ตามหัวข้อ 10.2)
  */
 export class PlayerAvatar {
@@ -15,11 +19,14 @@ export class PlayerAvatar {
   private readonly shadow: Phaser.GameObjects.Image;
   private readonly ring: Phaser.GameObjects.Image;
   private readonly boat: Phaser.GameObjects.Image;
+  private readonly bodyScale: number;
   private moving = false;
   private label?: Phaser.GameObjects.Text;
   private bubble?: Phaser.GameObjects.Container;
   private bubbleTimer?: Phaser.Time.TimerEvent;
   private moveTween?: Phaser.Tweens.Tween;
+  private stepTimer?: Phaser.Time.TimerEvent;
+  private terrain: TileTerrain = "land";
   tileX: number;
   tileY: number;
   facing: Direction = "down";
@@ -30,14 +37,19 @@ export class PlayerAvatar {
     x: number,
     y: number,
     terrain: TileTerrain,
+    private readonly avatar = 0,
   ) {
     this.tileX = x;
     this.tileY = y;
-    this.shadow = scene.add.image(0, 10, TEX.shadow);
+    this.shadow = scene.add.image(0, 12, TEX.shadow);
     this.boat = scene.add.image(0, 8, TEX.leafBoat).setVisible(false);
-    this.body = scene.add.image(0, 12, TEX.playerDown).setOrigin(0.5, 1);
-    this.ring = scene.add.image(0, 6, TEX.swimRing).setVisible(false);
-    this.container = scene.add.container(0, 0, [this.shadow, this.boat, this.body, this.ring]).setDepth(DEPTH_PLAYERS);
+    this.boat.setScale(BOAT_WIDTH / this.boat.width);
+    this.body = scene.add.image(0, 14, characterTextureKey(avatar, "down", "idle")).setOrigin(0.5, 1);
+    this.bodyScale = BODY_HEIGHT / this.body.height;
+    this.body.setScale(this.bodyScale);
+    this.ring = scene.add.image(0, 8, TEX.swimRing).setVisible(false);
+    this.ring.setScale(RING_WIDTH / this.ring.width);
+    this.container = scene.add.container(0, 0, [this.shadow, this.boat, this.body, this.ring]).setDepth(10);
     this.placeAt(x, y);
     this.setTerrain(terrain);
   }
@@ -57,33 +69,48 @@ export class PlayerAvatar {
     this.container.setPosition(px, py);
   }
 
+  private setFrame(frame: CharFrame) {
+    this.body.setTexture(characterTextureKey(this.avatar, this.facing, frame)).setFlipX(this.facing === "left");
+    this.applyCrop();
+  }
+
   face(dir: Direction) {
     this.facing = dir;
-    const key = dir === "up" ? TEX.playerUp : dir === "down" ? TEX.playerDown : TEX.playerRight;
-    this.body.setTexture(key).setFlipX(dir === "left");
+    this.setFrame("idle");
+  }
+
+  /** ในน้ำตื้นตัวจมลงครึ่งตัว (ตัดส่วนล่างของภาพ) */
+  private applyCrop() {
+    const h = this.body.height;
+    if (this.terrain === "shallow") this.body.setCrop(0, 0, this.body.width, h * 0.72);
+    else this.body.setCrop();
   }
 
   /** แสดงห่วงยาง/เรือตามภูมิประเทศที่ยืนอยู่ */
   setTerrain(terrain: TileTerrain) {
+    this.terrain = terrain;
     const inShallow = terrain === "shallow";
     const inDeep = terrain === "deep";
     this.ring.setVisible(inShallow);
     this.boat.setVisible(inDeep);
     this.shadow.setVisible(!inShallow && !inDeep);
-    // ในน้ำตัวจมลงเล็กน้อย
-    this.body.setCrop(0, 0, this.body.width, inShallow ? 34 : this.body.height);
-    this.body.y = inShallow ? 16 : inDeep ? 8 : 12;
+    this.body.y = inShallow ? 14 + BODY_HEIGHT * 0.28 : inDeep ? 6 : 14;
+    this.applyCrop();
   }
 
   /** เดินไปช่องข้าง ๆ ใช้เวลา durationMs */
   walkTo(x: number, y: number, dir: Direction, terrain: TileTerrain, durationMs: number, onDone?: () => void) {
-    this.face(dir);
+    this.facing = dir;
     this.moving = true;
     this.tileX = x;
     this.tileY = y;
     const { px, py } = this.pixel(x, y);
     // เปลี่ยนเป็นห่วงยาง/เรือตั้งแต่เริ่มก้าวลงน้ำ แต่ถ้าขึ้นฝั่งให้เปลี่ยนตอนถึง
     if (terrain !== "land") this.setTerrain(terrain);
+    // ก้าวเท้าครึ่งแรก ยืนครึ่งหลัง (ภาพ 2 ท่าจาก S06)
+    this.setFrame("step");
+    this.stepTimer?.remove();
+    this.stepTimer = this.scene.time.delayedCall(durationMs / 2, () => this.setFrame("idle"));
     this.moveTween = this.scene.tweens.add({
       targets: this.container,
       x: px,
@@ -97,13 +124,11 @@ export class PlayerAvatar {
         onDone?.();
       },
     });
-    // เด้ง + ยืดหด (ทำด้วยโค้ดตามหัวข้อ 14.1 ข้อ 3)
     const baseY = this.body.y;
     this.scene.tweens.add({
       targets: this.body,
-      y: baseY - 3,
-      scaleY: 0.94,
-      scaleX: 1.04,
+      y: baseY - 2,
+      scaleY: this.bodyScale * 0.96,
       duration: durationMs / 2,
       yoyo: true,
       ease: "Sine.easeOut",
@@ -114,16 +139,19 @@ export class PlayerAvatar {
   snapTo(x: number, y: number, terrain: TileTerrain) {
     this.moveTween?.stop();
     this.moveTween = undefined;
+    this.stepTimer?.remove();
     this.moving = false;
     this.placeAt(x, y);
     this.setTerrain(terrain);
+    this.setFrame("idle");
+    this.body.setScale(this.bodyScale);
   }
 
   /** ป้ายชื่อเหนือหัว */
   setLabel(text: string, color = "#fdf8ec") {
     if (!this.label) {
       this.label = this.scene.add
-        .text(0, -34, "", { fontFamily: "Kanit, sans-serif", fontSize: "12px", color, stroke: "#1b2130", strokeThickness: 3 })
+        .text(0, 12 - BODY_HEIGHT, "", { fontFamily: "Kanit, sans-serif", fontSize: "12px", color, stroke: "#1b2130", strokeThickness: 3 })
         .setOrigin(0.5, 1)
         .setResolution(2);
       this.container.add(this.label);
@@ -150,7 +178,7 @@ export class PlayerAvatar {
     bg.fillStyle(0xfdf8ec, 0.96).fillRoundedRect(-w / 2, -hgt / 2, w, hgt, 8);
     bg.fillTriangle(-5, hgt / 2 - 1, 5, hgt / 2 - 1, 0, hgt / 2 + 6);
     bg.lineStyle(2, 0x4a3020, 1).strokeRoundedRect(-w / 2, -hgt / 2, w, hgt, 8);
-    this.bubble = this.scene.add.container(0, -66 - hgt / 2, [bg, t]);
+    this.bubble = this.scene.add.container(0, -BODY_HEIGHT - 12 - hgt / 2, [bg, t]);
     this.container.add(this.bubble);
     this.bubbleTimer = this.scene.time.delayedCall(ms, () => {
       this.bubble?.destroy();
@@ -160,6 +188,7 @@ export class PlayerAvatar {
 
   destroy() {
     this.bubbleTimer?.remove();
+    this.stepTimer?.remove();
     this.moveTween?.stop();
     this.container.destroy();
   }

@@ -24,7 +24,13 @@ export const Pin = z.string().regex(/^\d{4}$/, "PIN ต้องเป็นต�
 export const LoginRequest = z.object({ classCode: ClassCode, nickname: Nickname, pin: Pin });
 export type LoginRequest = z.infer<typeof LoginRequest>;
 
-export const StarterRequest = z.object({ speciesId: Id });
+/** จำนวนรูปลักษณ์ตัวละครนักเรียน (sheet S06: 4 แบบ) */
+export const AVATAR_COUNT = 4;
+
+export const StarterRequest = z.object({
+  speciesId: Id,
+  avatar: z.number().int().min(0).max(AVATAR_COUNT - 1).default(0),
+});
 
 export interface MonsterSummary {
   uid: string;
@@ -39,6 +45,8 @@ export interface MonsterSummary {
 export interface PlayerProfile {
   id: string;
   nickname: string;
+  /** รูปลักษณ์ตัวละคร 0..AVATAR_COUNT-1 */
+  avatar: number;
   classroomId: string;
   classCode: string;
   level: number;

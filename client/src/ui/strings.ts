@@ -30,6 +30,8 @@ export const UI = {
     title: "เลือกมอนสเตอร์คู่หู",
     subtitle: "เลือกได้ 1 ตัว คู่หูจะร่วมผจญภัยไปกับเธอ",
     choose: (name: string) => `เลือก${name}`,
+    avatarTitle: "เลือกตัวละครของเธอ",
+    avatar: "ตัวละคร",
   },
   lobby: {
     hello: (name: string) => `สวัสดี ${name}`,
