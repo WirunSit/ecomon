@@ -1,0 +1,27 @@
+{
+  "topic": "pop_estimate",
+  "questions": [
+    {
+      "id": "q_pop_estimate_001",
+      "topic": "pop_estimate",
+      "difficulty": 3,
+      "type": "numeric",
+      "stem": "จับหนูป่า 60 ตัว ทำเครื่องหมายแล้วปล่อย 1 สัปดาห์ต่อมาจับได้ 50 ตัว มีเครื่องหมาย 12 ตัว ประชากรหนูป่ามีประมาณกี่ตัว",
+      "unit": "ตัว",
+      "answer": {
+        "value": 250,
+        "tolerance": 0
+      },
+      "explanation": "N = (จำนวนที่ทำเครื่องหมาย × จำนวนที่จับครั้งที่สอง) ÷ จำนวนที่มีเครื่องหมาย = (60 × 50) ÷ 12 = 250 ตัว",
+      "hint": "สัดส่วนตัวมีเครื่องหมายในครั้งที่สอง ≈ สัดส่วนในประชากรทั้งหมด",
+      "image": null,
+      "tags": [
+        "mark_recapture",
+        "calculation"
+      ],
+      "status": "draft",
+      "author": "แม่แบบจาก GAME_PLAN 11.4",
+      "version": 1
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "topic": "nutrient_cycles",
+  "questions": [
+    {
+      "id": "q_nutrient_cycles_001",
+      "topic": "nutrient_cycles",
+      "difficulty": 1,
+      "type": "mcq",
+      "stem": "แบคทีเรียในปมรากพืชตระกูลถั่วที่ตรึงไนโตรเจนคือสกุลใด",
+      "choices": [
+        "Rhizobium",
+        "Nitrosomonas",
+        "Escherichia",
+        "Lactobacillus"
+      ],
+      "answer": {
+        "index": 0
+      },
+      "explanation": "Rhizobium เปลี่ยน N₂ ในอากาศเป็นสารประกอบไนโตรเจนที่พืชนำไปใช้ได้",
+      "hint": "อยู่ในปมรากถั่ว",
+      "image": null,
+      "tags": [
+        "nitrogen_cycle"
+      ],
+      "status": "draft",
+      "author": "แม่แบบจาก GAME_PLAN 11.5",
+      "version": 1
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "id": "hedtoob",
+  "dex": 5,
+  "rarity": "normal",
+  "elements": [
+    "spore"
+  ],
+  "role": "decomposer",
+  "habitat": "land",
+  "archetype": "attacker",
+  "baseStats": {
+    "hp": 70,
+    "atk": 110,
+    "def": 60,
+    "spd": 60
+  },
+  "forms": [
+    {
+      "form": 1,
+      "name": "เห็ดตุ้บ",
+      "minLevel": 1,
+      "sprite": "hedtoob_f1"
+    },
+    {
+      "form": 2,
+      "name": "เห็ดตุ่น",
+      "minLevel": 16,
+      "sprite": "hedtoob_f2"
+    },
+    {
+      "form": 3,
+      "name": "ราชันย์เห็ด",
+      "minLevel": 36,
+      "sprite": "hedtoob_f3"
+    }
+  ],
+  "learnset": [
+    {
+      "level": 1,
+      "move": "spore_basic"
+    },
+    {
+      "level": 8,
+      "move": "spore_mid"
+    },
+    {
+      "level": 16,
+      "move": "spore_adv"
+    },
+    {
+      "level": 36,
+      "move": "sig_decay_spores"
+    }
+  ],
+  "habitatHint": "พบในป่าชื้น",
+  "dexFact": "เห็ดและราเป็นผู้ย่อยสลาย ปล่อยเอนไซม์ย่อยซากสิ่งมีชีวิตให้เป็นสารอนินทรีย์ที่พืชนำกลับไปใช้ได้",
+  "factTopic": "eco_components",
+  "enabled": true,
+  "addedInVersion": "1.0"
+}

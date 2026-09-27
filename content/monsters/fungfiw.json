@@ -1,0 +1,60 @@
+{
+  "id": "fungfiw",
+  "dex": 4,
+  "rarity": "normal",
+  "elements": [
+    "aero"
+  ],
+  "role": "consumer",
+  "habitat": "land",
+  "archetype": "speedster",
+  "baseStats": {
+    "hp": 60,
+    "atk": 75,
+    "def": 55,
+    "spd": 110
+  },
+  "forms": [
+    {
+      "form": 1,
+      "name": "ฟุ้งฟิ้ว",
+      "minLevel": 1,
+      "sprite": "fungfiw_f1"
+    },
+    {
+      "form": 2,
+      "name": "ฟุ้งเมฆ",
+      "minLevel": 16,
+      "sprite": "fungfiw_f2"
+    },
+    {
+      "form": 3,
+      "name": "วายุเมฆา",
+      "minLevel": 36,
+      "sprite": "fungfiw_f3"
+    }
+  ],
+  "learnset": [
+    {
+      "level": 1,
+      "move": "aero_basic"
+    },
+    {
+      "level": 8,
+      "move": "aero_mid"
+    },
+    {
+      "level": 16,
+      "move": "aero_adv"
+    },
+    {
+      "level": 36,
+      "move": "sig_cloud_storm"
+    }
+  ],
+  "habitatHint": "พบบนหน้าผาลมหวน",
+  "dexFact": "การแพร่กระจายของประชากรมี 3 แบบ คือ แบบสุ่ม แบบกลุ่ม และแบบสม่ำเสมอ",
+  "factTopic": "pop_traits",
+  "enabled": true,
+  "addedInVersion": "1.0"
+}

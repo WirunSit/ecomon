@@ -1,0 +1,60 @@
+{
+  "id": "joomjim",
+  "dex": 6,
+  "rarity": "normal",
+  "elements": [
+    "aqua"
+  ],
+  "role": "consumer",
+  "habitat": "water",
+  "archetype": "balanced",
+  "baseStats": {
+    "hp": 75,
+    "atk": 75,
+    "def": 75,
+    "spd": 75
+  },
+  "forms": [
+    {
+      "form": 1,
+      "name": "จุ๋มจิ๋ม",
+      "minLevel": 1,
+      "sprite": "joomjim_f1"
+    },
+    {
+      "form": 2,
+      "name": "จุ๋มจ้อย",
+      "minLevel": 16,
+      "sprite": "joomjim_f2"
+    },
+    {
+      "form": 3,
+      "name": "จุ๋มวารี",
+      "minLevel": 36,
+      "sprite": "joomjim_f3"
+    }
+  ],
+  "learnset": [
+    {
+      "level": 1,
+      "move": "aqua_basic"
+    },
+    {
+      "level": 8,
+      "move": "aqua_mid"
+    },
+    {
+      "level": 16,
+      "move": "aqua_adv"
+    },
+    {
+      "level": 36,
+      "move": "sig_rainbow_bubble"
+    }
+  ],
+  "habitatHint": "พบในทะเลสาบ",
+  "dexFact": "แอกโซลอเติลในธรรมชาติใกล้สูญพันธุ์ เพราะแหล่งน้ำถูกทำลายและมีปลาต่างถิ่นรุกราน",
+  "factTopic": "conservation",
+  "enabled": true,
+  "addedInVersion": "1.0"
+}

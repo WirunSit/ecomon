@@ -1,0 +1,61 @@
+{
+  "id": "mossmoth",
+  "dex": 14,
+  "rarity": "rare",
+  "elements": [
+    "spore",
+    "flora"
+  ],
+  "role": "decomposer",
+  "habitat": "land",
+  "archetype": "speedster",
+  "baseStats": {
+    "hp": 60,
+    "atk": 80,
+    "def": 55,
+    "spd": 105
+  },
+  "forms": [
+    {
+      "form": 1,
+      "name": "มอสมอธ",
+      "minLevel": 1,
+      "sprite": "mossmoth_f1"
+    },
+    {
+      "form": 2,
+      "name": "ผีเสื้อสปอร์",
+      "minLevel": 16,
+      "sprite": "mossmoth_f2"
+    },
+    {
+      "form": 3,
+      "name": "ราชินีราตรีเรือง",
+      "minLevel": 36,
+      "sprite": "mossmoth_f3"
+    }
+  ],
+  "learnset": [
+    {
+      "level": 1,
+      "move": "spore_basic"
+    },
+    {
+      "level": 8,
+      "move": "flora_mid"
+    },
+    {
+      "level": 16,
+      "move": "spore_adv"
+    },
+    {
+      "level": 36,
+      "move": "sig_glow_spore_dust"
+    }
+  ],
+  "habitatHint": "ตำนานเล่าว่าอาศัยอยู่ในป่าเห็ดเรืองแสง",
+  "dexFact": "ผีเสื้อกลางคืนกับดอกไม้มีภาวะได้ประโยชน์ร่วมกัน ผีเสื้อได้น้ำหวาน ดอกไม้ได้การถ่ายเรณู",
+  "factTopic": "relationships",
+  "enabled": true,
+  "addedInVersion": "1.0"
+}

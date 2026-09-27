@@ -1,0 +1,61 @@
+{
+  "id": "praiwan",
+  "dex": 11,
+  "rarity": "rare",
+  "elements": [
+    "flora",
+    "aqua"
+  ],
+  "role": "producer",
+  "habitat": "land",
+  "archetype": "balanced",
+  "baseStats": {
+    "hp": 80,
+    "atk": 70,
+    "def": 75,
+    "spd": 75
+  },
+  "forms": [
+    {
+      "form": 1,
+      "name": "ไพรวัลย์",
+      "minLevel": 1,
+      "sprite": "praiwan_f1"
+    },
+    {
+      "form": 2,
+      "name": "กวางไพร",
+      "minLevel": 16,
+      "sprite": "praiwan_f2"
+    },
+    {
+      "form": 3,
+      "name": "เทพกวางไพรวัลย์",
+      "minLevel": 36,
+      "sprite": "praiwan_f3"
+    }
+  ],
+  "learnset": [
+    {
+      "level": 1,
+      "move": "flora_basic"
+    },
+    {
+      "level": 8,
+      "move": "aqua_mid"
+    },
+    {
+      "level": 16,
+      "move": "flora_adv"
+    },
+    {
+      "level": 36,
+      "move": "sig_reviving_dew"
+    }
+  ],
+  "habitatHint": "ตำนานเล่าว่าอาศัยอยู่ที่ป่าริมน้ำตก",
+  "dexFact": "ป่าต้นน้ำดูดซับน้ำฝนและคายน้ำกลับสู่บรรยากาศ เป็นส่วนสำคัญของวัฏจักรน้ำ",
+  "factTopic": "nutrient_cycles",
+  "enabled": true,
+  "addedInVersion": "1.0"
+}

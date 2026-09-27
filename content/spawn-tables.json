@@ -1,0 +1,248 @@
+{
+  "tables": [
+    {
+      "id": "meadow_land",
+      "terrain": "land",
+      "entries": [
+        {
+          "species": "puibai",
+          "weight": 60,
+          "level": [
+            2,
+            6
+          ]
+        },
+        {
+          "species": "fungfiw",
+          "weight": 40,
+          "level": [
+            3,
+            8
+          ]
+        }
+      ]
+    },
+    {
+      "id": "forest_land",
+      "terrain": "land",
+      "entries": [
+        {
+          "species": "hedtoob",
+          "weight": 60,
+          "level": [
+            5,
+            12
+          ]
+        },
+        {
+          "species": "puibai",
+          "weight": 40,
+          "level": [
+            5,
+            10
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lake_shallow",
+      "terrain": "shallow",
+      "entries": [
+        {
+          "species": "buaboong",
+          "weight": 55,
+          "level": [
+            8,
+            15
+          ]
+        },
+        {
+          "species": "joomjim",
+          "weight": 45,
+          "level": [
+            8,
+            14
+          ]
+        }
+      ]
+    },
+    {
+      "id": "canyon_land",
+      "terrain": "land",
+      "entries": [
+        {
+          "species": "hinnoop",
+          "weight": 60,
+          "level": [
+            10,
+            18
+          ]
+        },
+        {
+          "species": "fungfiw",
+          "weight": 40,
+          "level": [
+            10,
+            16
+          ]
+        }
+      ]
+    },
+    {
+      "id": "volcano_land",
+      "terrain": "land",
+      "entries": [
+        {
+          "species": "tanmeow",
+          "weight": 60,
+          "level": [
+            14,
+            22
+          ]
+        },
+        {
+          "species": "hinnoop",
+          "weight": 40,
+          "level": [
+            14,
+            20
+          ]
+        }
+      ]
+    },
+    {
+      "id": "coast_beach",
+      "terrain": "shallow",
+      "entries": [
+        {
+          "species": "pupluek",
+          "weight": 100,
+          "level": [
+            16,
+            22
+          ]
+        }
+      ]
+    },
+    {
+      "id": "coast_reef",
+      "terrain": "shallow",
+      "entries": [
+        {
+          "species": "plapoong",
+          "weight": 100,
+          "level": [
+            18,
+            24
+          ]
+        }
+      ]
+    },
+    {
+      "id": "coast_vent",
+      "terrain": "deep",
+      "entries": [
+        {
+          "species": "muekoon",
+          "weight": 100,
+          "level": [
+            20,
+            26
+          ]
+        }
+      ]
+    },
+    {
+      "id": "valley_land",
+      "terrain": "land",
+      "entries": [
+        {
+          "species": "puibai",
+          "weight": 20,
+          "level": [
+            20,
+            30
+          ]
+        },
+        {
+          "species": "tanmeow",
+          "weight": 20,
+          "level": [
+            20,
+            30
+          ]
+        },
+        {
+          "species": "hinnoop",
+          "weight": 20,
+          "level": [
+            20,
+            30
+          ]
+        },
+        {
+          "species": "fungfiw",
+          "weight": 20,
+          "level": [
+            20,
+            30
+          ]
+        },
+        {
+          "species": "hedtoob",
+          "weight": 20,
+          "level": [
+            20,
+            30
+          ]
+        }
+      ]
+    },
+    {
+      "id": "valley_pond",
+      "terrain": "shallow",
+      "entries": [
+        {
+          "species": "joomjim",
+          "weight": 20,
+          "level": [
+            20,
+            30
+          ]
+        },
+        {
+          "species": "buaboong",
+          "weight": 20,
+          "level": [
+            20,
+            30
+          ]
+        },
+        {
+          "species": "plapoong",
+          "weight": 20,
+          "level": [
+            20,
+            30
+          ]
+        },
+        {
+          "species": "muekoon",
+          "weight": 20,
+          "level": [
+            20,
+            30
+          ]
+        },
+        {
+          "species": "pupluek",
+          "weight": 20,
+          "level": [
+            20,
+            30
+          ]
+        }
+      ]
+    }
+  ]
+}

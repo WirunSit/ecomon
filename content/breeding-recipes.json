@@ -1,0 +1,63 @@
+{
+  "normalToRare": [
+    {
+      "elements": [
+        "flora",
+        "aqua"
+      ],
+      "result": "praiwan"
+    },
+    {
+      "elements": [
+        "pyro",
+        "terra"
+      ],
+      "result": "ploengpha"
+    },
+    {
+      "elements": [
+        "aero",
+        "aqua"
+      ],
+      "result": "napawan"
+    },
+    {
+      "elements": [
+        "spore",
+        "flora"
+      ],
+      "result": "mossmoth"
+    },
+    {
+      "elements": [
+        "terra",
+        "spore"
+      ],
+      "result": "silarak"
+    }
+  ],
+  "rareToLegend": [
+    {
+      "parents": [
+        "praiwan",
+        "silarak"
+      ],
+      "result": "gaiara"
+    },
+    {
+      "parents": [
+        "napawan",
+        "mossmoth"
+      ],
+      "result": "varithara"
+    },
+    {
+      "parents": [
+        "ploengpha",
+        "napawan"
+      ],
+      "result": "suriya"
+    }
+  ],
+  "realityNote": "เรื่องจริงในธรรมชาติ: สิ่งมีชีวิตต่างสปีชีส์ส่วนใหญ่ผสมพันธุ์กันไม่ได้ หรือถ้าได้ ลูกมักเป็นหมัน เช่น ล่อที่เกิดจากม้ากับลา เรียกว่าการแยกทางการสืบพันธุ์ การผสมข้ามสายพันธุ์ในเกมนี้จึงเป็นเพียงจินตนาการเท่านั้น"
+}

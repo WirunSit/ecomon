@@ -1,0 +1,39 @@
+{
+  "id": "main_01_welcome",
+  "type": "main",
+  "title": "ยินดีต้อนรับสู่เกาะนิเวศา",
+  "description": "ไปพบศาสตราจารย์ต้นที่หมู่บ้านต้นกล้า แล้วออกสำรวจทุ่งหญ้าลมหวนเป็นครั้งแรก",
+  "giver": "npc_prof_ton",
+  "zone": "village",
+  "requires": {
+    "playerLevel": 1,
+    "quests": []
+  },
+  "objectives": [
+    {
+      "kind": "talk",
+      "npc": "npc_prof_ton"
+    },
+    {
+      "kind": "reach",
+      "zone": "meadow"
+    },
+    {
+      "kind": "catch",
+      "filter": {
+        "zone": "meadow"
+      },
+      "count": 1
+    }
+  ],
+  "rewards": {
+    "exp": 80,
+    "coins": 50,
+    "items": [
+      {
+        "id": "honey_potion",
+        "qty": 2
+      }
+    ]
+  }
+}

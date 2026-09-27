@@ -1,0 +1,52 @@
+{
+  "npcs": [
+    {
+      "id": "npc_prof_ton",
+      "name": "ศาสตราจารย์ต้น",
+      "title": "นักนิเวศวิทยาประจำหมู่บ้าน",
+      "zone": "village",
+      "sprite": "npc_prof_ton",
+      "portrait": "npc_prof_ton_portrait"
+    },
+    {
+      "id": "npc_shop_auntie",
+      "name": "ป้าส้ม",
+      "title": "เจ้าของร้านค้าหมู่บ้าน",
+      "zone": "village",
+      "sprite": "npc_shop_auntie",
+      "portrait": "npc_shop_auntie_portrait"
+    },
+    {
+      "id": "npc_lab_researcher",
+      "name": "พี่ฟ้า",
+      "title": "นักวิจัยห้องแล็บผสมพันธุ์",
+      "zone": "village",
+      "sprite": "npc_lab_researcher",
+      "portrait": "npc_lab_researcher_portrait"
+    },
+    {
+      "id": "npc_fisherman",
+      "name": "ลุงชล",
+      "title": "ชาวประมงชายฝั่ง",
+      "zone": "coast",
+      "sprite": "npc_fisherman",
+      "portrait": "npc_fisherman_portrait"
+    },
+    {
+      "id": "npc_ranger",
+      "name": "พี่ไพร",
+      "title": "เจ้าหน้าที่พิทักษ์ป่า",
+      "zone": "meadow",
+      "sprite": "npc_ranger",
+      "portrait": "npc_ranger_portrait"
+    },
+    {
+      "id": "npc_temple_elder",
+      "name": "ผู้เฒ่าแห่งวิหาร",
+      "title": "ผู้เฝ้าวิหารสมดุล",
+      "zone": "valley",
+      "sprite": "npc_temple_elder",
+      "portrait": "npc_temple_elder_portrait"
+    }
+  ]
+}

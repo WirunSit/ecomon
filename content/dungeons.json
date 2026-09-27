@@ -1,0 +1,233 @@
+{
+  "dungeons": [
+    {
+      "id": "root_cave",
+      "name": "ถ้ำรากแก้ว",
+      "zone": "forest",
+      "unlockLevel": 10,
+      "dropRarity": "rare",
+      "dropMode": "pool",
+      "dropPool": [
+        "silarak",
+        "mossmoth"
+      ],
+      "bosses": [
+        {
+          "species": "silarak",
+          "name": "ศิลารากมลพิษ",
+          "form": 3
+        }
+      ],
+      "bossLevel": 14,
+      "waves": [
+        {
+          "species": [
+            "hedtoob",
+            "puibai"
+          ],
+          "level": [
+            10,
+            13
+          ]
+        },
+        {
+          "species": [
+            "hedtoob"
+          ],
+          "level": [
+            12,
+            14
+          ]
+        }
+      ],
+      "topics": [
+        "eco_components",
+        "nutrient_cycles"
+      ],
+      "battleBackground": "mushroom_forest",
+      "guaranteedRewards": {
+        "coins": 150,
+        "exp": 200,
+        "lootTable": "chest_dungeon"
+      }
+    },
+    {
+      "id": "dormant_crater",
+      "name": "ปล่องภูเขาไฟหลับ",
+      "zone": "volcano",
+      "unlockLevel": 12,
+      "dropRarity": "rare",
+      "dropMode": "pool",
+      "dropPool": [
+        "ploengpha"
+      ],
+      "bosses": [
+        {
+          "species": "ploengpha",
+          "name": "มังกรเพลิงผาควันดำ",
+          "form": 3
+        }
+      ],
+      "bossLevel": 18,
+      "waves": [
+        {
+          "species": [
+            "tanmeow",
+            "hinnoop"
+          ],
+          "level": [
+            12,
+            16
+          ]
+        },
+        {
+          "species": [
+            "tanmeow"
+          ],
+          "level": [
+            14,
+            18
+          ]
+        }
+      ],
+      "topics": [
+        "succession"
+      ],
+      "battleBackground": "volcano",
+      "guaranteedRewards": {
+        "coins": 180,
+        "exp": 250,
+        "lootTable": "chest_dungeon"
+      }
+    },
+    {
+      "id": "cloud_bay",
+      "name": "อ่าวเมฆาคราบน้ำมัน",
+      "zone": "coast",
+      "unlockLevel": 14,
+      "dropRarity": "rare",
+      "dropMode": "pool",
+      "dropPool": [
+        "napawan",
+        "praiwan"
+      ],
+      "bosses": [
+        {
+          "species": "napawan",
+          "name": "นภาวาฬคราบน้ำมัน",
+          "form": 3
+        }
+      ],
+      "bossLevel": 20,
+      "waves": [
+        {
+          "species": [
+            "plapoong",
+            "pupluek"
+          ],
+          "level": [
+            14,
+            18
+          ]
+        },
+        {
+          "species": [
+            "plapoong",
+            "muekoon"
+          ],
+          "level": [
+            16,
+            20
+          ]
+        }
+      ],
+      "topics": [
+        "biomes",
+        "energy_flow"
+      ],
+      "battleBackground": "beach",
+      "guaranteedRewards": {
+        "coins": 200,
+        "exp": 300,
+        "lootTable": "chest_dungeon"
+      }
+    },
+    {
+      "id": "balance_temple",
+      "name": "วิหารสมดุล",
+      "zone": "valley",
+      "unlockLevel": 25,
+      "dropRarity": "legend",
+      "dropMode": "chosen_boss",
+      "chooseBoss": true,
+      "bosses": [
+        {
+          "species": "gaiara",
+          "name": "ไกอาร่าผืนพงไพร",
+          "form": 3
+        },
+        {
+          "species": "varithara",
+          "name": "มหาวาริธารา",
+          "form": 3
+        },
+        {
+          "species": "suriya",
+          "name": "สุริยะเทพปักษี",
+          "form": 3
+        }
+      ],
+      "bossLevel": 30,
+      "waves": [
+        {
+          "species": [
+            "tanmeow",
+            "hinnoop",
+            "fungfiw",
+            "hedtoob",
+            "puibai"
+          ],
+          "level": [
+            22,
+            26
+          ]
+        },
+        {
+          "species": [
+            "joomjim",
+            "plapoong",
+            "muekoon",
+            "pupluek",
+            "buaboong"
+          ],
+          "level": [
+            24,
+            28
+          ]
+        }
+      ],
+      "topics": [
+        "eco_components",
+        "relationships",
+        "food_chain",
+        "energy_flow",
+        "nutrient_cycles",
+        "biomes",
+        "succession",
+        "pop_traits",
+        "pop_estimate",
+        "pop_growth",
+        "human_pop",
+        "conservation"
+      ],
+      "includeCalculation": true,
+      "minDifficulty": 3,
+      "battleBackground": "temple",
+      "guaranteedRewards": {
+        "coins": 400,
+        "exp": 600,
+        "lootTable": "chest_dungeon"
+      }
+    }
+  ]
+}

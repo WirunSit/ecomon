@@ -1,0 +1,60 @@
+{
+  "id": "hinnoop",
+  "dex": 3,
+  "rarity": "normal",
+  "elements": [
+    "terra"
+  ],
+  "role": "consumer",
+  "habitat": "land",
+  "archetype": "tank",
+  "baseStats": {
+    "hp": 90,
+    "atk": 60,
+    "def": 105,
+    "spd": 45
+  },
+  "forms": [
+    {
+      "form": 1,
+      "name": "หินหนุบ",
+      "minLevel": 1,
+      "sprite": "hinnoop_f1"
+    },
+    {
+      "form": 2,
+      "name": "หินหนุ่ม",
+      "minLevel": 16,
+      "sprite": "hinnoop_f2"
+    },
+    {
+      "form": 3,
+      "name": "ศิลาเกราะ",
+      "minLevel": 36,
+      "sprite": "hinnoop_f3"
+    }
+  ],
+  "learnset": [
+    {
+      "level": 1,
+      "move": "terra_basic"
+    },
+    {
+      "level": 8,
+      "move": "terra_mid"
+    },
+    {
+      "level": 16,
+      "move": "terra_adv"
+    },
+    {
+      "level": 36,
+      "move": "sig_rockslide_roll"
+    }
+  ],
+  "habitatHint": "พบในหุบเขาหิน",
+  "dexFact": "หินผุพังด้วยลม น้ำ และสิ่งมีชีวิตจนกลายเป็นดิน ซึ่งเป็นองค์ประกอบทางกายภาพที่สำคัญของระบบนิเวศ",
+  "factTopic": "eco_components",
+  "enabled": true,
+  "addedInVersion": "1.0"
+}

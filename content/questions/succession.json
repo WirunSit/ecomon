@@ -1,0 +1,31 @@
+{
+  "topic": "succession",
+  "questions": [
+    {
+      "id": "q_succession_001",
+      "topic": "succession",
+      "difficulty": 2,
+      "type": "mcq",
+      "stem": "บนลาวาที่เพิ่งเย็นตัว สิ่งมีชีวิตผู้บุกเบิกที่พบก่อนคืออะไร",
+      "choices": [
+        "ไลเคน",
+        "ไม้ยืนต้น",
+        "หญ้า",
+        "เฟิร์น"
+      ],
+      "answer": {
+        "index": 0
+      },
+      "explanation": "เป็นการเปลี่ยนแปลงแทนที่แบบปฐมภูมิ ไลเคนช่วยผุพังหินจนเกิดดินให้สิ่งมีชีวิตอื่นเข้ามาอยู่ต่อ",
+      "hint": "ยังไม่มีดินเลย",
+      "image": null,
+      "tags": [
+        "primary_succession",
+        "pioneer"
+      ],
+      "status": "draft",
+      "author": "แม่แบบจาก GAME_PLAN 11.5",
+      "version": 1
+    }
+  ]
+}

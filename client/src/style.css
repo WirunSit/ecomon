@@ -1,0 +1,66 @@
+:root {
+  --ui-bg: rgba(30, 36, 48, 0.82);
+  --ui-fg: #fdf8ec;
+  --ui-muted: #c9c2b0;
+  --ui-accent: #7ed36f;
+  --ui-warn: #f0a04b;
+  --ui-radius: 12px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: #1b2130;
+  color: var(--ui-fg);
+  font-family: "Kanit", "Sarabun", system-ui, sans-serif;
+  overflow: hidden;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+#app { position: fixed; inset: 0; }
+#game { position: absolute; inset: 0; }
+#ui { position: absolute; inset: 0; pointer-events: none; }
+#ui .interactive { pointer-events: auto; }
+
+.hud-bar {
+  position: absolute;
+  top: max(8px, env(safe-area-inset-top));
+  left: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 14px;
+  background: var(--ui-bg);
+  border-radius: var(--ui-radius);
+  font-size: 15px;
+}
+.hud-bar h1 { margin: 0; font-size: 18px; font-weight: 600; }
+.hud-bar .spacer { flex: 1; }
+.hud-bar .muted { color: var(--ui-muted); }
+.status-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; background: var(--ui-warn); }
+.status-dot.ok { background: var(--ui-accent); }
+
+.info-card {
+  position: absolute;
+  right: 12px;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  width: min(340px, calc(100% - 24px));
+  padding: 10px 14px;
+  background: var(--ui-bg);
+  border-radius: var(--ui-radius);
+  font-family: "Sarabun", "Kanit", sans-serif;
+  font-size: 14px;
+  line-height: 1.45;
+}
+.info-card .muted { color: var(--ui-muted); }
+.info-card h2 { margin: 0 0 4px; font-family: "Kanit", sans-serif; font-size: 17px; font-weight: 600; }
+.info-card .chips { display: flex; flex-wrap: wrap; gap: 4px; margin: 4px 0; }
+.info-card .chip { padding: 0 8px; border-radius: 999px; font-size: 12px; color: #1b2130; }
+.info-card table { border-collapse: collapse; width: 100%; margin-top: 4px; }
+.info-card td { padding: 0 4px; }
+.info-card td:nth-child(even) { text-align: right; font-variant-numeric: tabular-nums; }

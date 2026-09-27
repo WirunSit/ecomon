@@ -1,0 +1,31 @@
+import Phaser from "phaser";
+import { FALLBACK_TEXTURE, fallbackUrl, monsterImageUrl, monsterTextureKey } from "../assets";
+import { monsters } from "../content";
+
+/** โหลดภาพทั้งหมดที่ต้องใช้ แล้วไปฉากถัดไป */
+export class BootScene extends Phaser.Scene {
+  constructor() {
+    super("Boot");
+  }
+
+  preload() {
+    const { width, height } = this.scale;
+    const bar = this.add.rectangle(width / 2 - 200, height / 2, 0, 12, 0x7ed36f).setOrigin(0, 0.5);
+    this.add.rectangle(width / 2, height / 2, 404, 16).setStrokeStyle(2, 0xfdf8ec);
+    this.load.on("progress", (p: number) => (bar.width = 400 * p));
+
+    this.load.image(FALLBACK_TEXTURE, fallbackUrl);
+    for (const m of monsters) {
+      for (const f of m.forms) {
+        for (const pose of ["idle", "attack"] as const) {
+          const url = monsterImageUrl(m.id, f.form, pose);
+          if (url) this.load.image(monsterTextureKey(m.id, f.form, pose), url);
+        }
+      }
+    }
+  }
+
+  create() {
+    this.scene.start("Preview");
+  }
+}

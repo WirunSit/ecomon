@@ -1,0 +1,60 @@
+{
+  "id": "pupluek",
+  "dex": 10,
+  "rarity": "normal",
+  "elements": [
+    "terra"
+  ],
+  "role": "decomposer",
+  "habitat": "water",
+  "archetype": "tank",
+  "baseStats": {
+    "hp": 85,
+    "atk": 65,
+    "def": 100,
+    "spd": 50
+  },
+  "forms": [
+    {
+      "form": 1,
+      "name": "ปูผลึก",
+      "minLevel": 1,
+      "sprite": "pupluek_f1"
+    },
+    {
+      "form": 2,
+      "name": "ปูผลึกใส",
+      "minLevel": 16,
+      "sprite": "pupluek_f2"
+    },
+    {
+      "form": 3,
+      "name": "ปูปราการ",
+      "minLevel": 36,
+      "sprite": "pupluek_f3"
+    }
+  ],
+  "learnset": [
+    {
+      "level": 1,
+      "move": "terra_basic"
+    },
+    {
+      "level": 8,
+      "move": "terra_mid"
+    },
+    {
+      "level": 16,
+      "move": "terra_adv"
+    },
+    {
+      "level": 36,
+      "move": "sig_crystal_claw"
+    }
+  ],
+  "habitatHint": "พบที่ชายหาด",
+  "dexFact": "ปูที่กินซากเป็นผู้บริโภคซากอินทรีย์ เป็นจุดเริ่มของห่วงโซ่อาหารแบบเศษอินทรีย์",
+  "factTopic": "food_chain",
+  "enabled": true,
+  "addedInVersion": "1.0"
+}

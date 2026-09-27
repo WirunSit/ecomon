@@ -1,0 +1,31 @@
+{
+  "topic": "relationships",
+  "questions": [
+    {
+      "id": "q_relationships_001",
+      "topic": "relationships",
+      "difficulty": 1,
+      "type": "mcq",
+      "stem": "ไลเคนเกิดจากราอยู่ร่วมกับสาหร่าย เป็นความสัมพันธ์แบบใด",
+      "choices": [
+        "ภาวะพึ่งพากัน",
+        "ภาวะอิงอาศัย",
+        "ภาวะปรสิต",
+        "การแข่งขัน"
+      ],
+      "answer": {
+        "index": 0
+      },
+      "explanation": "ราและสาหร่ายได้ประโยชน์ทั้งคู่และต้องอยู่ร่วมกันตลอด (+,+) จึงเป็นภาวะพึ่งพากัน",
+      "hint": "ทั้งสองฝ่ายได้ประโยชน์และแยกกันอยู่ไม่ได้",
+      "image": null,
+      "tags": [
+        "lichen",
+        "mutualism"
+      ],
+      "status": "draft",
+      "author": "แม่แบบจาก GAME_PLAN 11.5",
+      "version": 1
+    }
+  ]
+}

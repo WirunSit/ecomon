@@ -1,0 +1,60 @@
+{
+  "id": "buaboong",
+  "dex": 7,
+  "rarity": "normal",
+  "elements": [
+    "flora"
+  ],
+  "role": "producer",
+  "habitat": "water",
+  "archetype": "tank",
+  "baseStats": {
+    "hp": 105,
+    "atk": 60,
+    "def": 90,
+    "spd": 45
+  },
+  "forms": [
+    {
+      "form": 1,
+      "name": "บัวบุ๋ง",
+      "minLevel": 1,
+      "sprite": "buaboong_f1"
+    },
+    {
+      "form": 2,
+      "name": "บัวบาน",
+      "minLevel": 16,
+      "sprite": "buaboong_f2"
+    },
+    {
+      "form": 3,
+      "name": "บัวราชินี",
+      "minLevel": 36,
+      "sprite": "buaboong_f3"
+    }
+  ],
+  "learnset": [
+    {
+      "level": 1,
+      "move": "flora_basic"
+    },
+    {
+      "level": 8,
+      "move": "flora_mid"
+    },
+    {
+      "level": 16,
+      "move": "flora_adv"
+    },
+    {
+      "level": 36,
+      "move": "sig_lotus_heal"
+    }
+  ],
+  "habitatHint": "พบในบึงบัว",
+  "dexFact": "ปุ๋ยที่ไหลลงแหล่งน้ำทำให้สาหร่ายเพิ่มจำนวนอย่างรวดเร็ว (ยูโทรฟิเคชัน) จนออกซิเจนในน้ำลดลง",
+  "factTopic": "conservation",
+  "enabled": true,
+  "addedInVersion": "1.0"
+}

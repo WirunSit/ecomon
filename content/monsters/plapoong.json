@@ -1,0 +1,60 @@
+{
+  "id": "plapoong",
+  "dex": 8,
+  "rarity": "normal",
+  "elements": [
+    "aqua"
+  ],
+  "role": "consumer",
+  "habitat": "water",
+  "archetype": "balanced",
+  "baseStats": {
+    "hp": 75,
+    "atk": 75,
+    "def": 85,
+    "spd": 65
+  },
+  "forms": [
+    {
+      "form": 1,
+      "name": "ปลาปุ๊ง",
+      "minLevel": 1,
+      "sprite": "plapoong_f1"
+    },
+    {
+      "form": 2,
+      "name": "ปุ๊งพอง",
+      "minLevel": 16,
+      "sprite": "plapoong_f2"
+    },
+    {
+      "form": 3,
+      "name": "ปุ๊งมหาสมุทร",
+      "minLevel": 36,
+      "sprite": "plapoong_f3"
+    }
+  ],
+  "learnset": [
+    {
+      "level": 1,
+      "move": "aqua_basic"
+    },
+    {
+      "level": 8,
+      "move": "aqua_mid"
+    },
+    {
+      "level": 16,
+      "move": "aqua_adv"
+    },
+    {
+      "level": 36,
+      "move": "sig_puff_spikes"
+    }
+  ],
+  "habitatHint": "พบที่แนวปะการัง",
+  "dexFact": "ปะการังอยู่ร่วมกับสาหร่ายซูแซนเทลลีแบบภาวะพึ่งพากัน สาหร่ายสังเคราะห์ด้วยแสงให้อาหาร ปะการังให้ที่อยู่",
+  "factTopic": "relationships",
+  "enabled": true,
+  "addedInVersion": "1.0"
+}

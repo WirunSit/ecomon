@@ -1,0 +1,61 @@
+{
+  "id": "napawan",
+  "dex": 13,
+  "rarity": "rare",
+  "elements": [
+    "aero",
+    "aqua"
+  ],
+  "role": "consumer",
+  "habitat": "water",
+  "archetype": "speedster",
+  "baseStats": {
+    "hp": 75,
+    "atk": 70,
+    "def": 55,
+    "spd": 100
+  },
+  "forms": [
+    {
+      "form": 1,
+      "name": "นภาวาฬ",
+      "minLevel": 1,
+      "sprite": "napawan_f1"
+    },
+    {
+      "form": 2,
+      "name": "วาฬเมฆ",
+      "minLevel": 16,
+      "sprite": "napawan_f2"
+    },
+    {
+      "form": 3,
+      "name": "นภาวาฬราช",
+      "minLevel": 36,
+      "sprite": "napawan_f3"
+    }
+  ],
+  "learnset": [
+    {
+      "level": 1,
+      "move": "aero_basic"
+    },
+    {
+      "level": 8,
+      "move": "aqua_mid"
+    },
+    {
+      "level": 16,
+      "move": "aero_adv"
+    },
+    {
+      "level": 36,
+      "move": "sig_rainbow_rain"
+    }
+  ],
+  "habitatHint": "ตำนานเล่าว่าอาศัยอยู่บนฟ้าเหนือทะเล",
+  "dexFact": "วาฬบาลีนกินเคยที่กินแพลงก์ตอนพืชอีกทอด ห่วงโซ่อาหารสั้นทำให้พลังงานสูญเสียน้อยจึงเลี้ยงสัตว์ขนาดใหญ่ได้",
+  "factTopic": "energy_flow",
+  "enabled": true,
+  "addedInVersion": "1.0"
+}

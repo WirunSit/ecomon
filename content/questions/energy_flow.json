@@ -1,0 +1,31 @@
+{
+  "topic": "energy_flow",
+  "questions": [
+    {
+      "id": "q_energy_flow_001",
+      "topic": "energy_flow",
+      "difficulty": 2,
+      "type": "mcq",
+      "stem": "ผู้ผลิตตรึงพลังงาน 20,000 kJ ผู้บริโภคลำดับที่ 2 ได้รับพลังงานประมาณเท่าใด",
+      "choices": [
+        "2,000 kJ",
+        "200 kJ",
+        "20 kJ",
+        "10,000 kJ"
+      ],
+      "answer": {
+        "index": 1
+      },
+      "explanation": "ถ่ายทอดราว 10% ต่อลำดับขั้น: 20,000 → 2,000 (ผู้บริโภคลำดับที่ 1) → 200 kJ (ผู้บริโภคลำดับที่ 2)",
+      "hint": "พลังงานถ่ายทอดได้ประมาณ 10% ต่อลำดับขั้น",
+      "image": null,
+      "tags": [
+        "ten_percent_rule",
+        "calculation"
+      ],
+      "status": "draft",
+      "author": "แม่แบบจาก GAME_PLAN 11.5",
+      "version": 1
+    }
+  ]
+}

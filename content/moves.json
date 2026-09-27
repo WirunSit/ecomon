@@ -1,0 +1,544 @@
+{
+  "moves": [
+    {
+      "id": "aqua_basic",
+      "name": "สาดน้ำ",
+      "element": "aqua",
+      "tier": "basic",
+      "power": 40,
+      "cooldown": 0,
+      "effects": [],
+      "description": "สาดน้ำใส่ศัตรูอย่างแรง"
+    },
+    {
+      "id": "aqua_mid",
+      "name": "คลื่นซัด",
+      "element": "aqua",
+      "tier": "mid",
+      "power": 55,
+      "cooldown": 0,
+      "effects": [
+        {
+          "kind": "stat_mod",
+          "target": "enemy",
+          "stat": "spd",
+          "percent": -10,
+          "turns": 2
+        }
+      ],
+      "description": "คลื่นซัดศัตรูจนเคลื่อนไหวช้าลง"
+    },
+    {
+      "id": "aqua_adv",
+      "name": "วังวนน้ำวน",
+      "element": "aqua",
+      "tier": "adv",
+      "power": 70,
+      "cooldown": 1,
+      "effects": [],
+      "description": "สร้างน้ำวนขนาดใหญ่ดูดศัตรูเข้าไป"
+    },
+    {
+      "id": "pyro_basic",
+      "name": "ประกายไฟ",
+      "element": "pyro",
+      "tier": "basic",
+      "power": 40,
+      "cooldown": 0,
+      "effects": [],
+      "description": "พ่นประกายไฟเล็ก ๆ ใส่ศัตรู"
+    },
+    {
+      "id": "pyro_mid",
+      "name": "ลูกไฟ",
+      "element": "pyro",
+      "tier": "mid",
+      "power": 55,
+      "cooldown": 0,
+      "effects": [
+        {
+          "kind": "stat_mod",
+          "target": "enemy",
+          "stat": "def",
+          "percent": -10,
+          "turns": 2
+        }
+      ],
+      "description": "ลูกไฟร้อนแรงทำให้เกราะศัตรูอ่อนลง"
+    },
+    {
+      "id": "pyro_adv",
+      "name": "เปลวเพลิงระเบิด",
+      "element": "pyro",
+      "tier": "adv",
+      "power": 70,
+      "cooldown": 1,
+      "effects": [],
+      "description": "ระเบิดเปลวเพลิงรอบตัว"
+    },
+    {
+      "id": "flora_basic",
+      "name": "ใบมีดใบไม้",
+      "element": "flora",
+      "tier": "basic",
+      "power": 40,
+      "cooldown": 0,
+      "effects": [],
+      "description": "ขว้างใบไม้คมกริบใส่ศัตรู"
+    },
+    {
+      "id": "flora_mid",
+      "name": "เถาวัลย์รัด",
+      "element": "flora",
+      "tier": "mid",
+      "power": 55,
+      "cooldown": 0,
+      "effects": [
+        {
+          "kind": "stat_mod",
+          "target": "enemy",
+          "stat": "spd",
+          "percent": -10,
+          "turns": 2
+        }
+      ],
+      "description": "เถาวัลย์รัดตัวศัตรูให้เคลื่อนไหวช้าลง"
+    },
+    {
+      "id": "flora_adv",
+      "name": "พายุกลีบดอก",
+      "element": "flora",
+      "tier": "adv",
+      "power": 70,
+      "cooldown": 1,
+      "effects": [],
+      "description": "พายุกลีบดอกไม้หมุนวนรอบศัตรู"
+    },
+    {
+      "id": "terra_basic",
+      "name": "ขว้างก้อนหิน",
+      "element": "terra",
+      "tier": "basic",
+      "power": 40,
+      "cooldown": 0,
+      "effects": [],
+      "description": "ขว้างก้อนหินใส่ศัตรู"
+    },
+    {
+      "id": "terra_mid",
+      "name": "ทรายตาลาย",
+      "element": "terra",
+      "tier": "mid",
+      "power": 55,
+      "cooldown": 0,
+      "effects": [
+        {
+          "kind": "stat_mod",
+          "target": "enemy",
+          "stat": "atk",
+          "percent": -10,
+          "turns": 2
+        }
+      ],
+      "description": "สาดทรายใส่ตาศัตรูให้โจมตีเบาลง"
+    },
+    {
+      "id": "terra_adv",
+      "name": "แผ่นดินไหว",
+      "element": "terra",
+      "tier": "adv",
+      "power": 70,
+      "cooldown": 1,
+      "effects": [],
+      "description": "กระทืบพื้นจนแผ่นดินสั่นสะเทือน"
+    },
+    {
+      "id": "aero_basic",
+      "name": "ลมกรรโชก",
+      "element": "aero",
+      "tier": "basic",
+      "power": 40,
+      "cooldown": 0,
+      "effects": [],
+      "description": "ปล่อยลมแรงพัดใส่ศัตรู"
+    },
+    {
+      "id": "aero_mid",
+      "name": "ใบมีดลม",
+      "element": "aero",
+      "tier": "mid",
+      "power": 55,
+      "cooldown": 0,
+      "effects": [
+        {
+          "kind": "stat_mod",
+          "target": "self",
+          "stat": "spd",
+          "percent": 10,
+          "turns": 2
+        }
+      ],
+      "description": "ตัดอากาศเป็นใบมีดลม และเร่งความเร็วตัวเอง"
+    },
+    {
+      "id": "aero_adv",
+      "name": "ทอร์นาโด",
+      "element": "aero",
+      "tier": "adv",
+      "power": 70,
+      "cooldown": 1,
+      "effects": [],
+      "description": "เรียกพายุหมุนกลืนศัตรู"
+    },
+    {
+      "id": "spore_basic",
+      "name": "ปล่อยสปอร์",
+      "element": "spore",
+      "tier": "basic",
+      "power": 40,
+      "cooldown": 0,
+      "effects": [],
+      "description": "พ่นสปอร์ใส่ศัตรู"
+    },
+    {
+      "id": "spore_mid",
+      "name": "ผงพิษรา",
+      "element": "spore",
+      "tier": "mid",
+      "power": 55,
+      "cooldown": 0,
+      "effects": [
+        {
+          "kind": "stat_mod",
+          "target": "enemy",
+          "stat": "atk",
+          "percent": -10,
+          "turns": 2
+        }
+      ],
+      "description": "ผงสปอร์ทำให้ศัตรูอ่อนแรงลง"
+    },
+    {
+      "id": "spore_adv",
+      "name": "เห็ดระเบิด",
+      "element": "spore",
+      "tier": "adv",
+      "power": 70,
+      "cooldown": 1,
+      "effects": [],
+      "description": "ปลูกเห็ดที่ระเบิดสปอร์ใส่ศัตรู"
+    },
+    {
+      "id": "sig_photosynth_beam",
+      "name": "ลำแสงสังเคราะห์",
+      "element": "flora",
+      "tier": "signature",
+      "power": 95,
+      "cooldown": 2,
+      "effects": [
+        {
+          "kind": "heal",
+          "percent": 10
+        }
+      ],
+      "description": "รวมแสงอาทิตย์เป็นลำแสงพลังงาน และฟื้น HP ตัวเอง 10%"
+    },
+    {
+      "id": "sig_flame_tail_spin",
+      "name": "หางเพลิงหมุน",
+      "element": "pyro",
+      "tier": "signature",
+      "power": 95,
+      "cooldown": 2,
+      "effects": [
+        {
+          "kind": "stat_mod",
+          "target": "enemy",
+          "stat": "def",
+          "percent": -15,
+          "turns": 2
+        }
+      ],
+      "description": "หมุนหางเพลิงฟาดศัตรู ลด DEF ศัตรู 15%"
+    },
+    {
+      "id": "sig_rockslide_roll",
+      "name": "กลิ้งถล่มผา",
+      "element": "terra",
+      "tier": "signature",
+      "power": 95,
+      "cooldown": 2,
+      "effects": [
+        {
+          "kind": "stat_mod",
+          "target": "self",
+          "stat": "def",
+          "percent": 20,
+          "turns": 2
+        }
+      ],
+      "description": "ม้วนตัวกลิ้งลงจากผา เพิ่ม DEF ตัวเอง 20%"
+    },
+    {
+      "id": "sig_cloud_storm",
+      "name": "พายุปุยเมฆ",
+      "element": "aero",
+      "tier": "signature",
+      "power": 95,
+      "cooldown": 2,
+      "effects": [
+        {
+          "kind": "stat_mod",
+          "target": "enemy",
+          "stat": "spd",
+          "percent": -20,
+          "turns": 2
+        }
+      ],
+      "description": "พายุปุยเมฆห่อหุ้มศัตรู ลด SPD ศัตรู 20%"
+    },
+    {
+      "id": "sig_decay_spores",
+      "name": "สปอร์ย่อยสลาย",
+      "element": "spore",
+      "tier": "signature",
+      "power": 95,
+      "cooldown": 2,
+      "effects": [
+        {
+          "kind": "stat_mod",
+          "target": "enemy",
+          "stat": "def",
+          "percent": -20,
+          "turns": 2
+        }
+      ],
+      "description": "สปอร์ย่อยสลายกัดกร่อนเกราะ ลด DEF ศัตรู 20%"
+    },
+    {
+      "id": "sig_rainbow_bubble",
+      "name": "ฟองวนสายรุ้ง",
+      "element": "aqua",
+      "tier": "signature",
+      "power": 95,
+      "cooldown": 2,
+      "effects": [
+        {
+          "kind": "stat_mod",
+          "target": "enemy",
+          "stat": "atk",
+          "percent": -15,
+          "turns": 2
+        }
+      ],
+      "description": "ฟองน้ำสายรุ้งหมุนวนรอบศัตรู ลด ATK ศัตรู 15%"
+    },
+    {
+      "id": "sig_lotus_heal",
+      "name": "ดอกบัวบำบัด",
+      "element": "flora",
+      "tier": "signature",
+      "power": 95,
+      "cooldown": 2,
+      "effects": [
+        {
+          "kind": "heal",
+          "percent": 20
+        }
+      ],
+      "description": "ดอกบัวบานปล่อยพลังชีวิต ฟื้น HP ตัวเอง 20%"
+    },
+    {
+      "id": "sig_puff_spikes",
+      "name": "หนามพองพุ่ง",
+      "element": "aqua",
+      "tier": "signature",
+      "power": 95,
+      "cooldown": 2,
+      "effects": [
+        {
+          "kind": "stat_mod",
+          "target": "self",
+          "stat": "def",
+          "percent": 15,
+          "turns": 2
+        }
+      ],
+      "description": "พองตัวยิงหนาม เพิ่ม DEF ตัวเอง 15%"
+    },
+    {
+      "id": "sig_lava_ink",
+      "name": "หมึกลาวาพ่น",
+      "element": "pyro",
+      "tier": "signature",
+      "power": 95,
+      "cooldown": 2,
+      "effects": [
+        {
+          "kind": "stat_mod",
+          "target": "enemy",
+          "stat": "spd",
+          "percent": -15,
+          "turns": 2
+        }
+      ],
+      "description": "พ่นหมึกลาวาร้อนจัด ลด SPD ศัตรู 15%"
+    },
+    {
+      "id": "sig_crystal_claw",
+      "name": "ก้ามคริสตัล",
+      "element": "terra",
+      "tier": "signature",
+      "power": 95,
+      "cooldown": 2,
+      "effects": [
+        {
+          "kind": "stat_mod",
+          "target": "enemy",
+          "stat": "def",
+          "percent": -15,
+          "turns": 2
+        }
+      ],
+      "description": "หนีบด้วยก้ามคริสตัล ลด DEF ศัตรู 15%"
+    },
+    {
+      "id": "sig_reviving_dew",
+      "name": "น้ำค้างชุบชีวิต",
+      "element": "flora",
+      "tier": "signature",
+      "power": 95,
+      "cooldown": 2,
+      "effects": [
+        {
+          "kind": "heal",
+          "percent": 25
+        }
+      ],
+      "description": "โปรยน้ำค้างแห่งป่าต้นน้ำ ฟื้น HP ตัวเอง 25%"
+    },
+    {
+      "id": "sig_lava_avalanche",
+      "name": "ลาวาถล่มผา",
+      "element": "pyro",
+      "tier": "signature",
+      "power": 95,
+      "cooldown": 2,
+      "effects": [
+        {
+          "kind": "stat_mod",
+          "target": "enemy",
+          "stat": "def",
+          "percent": -20,
+          "turns": 2
+        }
+      ],
+      "description": "ลาวาไหลถล่มลงมาจากผา ลด DEF ศัตรู 20%"
+    },
+    {
+      "id": "sig_rainbow_rain",
+      "name": "ฝนสายรุ้ง",
+      "element": "aqua",
+      "tier": "signature",
+      "power": 95,
+      "cooldown": 2,
+      "effects": [
+        {
+          "kind": "stat_mod",
+          "target": "enemy",
+          "stat": "spd",
+          "percent": -20,
+          "turns": 2
+        }
+      ],
+      "description": "เรียกฝนสายรุ้งตกหนัก ลด SPD ศัตรู 20%"
+    },
+    {
+      "id": "sig_glow_spore_dust",
+      "name": "ฝุ่นสปอร์เรืองแสง",
+      "element": "spore",
+      "tier": "signature",
+      "power": 95,
+      "cooldown": 2,
+      "effects": [
+        {
+          "kind": "stat_mod",
+          "target": "enemy",
+          "stat": "atk",
+          "percent": -20,
+          "turns": 2
+        }
+      ],
+      "description": "โปรยฝุ่นสปอร์เรืองแสง ลด ATK ศัตรู 20%"
+    },
+    {
+      "id": "sig_mycelium_bind",
+      "name": "รากไมซีเลียมรัด",
+      "element": "spore",
+      "tier": "signature",
+      "power": 95,
+      "cooldown": 2,
+      "effects": [
+        {
+          "kind": "stat_mod",
+          "target": "enemy",
+          "stat": "spd",
+          "percent": -25,
+          "turns": 2
+        }
+      ],
+      "description": "เส้นใยไมซีเลียมรัดศัตรูไว้แน่น ลด SPD ศัตรู 25%"
+    },
+    {
+      "id": "sig_forest_rebirth",
+      "name": "ผืนป่าคืนชีพ",
+      "element": "flora",
+      "tier": "signature",
+      "power": 95,
+      "cooldown": 2,
+      "effects": [
+        {
+          "kind": "heal",
+          "percent": 30
+        }
+      ],
+      "description": "ปลุกผืนป่าบนหลังให้คืนชีพ ฟื้น HP ตัวเอง 30%"
+    },
+    {
+      "id": "sig_endless_cycle",
+      "name": "วงจรธาราไม่สิ้นสุด",
+      "element": "aqua",
+      "tier": "signature",
+      "power": 95,
+      "cooldown": 2,
+      "effects": [
+        {
+          "kind": "stat_mod",
+          "target": "self",
+          "stat": "atk",
+          "percent": 20,
+          "turns": 2
+        }
+      ],
+      "description": "วงน้ำหมุนเวียนไม่สิ้นสุด เพิ่ม ATK ตัวเอง 20%"
+    },
+    {
+      "id": "sig_solar_transfer",
+      "name": "พลังงานสุริยะส่งต่อ",
+      "element": "pyro",
+      "tier": "signature",
+      "power": 95,
+      "cooldown": 2,
+      "effects": [
+        {
+          "kind": "stat_mod",
+          "target": "self",
+          "stat": "atk",
+          "percent": 25,
+          "turns": 2
+        }
+      ],
+      "description": "รับพลังงานจากดวงอาทิตย์แล้วส่งต่อเป็นการโจมตี เพิ่ม ATK ตัวเอง 25%"
+    }
+  ]
+}
