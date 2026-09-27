@@ -21,3 +21,6 @@ export function releaseRoomCode(code: string) {
 
 /** ผู้เล่น 1 บัญชีอยู่ได้ 1 ห้องเท่านั้น: playerId → ที่อยู่ปัจจุบัน */
 export const activePlayers = new Map<string, { roomId: string; sessionId: string }>();
+
+/** ผู้เล่นที่กำลังอยู่ในดันเจี้ยน: playerId → roomId ของห้องดันเจี้ยน (ห้องโลกยังเชื่อมต่ออยู่ด้วย) */
+export const inDungeon = new Map<string, string>();

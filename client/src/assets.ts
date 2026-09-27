@@ -3,6 +3,7 @@
 import type Phaser from "phaser";
 import type { Direction } from "@ecomon/shared";
 import fallbackUrl from "../../assets/monsters/_fallback.png?url";
+import { registry } from "./content";
 
 // ในเกมใช้ atlas · ภาพแยกไฟล์ใช้เฉพาะใน HTML (ร่าง 1 ท่ายืน เช่นหน้าเลือกมอนตั้งต้น)
 const monsterImages = import.meta.glob<string>("../../assets/monsters/*/f1_idle.png", { eager: true, query: "?url", import: "default" });
@@ -85,6 +86,11 @@ export function propImageUrl(id: string): string | undefined {
 
 export function propTextureKey(id: string): string {
   return `prop_${id}`;
+}
+
+/** ภาพประตูดันเจี้ยน (entranceProp ใน dungeons.json หรือปากถ้ำทั่วไป) */
+export function dungeonEntranceProp(dungeonId: string): string {
+  return registry.dungeons.find(dungeonId)?.entranceProp ?? "cave_entrance";
 }
 
 // ---------- ภาพพื้นแผนที่ (tools/render_maps.py) ----------

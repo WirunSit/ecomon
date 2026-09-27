@@ -352,6 +352,10 @@ export function validateContent(c: GameContent, origins: ContentOrigins, opts: V
     d.waves.forEach((w, j) => w.species.forEach((s, k) => speciesRef(F.dungeons, [...path, "waves", j, "species", k], s)));
     if (!loot.has(d.guaranteedRewards.lootTable))
       err(F.dungeons, [...path, "guaranteedRewards", "lootTable"], `ไม่มีตารางสุ่ม "${d.guaranteedRewards.lootTable}"`);
+    if (d.entranceProp && opts.assetExists && !opts.assetExists(`props/${d.entranceProp}.png`))
+      warn(F.dungeons, [...path, "entranceProp"], `ไม่มีภาพทางเข้า assets/props/${d.entranceProp}.png`);
+    if (!c.maps.some((m) => m.markers.some((k) => k.type === "dungeon" && k.name === d.id)))
+      warn(F.dungeons, path, `ยังไม่มีทางเข้าดันเจี้ยนนี้บนแผนที่ (marker type "dungeon" name "${d.id}")`);
   });
 
   // ---------- quests ----------
@@ -455,6 +459,9 @@ export function validateContent(c: GameContent, origins: ContentOrigins, opts: V
     }
     for (const m of map.markers.filter((x) => x.type === "npc")) {
       if (!npcs.has(m.name)) err(file, ["layers"], `NPC #${m.objectId}: ไม่มี "${m.name}" ใน npcs.json`);
+    }
+    for (const m of map.markers.filter((x) => x.type === "dungeon")) {
+      if (!dungeons.has(m.name)) err(file, ["layers"], `ทางเข้าดันเจี้ยน #${m.objectId}: ไม่มี "${m.name}" ใน dungeons.json`);
     }
     if (opts.assetExists) {
       for (const id of new Set(map.props.map((p) => p.prop)))

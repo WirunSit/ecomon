@@ -54,6 +54,8 @@ export const DungeonDef = z.strictObject({
   includeCalculation: z.boolean().default(false),
   minDifficulty: z.number().int().min(1).max(3).default(1),
   battleBackground: Id,
+  /** ภาพทางเข้าบนแผนที่ (assets/props/<id>.png) */
+  entranceProp: Id.optional(),
   guaranteedRewards: z.strictObject({
     coins: z.number().int().nonnegative(),
     exp: z.number().int().nonnegative(),

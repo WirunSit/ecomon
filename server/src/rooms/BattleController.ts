@@ -1,30 +1,15 @@
 import type { Client, Delayed } from "@colyseus/core";
-import {
-  BattleActionMessage,
-  BattleAnswerMessage,
-  HelperRequest,
-  MSG,
-  type BattleEndMessage,
-  type BattleResultMessage,
-  type BattleStateView,
-  type BattleTurnMessage,
-  type GameMap,
-  type NoticeMessage,
-} from "@ecomon/shared";
+import { MSG, type BattleEndMessage, type GameMap, type NoticeMessage } from "@ecomon/shared";
 import { randomUUID } from "node:crypto";
-import { GameError } from "../services/errors";
-import { itemCount, takeItem } from "../services/inventory";
-import { BattleError, BattleSession, makeCombatant, makeParticipant, type TurnOutcome } from "../battle/BattleSession";
+import { BattleSession, makeCombatant, makeParticipant, type Participant } from "../battle/BattleSession";
 import { registry } from "../content";
 import { services } from "../context";
 import type { WildMonster } from "../world/SpawnManager";
+import { BattleRunner, type RunnerHost } from "./BattleRunner";
 
-interface ActiveBattle {
-  sessionId: string;
-  session: BattleSession;
-  playerId: string;
+interface WorldBattle {
+  runner: BattleRunner;
   wildId: string;
-  timer?: Delayed;
 }
 
 export interface BattleHost {
@@ -37,14 +22,18 @@ export interface BattleHost {
   setInBattle(sessionId: string, inBattle: boolean): void;
   /** แพ้ → ย้ายไปจุดฟื้นฟู คืนพิกัดใหม่ */
   respawn(sessionId: string): { x: number; y: number };
+  /** ชื่อที่เพื่อนเห็น */
+  nickname(sessionId: string): string;
 }
 
 /**
- * ผูกการต่อสู้ (BattleSession) เข้ากับห้อง: รับคำสั่ง/คำตอบจาก client ถามคำถาม จับเวลา และบันทึกผล
+ * การต่อสู้กับมอนป่าบนแผนที่ (หัวข้อ 5) — ผูก BattleRunner เข้ากับห้องโลก
  * 1 ผู้เล่นอยู่ได้ 1 การต่อสู้ · มอนป่าที่กำลังถูกต่อสู้ถูกล็อก (หัวข้อ 10.3)
+ * ชนะแล้วทุกคนที่ร่วมสู้ได้มอนตัวนั้นคนละตัว (หัวข้อ 5.3)
  */
 export class BattleController {
-  private readonly battles = new Map<string, ActiveBattle>();
+  /** sessionId → การต่อสู้ที่อยู่ */
+  private readonly battles = new Map<string, WorldBattle>();
 
   constructor(private readonly host: BattleHost) {}
 
@@ -59,18 +48,13 @@ export class BattleController {
   /** เดินชนมอนป่า → เริ่มต่อสู้ (หัวข้อ 5.1) คืน false ถ้าเริ่มไม่ได้ */
   start(client: Client, playerId: string, wildId: string): boolean {
     if (this.battles.has(client.sessionId)) return false;
-    const { battles, questions } = services();
+    const { questions } = services();
     if (questions.pool().length === 0) {
       client.send(MSG.notice, { code: "no_questions" } satisfies NoticeMessage);
       return false;
     }
-    const teamInput = battles.loadTeam(playerId);
-    if (teamInput.length === 0) return false;
-    let team = teamInput.map((m) => makeCombatant(registry, m));
-    if (team.every((c) => c.hp <= 0)) {
-      battles.healTeam(playerId); // ไม่ควรเกิด (แพ้แล้วฟื้นเต็ม) แต่กันไว้ไม่ให้ติด
-      team = teamInput.map((m) => makeCombatant(registry, { ...m, hp: null }));
-    }
+    const participant = this.loadParticipant(client.sessionId, playerId);
+    if (!participant) return false;
     const wild = this.host.lockWild(wildId);
     if (!wild) return false;
     services().catalog.seen(playerId, wild.species, 1);
@@ -80,156 +64,90 @@ export class BattleController {
       registry,
       randomUUID(),
       makeCombatant(registry, { id: wild.id, speciesId: wild.species, level: wild.level, form: 1 }, BattleSession.wildHpMultiplier(registry, 1)),
-      [makeParticipant(playerId, team)],
+      [participant],
       { canFlee: registry.balance.battle.canFleeWild, background: zone?.battleBackground ?? "meadow", zoneTopics: zone?.topics ?? [] },
     );
-    this.battles.set(client.sessionId, { sessionId: client.sessionId, session, playerId, wildId });
+    const wb: WorldBattle = { wildId, runner: undefined as unknown as BattleRunner };
+    wb.runner = new BattleRunner(this.runnerHost(wb), session, [{ sessionId: client.sessionId, playerId }]);
+    this.battles.set(client.sessionId, wb);
     this.host.setInBattle(client.sessionId, true);
-    client.send(MSG.battleState, session.view(playerId));
+    wb.runner.start();
     return true;
+  }
+
+  /** ทีมของผู้เล่นพร้อมสู้ (ทีมหมดแรงทั้งทีม = ฟื้นให้ก่อน ไม่ให้ติด) */
+  private loadParticipant(sessionId: string, playerId: string): Participant | undefined {
+    const { battles } = services();
+    const input = battles.loadTeam(playerId);
+    if (input.length === 0) return undefined;
+    let team = input.map((m) => makeCombatant(registry, m));
+    if (team.every((c) => c.hp <= 0)) {
+      battles.healTeam(playerId);
+      team = input.map((m) => makeCombatant(registry, { ...m, hp: null }));
+    }
+    return makeParticipant(playerId, team, this.host.nickname(sessionId));
+  }
+
+  private runnerHost(wb: WorldBattle): RunnerHost {
+    return {
+      send: (sid, type, payload) => this.host.client(sid)?.send(type, payload),
+      clock: this.host.clock,
+      ask: (playerId, runner) => services().questions.ask(playerId, runner.session.options.zoneTopics, "battle"),
+      onEnded: () => this.end(wb),
+    };
   }
 
   // ---------- ข้อความจาก client ----------
 
   action(client: Client, raw: unknown) {
-    const b = this.battles.get(client.sessionId);
-    const parsed = BattleActionMessage.safeParse(raw);
-    if (!b || !parsed.success) return;
-    const a = parsed.data;
-    try {
-      if (a.type === "flee") {
-        if (b.session.flee(b.playerId)) this.end(b);
-        return;
-      }
-      if (a.type === "switch") return this.afterTurn(b, b.session.switchTo(b.playerId, a.uid));
-      if (a.type === "item") return this.useItem(b, a.itemId, a.uid);
-      b.session.chooseMove(b.playerId, a.moveId);
-      this.ask(b);
-    } catch (e) {
-      if (!(e instanceof BattleError)) throw e;
-      client.send(MSG.notice, { text: e.message });
-      client.send(MSG.battleState, this.stateFor(b));
-    }
+    this.battles.get(client.sessionId)?.runner.action(client.sessionId, raw);
   }
 
   answer(client: Client, raw: unknown) {
-    const b = this.battles.get(client.sessionId);
-    const parsed = BattleAnswerMessage.safeParse(raw);
-    if (!b || !parsed.success) return;
-    const p = b.session.participant(b.playerId);
-    if (p.questionId !== parsed.data.instanceId) return;
-    this.resolveAnswer(b, { choice: parsed.data.choice, value: parsed.data.value });
+    this.battles.get(client.sessionId)?.runner.answer(client.sessionId, raw);
   }
 
-  /** ไอเท็มตัวช่วยตอบระหว่างคำถาม (หัวข้อ 9.2) — นาฬิกาทรายเลื่อนเวลาหมดของ server ด้วย */
   helper(client: Client, raw: unknown) {
-    const b = this.battles.get(client.sessionId);
-    const parsed = HelperRequest.safeParse(raw);
-    if (!b || !parsed.success) return;
-    const p = b.session.participant(b.playerId);
-    if (p.questionId !== parsed.data.instanceId) return;
-    const { questions } = services();
-    try {
-      const result = questions.useHelper(parsed.data.instanceId, b.playerId, parsed.data.itemId);
-      if (result.addSeconds) {
-        const instance = questions.get(parsed.data.instanceId)!;
-        const deadline = questions.deadline(instance);
-        b.timer?.clear();
-        if (deadline !== null) b.timer = this.host.clock.setTimeout(() => this.resolveAnswer(b, null), deadline - Date.now());
-      }
-      client.send(MSG.battleHelper, result);
-    } catch (e) {
-      if (!(e instanceof GameError)) throw e;
-      client.send(MSG.notice, { text: e.message } satisfies NoticeMessage);
-    }
-  }
-
-  /** ไอเท็มฟื้นฟูในการต่อสู้ — ตรวจของในกระเป๋าก่อน ใช้สำเร็จแล้วจึงหักออก */
-  private useItem(b: ActiveBattle, itemId: string, uid: string) {
-    const item = registry.items.find(itemId);
-    if (item?.category !== "consumable" || !item.usableIn.includes("battle") || (item.effect.kind !== "heal" && item.effect.kind !== "revive"))
-      throw new BattleError("ไอเท็มนี้ใช้ในการต่อสู้ไม่ได้");
-    const { db } = services();
-    if (itemCount(db, b.playerId, itemId) <= 0) throw new BattleError(`ไม่มี${item.name}ในกระเป๋า`);
-    const outcome = b.session.useItem(b.playerId, itemId, uid, item.effect.kind, item.effect.percent);
-    takeItem(db, b.playerId, itemId, "");
-    this.afterTurn(b, outcome);
+    this.battles.get(client.sessionId)?.runner.helper(client.sessionId, raw);
   }
 
   resync(client: Client) {
-    const b = this.battles.get(client.sessionId);
-    if (b) client.send(MSG.battleState, this.stateFor(b));
+    this.battles.get(client.sessionId)?.runner.resync(client.sessionId);
   }
 
-  /** ผู้เล่นออกจากห้อง/หลุดถาวร → ยกเลิกการต่อสู้ (ถือว่าหนี เก็บ HP ที่เหลือ) */
+  /** ผู้เล่นออกจากห้อง/หลุดถาวร → ออกจากการต่อสู้ (ถือว่าหนี เก็บ HP ที่เหลือ) */
   abort(sessionId: string) {
-    const b = this.battles.get(sessionId);
-    if (!b) return;
-    b.timer?.clear();
-    const p = b.session.participant(b.playerId);
-    if (p.questionId) services().questions.discard(p.questionId);
-    services().battles.saveTeamHp(p.team);
-    this.host.releaseWild(b.wildId, false);
+    const wb = this.battles.get(sessionId);
+    if (!wb) return;
     this.battles.delete(sessionId);
+    wb.runner.leave(sessionId);
+    // เหลือคนเดียวแล้วออก = จบ (runner เรียก end ไปแล้ว) · ยังไม่จบแต่ไม่เหลือใคร = ปล่อยมอน
+    if (wb.runner.members.size === 0 && !wb.runner.ended) {
+      wb.runner.dispose();
+      this.host.releaseWild(wb.wildId, false);
+    }
   }
 
-  // ---------- ภายใน ----------
+  // ---------- จบการต่อสู้ ----------
 
-  /** ถามคำถาม 1 ข้อก่อนโจมตี + ตั้งเวลาหมดเวลา (server ตัดสิน หัวข้อ 5.4) */
-  private send(b: ActiveBattle, type: string, payload: unknown) {
-    this.host.client(b.sessionId)?.send(type, payload);
+  /** ผลของแต่ละคน: ปาร์ตี้ชนะ = ทุกคนที่ไม่ได้หนีชนะด้วย */
+  private resultOf(session: BattleSession, p: Participant): "win" | "lose" | "fled" {
+    if (session.ended === "win") return p.outcome === "fled" ? "fled" : "win";
+    return p.outcome ?? session.ended ?? "fled";
   }
 
-  private ask(b: ActiveBattle) {
-    const { questions } = services();
-    const q = questions.ask(b.playerId, b.session.options.zoneTopics, "battle");
-    b.session.attachQuestion(b.playerId, q.id);
-    this.send(b, MSG.battleQuestion, questions.toMessage(q));
-    const deadline = questions.deadline(q);
-    // หมดเวลา → ถือว่าตอบผิด (ทำงานแม้ผู้เล่นกำลังหลุดอยู่)
-    if (deadline !== null) b.timer = this.host.clock.setTimeout(() => this.resolveAnswer(b, null), deadline - Date.now());
-  }
-
-  private resolveAnswer(b: ActiveBattle, submitted: { choice?: number; value?: number | boolean } | null) {
-    const p = b.session.participant(b.playerId);
-    if (!p.questionId || this.battles.get(b.sessionId) !== b) return;
-    b.timer?.clear();
-    b.timer = undefined;
-    const outcome = services().questions.answer(p.questionId, b.playerId, submitted, Date.now(), b.session.active(p).effects.quickWindowSec);
-    if (!outcome) return;
-    this.send(b, MSG.battleResult, {
-      instanceId: outcome.instance.id,
-      correct: outcome.correct,
-      quick: outcome.quick,
-      timedOut: outcome.timedOut,
-      answer: outcome.reveal,
-      explanation: outcome.explanation,
-    } satisfies BattleResultMessage);
-    this.afterTurn(b, b.session.answered(b.playerId, outcome.correct, outcome.quick));
-  }
-
-  private afterTurn(b: ActiveBattle, outcome: TurnOutcome | null) {
-    if (!outcome) return;
-    this.send(b, MSG.battleTurn, { turn: outcome.turn, events: outcome.events, state: this.stateFor(b) } satisfies BattleTurnMessage);
-    if (outcome.ended) this.end(b);
-  }
-
-  private end(b: ActiveBattle) {
-    const result = b.session.ended ?? "fled";
-    const p = b.session.participant(b.playerId);
+  private end(wb: WorldBattle) {
+    const session = wb.runner.session;
     const { battles, players } = services();
-    const rewards = battles.finish(p, b.session.wild, result, this.host.map.zone);
-    this.host.releaseWild(b.wildId, result === "win");
-    this.battles.delete(b.sessionId);
-    this.host.setInBattle(b.sessionId, false);
-    const respawn = result === "lose" ? this.host.respawn(b.sessionId) : undefined;
-    this.send(b, MSG.battleEnd, { ...rewards, respawn, profile: players.profile(b.playerId) } satisfies BattleEndMessage);
-  }
-
-  private stateFor(b: ActiveBattle): BattleStateView {
-    const view = b.session.view(b.playerId);
-    const p = b.session.participant(b.playerId);
-    const q = p.questionId ? services().questions.get(p.questionId) : undefined;
-    return q ? { ...view, question: services().questions.toMessage(q) } : view;
+    this.host.releaseWild(wb.wildId, session.ended === "win");
+    for (const m of wb.runner.members.values()) {
+      const p = wb.runner.participant(m);
+      const result = this.resultOf(session, p);
+      const rewards = battles.finish(p, session.wild, result, this.host.map.zone);
+      this.battles.delete(m.sessionId);
+      this.host.setInBattle(m.sessionId, false);
+      const respawn = result === "lose" ? this.host.respawn(m.sessionId) : undefined;
+      this.host.client(m.sessionId)?.send(MSG.battleEnd, { ...rewards, respawn, profile: players.profile(m.playerId) } satisfies BattleEndMessage);
+    }
   }
 }

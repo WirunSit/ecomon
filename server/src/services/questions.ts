@@ -28,6 +28,12 @@ import { takeItem } from "./inventory";
 /** จำนวนคำตอบล่าสุดที่โหลดจากฐานข้อมูลเพื่อสร้างสถานะกันซ้ำ/สมุดทบทวน */
 const HISTORY = 200;
 
+/** กรองคลังคำถาม ถ้ากรองแล้วไม่เหลือใช้คลังเดิม (ไม่ให้เกมค้าง) */
+const narrow = (pool: Question[], keep: (q: Question) => boolean) => {
+  const out = pool.filter(keep);
+  return out.length ? out : pool;
+};
+
 export interface QuestionInstance {
   id: string;
   playerId: string;
@@ -106,12 +112,33 @@ export class QuestionService {
     return state;
   }
 
-  /** เลือกคำถามให้ผู้เล่นตามหัวข้อของโซน (หัวข้อ 11.3) */
-  /** @param onlyTopic ถามเฉพาะหัวข้อนี้ (บททดสอบพัฒนาร่าง) */
-  ask(playerId: string, zoneTopics: readonly string[], context: string, now = Date.now(), minDifficulty = 1, onlyTopic?: string): QuestionInstance {
-    const all = this.pool();
-    const topicPool = onlyTopic ? all.filter((q) => q.topic === onlyTopic) : all;
-    const question = pickQuestion(topicPool.length ? topicPool : all, this.learner(playerId), zoneTopics, registry.balance, this.rng, minDifficulty);
+  /**
+   * เลือกคำถามให้ผู้เล่นตามหัวข้อของโซน (หัวข้อ 11.3)
+   * @param onlyTopic ถามเฉพาะหัวข้อนี้ (บททดสอบพัฒนาร่าง)
+   * @param filter จำกัดคลังคำถาม (เช่นเฉพาะข้อคำนวณในดันเจี้ยน) — ไม่มีข้อที่ผ่านตัวกรอง = ใช้คลังปกติ
+   */
+  ask(
+    playerId: string,
+    zoneTopics: readonly string[],
+    context: string,
+    now = Date.now(),
+    minDifficulty = 1,
+    onlyTopic?: string,
+    filter?: (q: Question) => boolean,
+  ): QuestionInstance {
+    return this.askQuestion(playerId, this.pick(playerId, zoneTopics, minDifficulty, onlyTopic, filter), context, now);
+  }
+
+  /** เลือกคำถามให้ผู้เล่นคนนี้แบบปรับตามผู้เรียน (ยังไม่ถาม) — ใช้เลือกข้อเดียวสำหรับคำถามทีม */
+  pick(playerId: string, zoneTopics: readonly string[], minDifficulty = 1, onlyTopic?: string, filter?: (q: Question) => boolean): Question {
+    let pool = this.pool();
+    if (onlyTopic) pool = narrow(pool, (q) => q.topic === onlyTopic);
+    if (filter) pool = narrow(pool, filter);
+    return pickQuestion(pool, this.learner(playerId), zoneTopics, registry.balance, this.rng, minDifficulty);
+  }
+
+  /** ถามข้อที่เลือกไว้แล้ว (คำถามทีม: ทุกคนได้ข้อเดียวกัน แต่สลับตัวเลือกแยกกัน) */
+  askQuestion(playerId: string, question: Question, context: string, now = Date.now()): QuestionInstance {
     const instance: QuestionInstance = {
       id: randomUUID(),
       playerId,

@@ -26,6 +26,83 @@ function attack(session: BattleSession, moveId: string, correct: boolean, quick 
   return session.answered("p1", correct, quick)!;
 }
 
+describe("บอสดันเจี้ยน (หัวข้อ 8.3)", () => {
+  // ผู้ผลิต (ปุยใบ) ไม่มีโบนัสตอบถูกติดกัน · ท่าบอสไม่มีผลเสริม → ดาเมจแต่ละเทิร์นต่างกันแค่โล่
+  function bossBattle(players: number, phase2Moves = ["terra_basic", "sig_mycelium_bind"]) {
+    const team = (id: string) => [makeCombatant(reg, { id, speciesId: "puibai", level: 40, form: 3 })];
+    const boss = makeCombatant(reg, { id: "boss", speciesId: "silarak", level: 14, form: 1, moves: ["terra_basic"] });
+    boss.maxHp = boss.hp = boss.stats.hp * reg.balance.dungeon.bossHpMultiplier;
+    const session = new BattleSession(
+      reg,
+      "boss",
+      boss,
+      Array.from({ length: players }, (_, i) => makeParticipant(`p${i + 1}`, team(`m${i + 1}`), `P${i + 1}`)),
+      { canFlee: false, background: "mushroom_forest", zoneTopics: [], boss: { teamQuestionAtHp: 0.5, phase2Moves, shieldMultiplier: 1.5 } },
+      sequenceRng([0.5]),
+    );
+    return session;
+  }
+  const playerDamage = (out: { events: { kind: string; side?: string }[] }) =>
+    (out.events.find((e) => e.kind === "attack" && e.side === "player") as unknown as { damage: number }).damage;
+
+  it("HP ถึงครึ่ง → ทุกคนต้องตอบคำถามทีมก่อนเล่นต่อ · ผ่าน = โล่แตก ดาเมจเทิร์นถัดไป ×1.5 (เทิร์นเดียว) · เข้าเฟส 2 ได้ท่าใหม่", () => {
+    const s = bossBattle(1, ["terra_basic", "terra_adv"]);
+    const hit = () => {
+      s.chooseMove("p1", "flora_basic");
+      return s.answered("p1", true, false)!;
+    };
+    let out = hit();
+    const normal = playerDamage(out);
+    while (!out.teamQuestion) out = hit();
+    expect(s.wild.hp).toBeLessThanOrEqual(s.wild.maxHp / 2);
+    expect(s.view("p1").phase).toBe("awaiting_team");
+    expect(() => s.chooseMove("p1", "flora_basic")).toThrow(BattleError);
+
+    const team = s.teamResolved(true);
+    expect(team.events).toContainEqual({ kind: "shield", broken: true });
+    expect(team.events).toContainEqual({ kind: "boss_phase", phase: 2, newMoves: ["terra_adv"] });
+    expect(s.view("p1").wild).toMatchObject({ boss: true, bossPhase: 2, shieldBroken: true });
+    const boosted = playerDamage(hit());
+    expect(Math.abs(boosted - normal * 1.5)).toBeLessThanOrEqual(1);
+    expect(s.shieldBroken).toBe(false);
+    expect(playerDamage(hit())).toBe(normal);
+  });
+
+  it("คำถามทีมไม่ผ่าน = โล่ไม่แตก แต่ยังเข้าเฟส 2 · ถามครั้งเดียวต่อการต่อสู้", () => {
+    const s = bossBattle(2);
+    const both = () => {
+      for (const id of ["p1", "p2"]) s.chooseMove(id, "flora_basic");
+      s.answered("p1", true, false);
+      return s.answered("p2", true, false)!;
+    };
+    let out = both();
+    while (!out.teamQuestion) out = both();
+    expect(s.view("p2").phase).toBe("awaiting_team");
+    const team = s.teamResolved(false);
+    expect(team.events.some((e) => e.kind === "shield")).toBe(false);
+    expect(s.bossPhase).toBe(2);
+    while (!s.ended) expect(both().teamQuestion).toBeFalsy();
+    expect(s.ended).toBe("win");
+  });
+
+  it("ปาร์ตี้: เพื่อนเห็นกันใน view · เหตุการณ์ของเพื่อนแปลงเป็น ally · คนหนึ่งออก เทิร์นเดินต่อได้", () => {
+    const s = bossBattle(2);
+    s.chooseMove("p1", "flora_basic");
+    expect(s.answered("p1", true, false)).toBeNull(); // รอ p2
+    expect(s.view("p1").phase).toBe("waiting");
+    expect(s.view("p1").allies).toEqual([expect.objectContaining({ playerId: "p2", nickname: "P2", thinking: true, out: false })]);
+    s.chooseMove("p2", "flora_basic");
+    const out = s.answered("p2", false, false)!;
+    const forP1 = s.eventsFor("p1", out.events);
+    expect(forP1.some((e) => e.kind === "ally" && e.playerId === "p2" && e.action === "miss")).toBe(true);
+    // p2 ออก (หลุด) ระหว่างที่ p1 เลือกท่าแล้ว → เดินเทิร์นทันที ไม่ค้าง
+    s.chooseMove("p1", "flora_basic");
+    expect(s.answered("p1", true, false)).toBeNull();
+    expect(s.leave("p2")).not.toBeNull();
+    expect(s.view("p1").allies![0]!.out).toBe(true);
+  });
+});
+
 describe("ผู้ต่อสู้", () => {
   it("ค่าพลังจากสูตร ท่าตามเลเวลและร่าง (ท่าขั้นสูงต้องพัฒนาร่างก่อน)", () => {
     const c = makeCombatant(reg, puibai(20));

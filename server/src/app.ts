@@ -4,11 +4,12 @@ import cors from "cors";
 import express from "express";
 import { createServer, type Server as HttpServer } from "node:http";
 import type { AddressInfo } from "node:net";
-import { WORLD_ROOM } from "@ecomon/shared";
+import { DUNGEON_ROOM, WORLD_ROOM } from "@ecomon/shared";
 import { loadConfig, type ServerConfig } from "./config";
 import { setServices, type Services } from "./context";
 import { openDatabase } from "./db/client";
 import { apiRouter, errorHandler } from "./http/routes";
+import { DungeonRoom } from "./rooms/DungeonRoom";
 import { WorldRoom } from "./rooms/WorldRoom";
 import { AuthService, ensureClassroom } from "./services/auth";
 import { notifyPlayer } from "./rooms/hooks";
@@ -17,6 +18,7 @@ import { BreedingService } from "./services/breeding";
 import { CatalogService } from "./services/catalog";
 import { GameEvents } from "./services/events";
 import { CollectionService } from "./services/collection";
+import { DungeonService } from "./services/dungeons";
 import { EvolutionService } from "./services/evolution";
 import { InventoryService } from "./services/inventory";
 import { ShopService } from "./services/shop";
@@ -56,11 +58,13 @@ export function createGameServer(overrides: Partial<ServerConfig> = {}): GameSer
     questions,
     evolution: new EvolutionService(db, questions, players, catalog, events),
     breeding: new BreedingService(db, players, collection, catalog, events, notifyPlayer),
+    dungeons: new DungeonService(db, players, catalog, events),
   };
   setServices(s);
 
   if (config.seedClassCode) ensureClassroom(db, config.seedClassCode, "ห้องเรียนทดลอง");
   s.auth.pruneExpiredSessions();
+  s.dungeons.closeStale();
 
   const app = express();
   app.set("trust proxy", 1);
@@ -72,6 +76,7 @@ export function createGameServer(overrides: Partial<ServerConfig> = {}): GameSer
   const http = createServer(app);
   const gameServer = new Server({ transport: new WebSocketTransport({ server: http }), greet: false });
   gameServer.define(WORLD_ROOM, WorldRoom).filterBy(["classroomId"]);
+  gameServer.define(DUNGEON_ROOM, DungeonRoom);
 
   return {
     config,

@@ -24,6 +24,8 @@ export interface ServerConfig {
   includeDraftQuestions: boolean;
   /** เปิดตัวจับเวลาตอบคำถาม (ครูปิดได้ในโหมดฝึก หัวข้อ 5.1) */
   questionTimer: boolean;
+  /** เว้นระหว่างห้องในดันเจี้ยน (ms) ให้อ่านสรุปผลก่อนห้องถัดไป — เทสต์ตั้งให้สั้น */
+  dungeonStageBreakMs: number;
 }
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env, overrides: Partial<ServerConfig> = {}): ServerConfig {
@@ -41,6 +43,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env, overrides: Part
     saveIntervalSec: 30,
     includeDraftQuestions: env.INCLUDE_DRAFT_QUESTIONS ? env.INCLUDE_DRAFT_QUESTIONS === "1" : !production,
     questionTimer: env.QUESTION_TIMER !== "0",
+    dungeonStageBreakMs: 4000,
     ...overrides,
   };
 }

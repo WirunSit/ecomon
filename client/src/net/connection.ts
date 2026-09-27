@@ -16,6 +16,17 @@ export interface PlayerView {
   partnerForm: number;
   /** id ฉายา ("" = ไม่มี) */
   title: string;
+  /** อยู่ในดันเจี้ยน */
+  inDungeon: boolean;
+}
+
+/** ปาร์ตี้หน้าทางเข้าดันเจี้ยน (ตรงกับ DungeonLobbyState ฝั่ง server) */
+export interface LobbyView {
+  dungeonId: string;
+  leader: string;
+  members: string[];
+  boss: string;
+  expiresAt: number;
 }
 
 export interface WorldView {
@@ -23,6 +34,7 @@ export interface WorldView {
   code: string;
   players: Map<string, PlayerView>;
   wild: Map<string, import("../world/WildMonsterSprite").WildView>;
+  lobbies: Map<string, LobbyView>;
 }
 
 export type WorldRoom = Room<WorldView>;
@@ -86,6 +98,32 @@ export const connection = {
   /** ออกจากห้องโดยตั้งใจ */
   async leave(room: WorldRoom) {
     session.reconnectToken = null;
+    await room.leave(true).catch(() => undefined);
+  },
+
+  /** เข้าห้องดันเจี้ยนด้วยที่นั่งที่ห้องโลกจองให้ (ห้องโลกยังเชื่อมต่ออยู่) */
+  async enterDungeon(reservation: unknown): Promise<Room> {
+    const room = await client().consumeSeatReservation(reservation as Parameters<Client["consumeSeatReservation"]>[0]);
+    session.dungeonToken = room.reconnectionToken;
+    return room;
+  },
+
+  /** กลับเข้าห้องดันเจี้ยนเดิมหลังรีเฟรช/หลุด */
+  async reconnectDungeon(): Promise<Room | null> {
+    const token = session.dungeonToken;
+    if (!token) return null;
+    try {
+      const room = await client().reconnect(token);
+      session.dungeonToken = room.reconnectionToken;
+      return room;
+    } catch {
+      session.dungeonToken = null;
+      return null;
+    }
+  },
+
+  async leaveDungeon(room: Room) {
+    session.dungeonToken = null;
     await room.leave(true).catch(() => undefined);
   },
 };

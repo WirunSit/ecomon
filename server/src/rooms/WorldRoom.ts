@@ -5,6 +5,9 @@ import {
   CLOSE_CODES,
   DevToggleKeyItemMessage,
   DIR_VECTORS,
+  DUNGEON_ROOM,
+  DungeonBossMessage,
+  DungeonOpenMessage,
   findMarker,
   MoveMessage,
   movementUnlocks,
@@ -14,6 +17,8 @@ import {
   type ChatBroadcast,
   type CorrectionMessage,
   type Direction,
+  type DungeonDeniedMessage,
+  type DungeonEnterMessage,
   type GameMap,
   type NoticeMessage,
   type PlayerProfile,
@@ -23,10 +28,11 @@ import {
 import { registry } from "../content";
 import { services } from "../context";
 import type { AuthData } from "../services/auth";
-import { activePlayers, allocateRoomCode, releaseRoomCode } from "./presence";
+import { activePlayers, allocateRoomCode, inDungeon, releaseRoomCode } from "./presence";
 import { SpawnManager, type WildMonster } from "../world/SpawnManager";
 import { BattleController } from "./BattleController";
-import { PlayerState, WildMonsterState, WorldState } from "./WorldState";
+import type { DungeonRoomOptions } from "./DungeonRoom";
+import { DungeonLobbyState, PlayerState, WildMonsterState, WorldState } from "./WorldState";
 
 interface ClientData {
   playerId: string;
@@ -107,11 +113,20 @@ export class WorldRoom extends Room<WorldState, { code: string; classroomId: str
         if (p) p.inBattle = inBattle;
       },
       respawn: (sid) => this.respawnAtRecovery(sid),
+      nickname: (sid) => this.state.players.get(sid)?.nickname ?? "",
     });
     this.onMessage(MSG.battleAction, (client, raw) => this.battles.action(client, raw));
     this.onMessage(MSG.battleAnswer, (client, raw) => this.battles.answer(client, raw));
     this.onMessage(MSG.battleResync, (client) => this.battles.resync(client));
     this.onMessage(MSG.battleHelper, (client, raw) => this.battles.helper(client, raw));
+
+    // ปาร์ตี้หน้าทางเข้าดันเจี้ยน (หัวข้อ 8.2)
+    this.onMessage(MSG.dungeonOpen, (client, raw) => this.dungeonOpen(client, raw));
+    this.onMessage(MSG.dungeonJoin, (client, raw) => this.dungeonOpen(client, raw, true));
+    this.onMessage(MSG.dungeonLeave, (client) => this.leaveLobby(client.sessionId));
+    this.onMessage(MSG.dungeonBoss, (client, raw) => this.dungeonBoss(client, raw));
+    this.onMessage(MSG.dungeonStart, (client) => void this.dungeonStart(client));
+    this.clock.setInterval(() => this.expireLobbies(), 5000);
   }
 
   override onJoin(client: Client<ClientData, AuthData>, _options: unknown, auth: AuthData) {
@@ -137,6 +152,7 @@ export class WorldRoom extends Room<WorldState, { code: string; classroomId: str
     p.x = start.x;
     p.y = start.y;
     p.facing = start.facing;
+    p.inDungeon = inDungeon.has(auth.playerId);
     this.applyProfile(p, profile);
     this.state.players.set(client.sessionId, p);
     services().catalog.syncOwned(auth.playerId); // ข้อมูลเก่าก่อนมีสมุดภาพ
@@ -157,6 +173,7 @@ export class WorldRoom extends Room<WorldState, { code: string; classroomId: str
     const ud = client.userData;
     if (!p || !ud) return;
     this.save(ud.playerId, p);
+    this.leaveLobby(client.sessionId);
 
     if (consented || ud.replaced) {
       this.battles.abort(client.sessionId);
@@ -232,7 +249,7 @@ export class WorldRoom extends Room<WorldState, { code: string; classroomId: str
     ud.lastMoveAt = now;
 
     p.facing = dir;
-    if (this.battles.inBattle(client.sessionId)) return this.correct(client, p);
+    if (this.battles.inBattle(client.sessionId) || p.inDungeon) return this.correct(client, p);
     const step = checkStep(this.map, p.x, p.y, dir, ud.unlocks);
     if (!step.ok) return this.correct(client, p);
 
@@ -337,6 +354,135 @@ export class WorldRoom extends Room<WorldState, { code: string; classroomId: str
   /** ส่งข้อความถึงผู้เล่นคนเดียว (ใช้จากนอกห้อง ผ่าน rooms/hooks.ts) */
   sendTo(sessionId: string, type: string, payload: unknown) {
     this.clients.getById(sessionId)?.send(type, payload);
+  }
+
+  // ---------- ปาร์ตี้หน้าทางเข้าดันเจี้ยน (หัวข้อ 8.2) ----------
+
+  /** ยืนข้างประตูดันเจี้ยนนี้ไหม (marker type "dungeon") */
+  private nearDungeon(dungeonId: string, p: PlayerState): boolean {
+    const r = registry.balance.world.interactRadius;
+    return this.map.markers.some((m) => m.type === "dungeon" && m.name === dungeonId && Math.abs(m.x - p.x) <= r && Math.abs(m.y - p.y) <= r);
+  }
+
+  /** เปิดปาร์ตี้ (ยังไม่มี) หรือเข้าร่วมปาร์ตี้ที่เปิดอยู่ของทางเข้านี้ */
+  private dungeonOpen(client: Client<ClientData, AuthData>, raw: unknown, joinOnly = false) {
+    const parsed = DungeonOpenMessage.safeParse(raw);
+    const p = this.state.players.get(client.sessionId);
+    if (!parsed.success || !p || !registry.dungeons.has(parsed.data.dungeonId)) return;
+    const { dungeonId } = parsed.data;
+    if (!this.nearDungeon(dungeonId, p) || this.battles.inBattle(client.sessionId) || p.inDungeon) return;
+    this.leaveLobby(client.sessionId, dungeonId);
+    const now = Date.now();
+    const lobby = this.state.lobbies.get(dungeonId);
+    if (lobby) {
+      if (lobby.members.includes(client.sessionId)) return;
+      if (lobby.members.length >= registry.balance.coop.maxParticipants) {
+        client.send(MSG.notice, { code: "party_full" } satisfies NoticeMessage);
+        return;
+      }
+      lobby.members.push(client.sessionId);
+      lobby.expiresAt = now + registry.balance.dungeon.lobbyTimeoutSec * 1000;
+      return;
+    }
+    if (joinOnly) return;
+    const l = new DungeonLobbyState();
+    l.dungeonId = dungeonId;
+    l.leader = client.sessionId;
+    l.members.push(client.sessionId);
+    l.expiresAt = now + registry.balance.dungeon.lobbyTimeoutSec * 1000;
+    this.state.lobbies.set(dungeonId, l);
+  }
+
+  /** ออกจากปาร์ตี้ทุกอัน (ยกเว้น keep) · หัวหน้าออก = ยุบปาร์ตี้ */
+  private leaveLobby(sessionId: string, keep?: string) {
+    for (const [id, lobby] of [...this.state.lobbies.entries()]) {
+      if (id === keep) continue;
+      if (lobby.leader === sessionId) this.state.lobbies.delete(id);
+      else {
+        const i = lobby.members.indexOf(sessionId);
+        if (i >= 0) lobby.members.splice(i, 1);
+      }
+    }
+  }
+
+  private expireLobbies() {
+    const now = Date.now();
+    for (const [id, lobby] of [...this.state.lobbies.entries()]) if (lobby.expiresAt <= now) this.state.lobbies.delete(id);
+  }
+
+  /** หัวหน้าเลือกบอส (ดันเจี้ยนที่ให้เลือก เช่นวิหารสมดุล) */
+  private dungeonBoss(client: Client, raw: unknown) {
+    const parsed = DungeonBossMessage.safeParse(raw);
+    const lobby = [...this.state.lobbies.values()].find((l) => l.leader === client.sessionId);
+    if (!parsed.success || !lobby) return;
+    const d = registry.dungeons.get(lobby.dungeonId);
+    if (d.chooseBoss && d.bosses.some((b) => b.species === parsed.data.species)) lobby.boss = parsed.data.species;
+  }
+
+  /**
+   * หัวหน้ากดเข้า: ทุกคนต้องยังยืนหน้าทางเข้า ไม่ได้ต่อสู้อยู่ เลเวลถึง และคูลดาวน์พร้อม
+   * ไม่พร้อม → แจ้งรายชื่อ · พร้อม → บันทึกการเข้า (นับคูลดาวน์) สร้างห้องดันเจี้ยน แล้วส่งที่นั่งให้ทุกคน
+   */
+  private async dungeonStart(client: Client<ClientData, AuthData>) {
+    const lobby = [...this.state.lobbies.values()].find((l) => l.leader === client.sessionId);
+    if (!lobby) return;
+    const d = registry.dungeons.get(lobby.dungeonId);
+    if (d.chooseBoss && !lobby.boss) {
+      client.send(MSG.notice, { code: "choose_boss" } satisfies NoticeMessage);
+      return;
+    }
+    const now = Date.now();
+    const members = [...lobby.members].map((sid) => ({ sid, c: this.clients.getById(sid) as Client<ClientData, AuthData> | undefined, p: this.state.players.get(sid) }));
+    const denied: DungeonDeniedMessage["players"] = [];
+    const ok: typeof members = [];
+    for (const m of members) {
+      const nickname = m.p?.nickname ?? "";
+      if (!m.c?.userData || !m.p || !m.p.connected) denied.push({ nickname, reason: "offline" });
+      else if (this.battles.inBattle(m.sid) || m.p.inDungeon) denied.push({ nickname, reason: "busy" });
+      else if (!this.nearDungeon(d.id, m.p)) denied.push({ nickname, reason: "far" });
+      else ok.push(m);
+    }
+    const { dungeons } = services();
+    for (const n of dungeons.check(ok.map((m) => m.c!.userData!.playerId), d.id, now)) {
+      const m = ok.find((x) => x.c!.userData!.playerId === n.playerId)!;
+      denied.push({ nickname: m.p!.nickname, reason: n.reason, required: n.required, readyAt: n.readyAt });
+    }
+    if (denied.length) {
+      for (const m of members) m.c?.send(MSG.dungeonDenied, { players: denied, serverNow: now } satisfies DungeonDeniedMessage);
+      return;
+    }
+
+    this.state.lobbies.delete(d.id);
+    const options: DungeonRoomOptions = {
+      dungeonId: d.id,
+      members: ok.map((m) => ({ playerId: m.c!.userData!.playerId, nickname: m.p!.nickname, avatar: m.p!.avatar })),
+      boss: lobby.boss || undefined,
+    };
+    for (const m of ok) m.p!.inDungeon = true;
+    try {
+      const room = await matchMaker.createRoom(DUNGEON_ROOM, options);
+      dungeons.recordEntry(options.members.map((m) => m.playerId), d.id, now);
+      for (const m of ok) {
+        const reservation = await matchMaker.reserveSeatFor(room, {}, m.c!.auth);
+        m.c!.send(MSG.dungeonEnter, { dungeonId: d.id, reservation } satisfies DungeonEnterMessage);
+      }
+    } catch (e) {
+      console.error("สร้างห้องดันเจี้ยนไม่สำเร็จ", e);
+      for (const m of ok) {
+        m.p!.inDungeon = false;
+        m.c?.send(MSG.notice, { code: "dungeon_error" } satisfies NoticeMessage);
+      }
+    }
+  }
+
+  /** กลับจากดันเจี้ยน: เดินได้อีก · ล้มเหลว = ไปพักที่จุดฟื้นฟู (HP ฟื้นแล้ว ไม่เสียของ) */
+  dungeonDone(sessionId: string, result: "clear" | "fail" | "left") {
+    const p = this.state.players.get(sessionId);
+    if (!p) return;
+    p.inDungeon = false;
+    if (result === "fail") this.respawnAtRecovery(sessionId);
+    const client = this.clients.getById(sessionId) as Client<ClientData, AuthData> | undefined;
+    if (client?.userData) client.send(MSG.profile, services().players.profile(client.userData.playerId));
   }
 
   // ---------- โหมดทดสอบ ----------

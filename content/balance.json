@@ -214,7 +214,11 @@
       "enabled": true,
       "rare": 5,
       "legend": 10
-    }
+    },
+    "reviveBetweenStages": 0.3,
+    "lobbyTimeoutSec": 120,
+    "joinTimeoutSec": 20,
+    "calculationShare": 0.35
   },
   "player": {
     "maxLevel": 40,

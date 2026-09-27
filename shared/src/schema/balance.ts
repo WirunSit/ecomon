@@ -145,6 +145,14 @@ export const BalanceSchema = z.strictObject({
     shieldBreakDamageMultiplier: Positive,
     phase2DifficultyStep: z.number().int().nonnegative(),
     shards: z.strictObject({ enabled: z.boolean(), rare: PosInt, legend: PosInt }),
+    /** ระหว่างห้อง มอนที่หมดแรงฟื้นกลับมากี่ % (ไม่ลงโทษหนัก — คนที่หมดแรงยังไปต่อกับปาร์ตี้ได้) */
+    reviveBetweenStages: Probability,
+    /** ปาร์ตี้หน้าทางเข้าหมดอายุถ้าไม่เริ่มภายในกี่วินาที */
+    lobbyTimeoutSec: PosInt,
+    /** รอสมาชิกเข้าห้องดันเจี้ยนกี่วินาที ก่อนเริ่มโดยไม่รอคนที่ยังไม่มา */
+    joinTimeoutSec: PosInt,
+    /** สัดส่วนคำถามคำนวณในดันเจี้ยนที่ includeCalculation = true */
+    calculationShare: Probability,
   }),
   player: z.strictObject({
     maxLevel: PosInt,

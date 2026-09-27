@@ -2,6 +2,8 @@ import {
   canBreed,
   type BreedResponse,
   type CollectionResponse,
+  type DungeonsResponse,
+  type ShardExchangeResponse,
   type EggView,
   type HatchResponse,
   type LabResponse,
@@ -19,7 +21,7 @@ import { showPicker } from "../Picker";
 import { UI } from "../strings";
 import { displayName } from "./CollectionPanel";
 
-type Tab = "eggs" | "breed" | "recipes";
+type Tab = "eggs" | "breed" | "recipes" | "shards";
 const T = UI.lab;
 
 function button(text: string, onClick: () => void, className = "btn small"): HTMLButtonElement {
@@ -58,6 +60,8 @@ export class LabPanel {
   private busy = false;
   /** ไข่ที่เพิ่งได้ (ไฮไลต์ในแท็บไข่) */
   private fresh?: string;
+  /** เศษพลังชีวิตที่มี (โหลดเมื่อเปิดแท็บ) */
+  private shards?: { rare: number; legend: number };
 
   constructor(private readonly toast: (text: string) => void) {}
 
@@ -71,6 +75,7 @@ export class LabPanel {
     this.tab = opts.tab ?? (opts.parent || this.atLab ? "breed" : "eggs");
     this.parents = opts.parent ? [opts.parent] : [];
     this.fresh = undefined;
+    this.shards = undefined;
     this.panel = new FullPanel(T.title);
     this.panel.setBody([h("p", { className: "muted", text: UI.collection.loading })]);
     try {
@@ -87,14 +92,61 @@ export class LabPanel {
     if (!this.panel || this.panel.isClosed || !this.lab) return;
     const lab = this.lab;
     this.panel.setExtra([h("span", { className: `full-chip${lab.eggs.some((e) => e.ready) ? " warn" : ""}`, text: T.eggSlots(lab.eggs.length, lab.maxEggs) })]);
-    const tabs = h("div", { className: "tabs" }, (["eggs", "breed", "recipes"] as const).map((t) =>
-      button(T.tabs[t]!, () => {
+    const tabs = h("div", { className: "tabs" }, (["eggs", "breed", "recipes", "shards"] as const).map((t) =>
+      button(t === "shards" ? UI.shards.tab : T.tabs[t]!, () => {
         this.tab = t;
         this.render();
       }, `tab${this.tab === t ? " active" : ""}`),
     ));
-    const body = this.tab === "eggs" ? this.renderEggs() : this.tab === "breed" ? this.renderBreed() : this.renderRecipes();
+    const body =
+      this.tab === "eggs" ? this.renderEggs() : this.tab === "breed" ? this.renderBreed() : this.tab === "recipes" ? this.renderRecipes() : this.renderShards();
     this.panel.setBody([tabs, ...body]);
+  }
+
+  // ---------- เศษพลังชีวิต (หัวข้อ 8.4) ----------
+
+  private renderShards(): HTMLElement[] {
+    const cfg = registry.balance.dungeon.shards;
+    if (!cfg.enabled) return [h("p", { className: "muted empty", text: UI.shards.disabled })];
+    if (!this.shards) {
+      void api<DungeonsResponse>("/dungeons").then((s) => {
+        this.shards = s.shards;
+        if (this.tab === "shards") this.render();
+      });
+      return [h("p", { className: "muted", text: UI.collection.loading })];
+    }
+    const have = this.shards;
+    const shardImg = () => img(eggImageUrl("life_shard") ?? "", "pick-mon");
+    const section = (rarity: "rare" | "legend") => {
+      const need = cfg[rarity];
+      const rows = registry.enabledMonsters(rarity).map((m) => {
+        const b = button(UI.shards.exchange, () => void this.exchange(m.id), "btn small primary");
+        b.disabled = have[rarity] < need || this.busy;
+        return h("div", { className: "recipe-row" }, [img(monsterThumb(m.id, 1), "pick-mon"), h("b", { text: speciesName(m.id) }), h("span", { className: "spacer" }), b]);
+      });
+      return [
+        h("h3", { className: "lab-h" }, [shardImg(), ` ${UI.shards.have(UI.catalog.rarity[rarity] ?? rarity, have[rarity], need)}`]),
+        h("div", { className: "cat-bar" }, [h("i", { style: { width: `${Math.min(100, (have[rarity] / need) * 100)}%` } })]),
+        h("div", { className: "recipe-list shard-list" }, rows),
+      ];
+    };
+    return [h("p", { className: "muted lab-note", text: UI.shards.hint }), ...section("rare"), ...section("legend")];
+  }
+
+  private async exchange(speciesId: string) {
+    if (this.busy) return;
+    this.busy = true;
+    try {
+      const r = await api<ShardExchangeResponse>("/shards/exchange", { body: { speciesId } });
+      this.shards = r.shards;
+      profile.set(r.profile);
+      this.toast(UI.shards.got(speciesName(speciesId)));
+    } catch (e) {
+      this.toast(e instanceof Error ? e.message : String(e));
+    } finally {
+      this.busy = false;
+      this.render();
+    }
   }
 
   // ---------- ไข่ ----------

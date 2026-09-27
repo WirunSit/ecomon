@@ -3,6 +3,7 @@
 const TOKEN_KEY = "ecomon.token";
 const LAST_LOGIN_KEY = "ecomon.lastLogin";
 const RECONNECT_KEY = "ecomon.reconnect";
+const DUNGEON_KEY = "ecomon.dungeon";
 
 function read(storage: () => Storage, key: string): string | null {
   try {
@@ -52,5 +53,13 @@ export const session = {
   },
   set reconnectToken(v: string | null) {
     write(perTab, RECONNECT_KEY, v);
+  },
+
+  /** reconnection token ของห้องดันเจี้ยนที่กำลังเล่น (รีเฟรชหน้าแล้วกลับเข้าไปต่อได้) */
+  get dungeonToken(): string | null {
+    return read(perTab, DUNGEON_KEY);
+  },
+  set dungeonToken(v: string | null) {
+    write(perTab, DUNGEON_KEY, v);
   },
 };

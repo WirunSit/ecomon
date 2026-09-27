@@ -125,6 +125,24 @@ tools/    validate.ts, make-placeholders.ts, make-test-map.ts (อนาคต: 
 - ให้ EXP/เหรียญ/แต้มอนุรักษ์ผู้เล่นใช้ `PlayerService.grant()` · ยืนใกล้ NPC ตรวจด้วย `nearNpc()` ใน `services/spot.ts`
 - client: `ui/collection/LabPanel.ts` (แท็บ ไข่ / ผสม / สูตรและ pity + การ์ดเรื่องจริงในธรรมชาติ) · ภาพไข่ `eggImageUrl()` + `eggStage()`
 
+## ดันเจี้ยน (เฟส 9)
+
+- **การต่อสู้ทุกแบบผ่าน `server/src/rooms/BattleRunner.ts`** (ผู้เล่น 1–5 คน: คำถาม/ตัวจับเวลารายคน คำถามทีม ส่งผลเทิร์นในมุมของแต่ละคน
+  ด้วย `BattleSession.eventsFor()`) · ห้องโลกใช้ผ่าน `BattleController` · ห้องดันเจี้ยนใช้ใน `DungeonRoom` · กติกาอยู่ใน `BattleSession` ที่เดียว
+- บอส = `BattleOptions.boss` (HP ≤ `teamQuestionAtHp` → `TurnOutcome.teamQuestion` → ทุกคนตอบข้อเดียวกัน → `teamResolved(passed)`
+  โล่แตก ดาเมจเทิร์นถัดไป ×`shieldBreakDamageMultiplier` แล้วเข้าเฟส 2 ได้ท่าประจำตัว คำถามยากขึ้น `phase2DifficultyStep`)
+- ปาร์ตี้หน้าทางเข้าอยู่ใน state ห้องโลก (`WorldState.lobbies`) · `MSG.dungeonOpen/Join/Leave/Boss/Start` · หัวหน้ากดเข้า →
+  ตรวจทุกคน (ยืนหน้าประตู/ไม่ได้สู้อยู่/เลเวล/คูลดาวน์) ไม่พร้อม = `dungeonDenied` พร้อมรายชื่อ · พร้อม = สร้าง `DungeonRoom`
+  (`matchMaker.createRoom`) แล้วส่ง seat reservation (`dungeonEnter`) ห้องโลกยังเชื่อมต่ออยู่ (`PlayerState.inDungeon` เดินไม่ได้)
+- `DungeonRoom`: ระลอก (มอนมลพิษ ไม่เข้าคลัง ไม่ได้เหรียญ) → บอส · ระหว่างห้องมอนที่หมดแรงฟื้น `reviveBetweenStages`
+  · แพ้ทั้งปาร์ตี้ = fail (ฟื้น HP กลับจุดฟื้นฟู ไม่ลงโทษ) · ชนะ = `DungeonService.clearRewards()` แยกรายคน
+- คูลดาวน์นับตอนเข้า (ตาราง `dungeon_entries` รวมทุกดันเจี้ยน `nextDungeonEntryAt()`) · เศษพลังชีวิต `players.shards_rare/legend`
+  แลกที่ `POST /api/shards/exchange` (แท็บในห้องแล็บ) · `GET /api/dungeons` = คูลดาวน์ + เศษของผู้เล่น
+- ทางเข้าบนแผนที่ = marker type `dungeon` (name = id ดันเจี้ยน ขวางทางเหมือน NPC) ภาพจาก `entranceProp` ใน dungeons.json
+- client: `ui/dungeon/DungeonPanel.ts` (หน้าทางเข้า/ปาร์ตี้) · `scenes/DungeonScene.ts` (เจ้าของห้องดันเจี้ยน เปิด `BattleScene`
+  ทีละห้อง ใช้ข้อความ battle:* ชุดเดิม + team:*) · มอนมลพิษ/บอส ย้อมสี + ไอพิษ + ขยายด้วยโค้ดใน `BattleScene`
+- เทสต์ตั้ง `dungeonStageBreakMs` ให้สั้น · ตอนพัฒนา client มี `window.__ecomon.game` ไว้ให้เครื่องมือทดสอบเดินเฟรมเอง
+
 ## ข้อตกลงของ content
 
 - id เป็น `a-z0-9_` ขึ้นต้นด้วยตัวอักษร ใช้เป็นชื่อไฟล์/โฟลเดอร์ asset ได้
@@ -176,6 +194,7 @@ tools/    validate.ts, make-placeholders.ts, make-test-map.ts (อนาคต: 
 - [x] เฟส 6 — คลังของฉัน สมุดภาพ คู่หู (ดูหัวข้อ "คลังและสมุดภาพ" ด้านบน)
 - [x] เฟส 7 — พัฒนาร่าง ไอเท็ม ร้านค้า (ดูหัวข้อ "ไอเท็ม ร้านค้า พัฒนาร่าง" ด้านบน)
 - [x] เฟส 8 — ผสมพันธุ์และไข่ (ดูหัวข้อ "ผสมพันธุ์และไข่" ด้านบน)
-- [ ] เฟส 9 เป็นต้นไป — ดู docs/GAME_PLAN.md หัวข้อ 13
+- [x] เฟส 9 — ดันเจี้ยน (ดูหัวข้อ "ดันเจี้ยน" ด้านบน)
+- [ ] เฟส 10 เป็นต้นไป — ดู docs/GAME_PLAN.md หัวข้อ 13
 - [~] เฟส 12 — ทำ pipeline ตัดภาพ (หัวข้อ 15) และใช้ภาพจริงกับมอนสเตอร์ ตัวละคร tileset หน้า login แล้ว
       ฉากต่อสู้ (S11–S12) และเอฟเฟกต์ธาตุ (S15) ใช้แล้วในเฟส 5 · ที่เหลือ: ภาพ NPC/ไอเท็ม/ไข่ จะผูกเข้าเกมตามเฟสที่ใช้

@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import {
   characterImages$,
+  dungeonEntranceProp,
   FALLBACK_TEXTURE,
   fallbackUrl,
   MONSTER_ATLAS,
@@ -47,6 +48,12 @@ export class BootScene extends Phaser.Scene {
       const url = propImageUrl(id);
       if (url) this.load.image(propTextureKey(id), url);
       else console.error(`ไม่พบภาพของประดับ assets/props/${id}.png`);
+    }
+    // ประตูดันเจี้ยนบนแผนที่ (ภาพตาม entranceProp ใน dungeons.json)
+    for (const name of new Set(registry.maps.all.flatMap((m) => m.markers.filter((x) => x.type === "dungeon").map((x) => x.name)))) {
+      const prop = dungeonEntranceProp(name);
+      const url = propImageUrl(prop);
+      if (url && !this.textures.exists(propTextureKey(prop))) this.load.image(propTextureKey(prop), url);
     }
     // NPC ที่ยืนอยู่บนแผนที่
     for (const name of new Set(registry.maps.all.flatMap((m) => m.markers.filter((x) => x.type === "npc").map((x) => x.name)))) {

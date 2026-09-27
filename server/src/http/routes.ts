@@ -10,6 +10,7 @@ import {
   HelperRequest,
   BuyRequest,
   BreedRequest,
+  ShardExchangeRequest,
   ROOM_CODE_PATTERN,
   StarterRequest,
   WORLD_ROOM,
@@ -165,6 +166,19 @@ export function apiRouter(s: Services) {
   r.post("/eggs/:id/hatch", requireAuth, (req: AuthedRequest, res) => {
     const playerId = req.auth!.playerId;
     const result = s.breeding.hatch(playerId, String(req.params.id));
+    profileChanged(playerId, result.profile);
+    res.json(result);
+  });
+
+  // ---------- ดันเจี้ยน (หัวข้อ 8) ----------
+
+  r.get("/dungeons", requireAuth, (req: AuthedRequest, res) => {
+    res.json(s.dungeons.status(req.auth!.playerId));
+  });
+
+  r.post("/shards/exchange", requireAuth, (req: AuthedRequest, res) => {
+    const playerId = req.auth!.playerId;
+    const result = s.dungeons.exchange(playerId, ShardExchangeRequest.parse(req.body).speciesId);
     profileChanged(playerId, result.profile);
     res.json(result);
   });

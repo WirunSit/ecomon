@@ -89,6 +89,8 @@ export type PlayerAction =
 
 export interface Participant {
   playerId: string;
+  /** ชื่อที่เพื่อนร่วมต่อสู้เห็น */
+  nickname: string;
   team: Combatant[];
   active: number;
   /** ตอบถูกติดกัน (ใช้กับความสามารถผู้บริโภค) */
@@ -97,17 +99,19 @@ export interface Participant {
   answered: number;
   /** uid ที่เคยออกสู้ในการต่อสู้นี้ (ได้ EXP เต็ม) */
   fought: Set<string>;
-  phase: "awaiting_action" | "awaiting_answer" | "ready" | "out";
+  /** awaiting_team = ต้องตอบคำถามทีมของบอส (หัวข้อ 8.3) */
+  phase: "awaiting_action" | "awaiting_answer" | "awaiting_team" | "ready" | "out";
   pendingMove?: string;
   questionId?: string;
   action?: PlayerAction;
   outcome?: "lose" | "fled";
 }
 
-export function makeParticipant(playerId: string, team: Combatant[]): Participant {
+export function makeParticipant(playerId: string, team: Combatant[], nickname = ""): Participant {
   const active = Math.max(0, team.findIndex((m) => m.hp > 0));
   return {
     playerId,
+    nickname,
     team,
     active,
     streak: 0,
@@ -118,10 +122,23 @@ export function makeParticipant(playerId: string, team: Combatant[]): Participan
   };
 }
 
+export interface BossOptions {
+  /** HP เหลือไม่เกินสัดส่วนนี้ → คำถามทีม แล้วเข้าเฟส 2 */
+  teamQuestionAtHp: number;
+  /** ท่าของบอสเฟส 2 (เพิ่มท่าประจำตัว) */
+  phase2Moves: string[];
+  /** โล่แตก → ดาเมจของผู้เล่นเทิร์นถัดไปคูณเท่านี้ */
+  shieldMultiplier: number;
+}
+
 export interface BattleOptions {
   canFlee: boolean;
   background: string;
   zoneTopics: string[];
+  /** มอนมลพิษในดันเจี้ยน (แสดงผลเท่านั้น) */
+  polluted?: boolean;
+  /** บอสดันเจี้ยน (หัวข้อ 8.3) */
+  boss?: BossOptions;
 }
 
 export type BattleResult = "win" | "lose" | "fled";
@@ -130,6 +147,8 @@ export interface TurnOutcome {
   turn: number;
   events: BattleEvent[];
   ended: BattleResult | null;
+  /** จบเทิร์นแล้วบอส HP ถึงเกณฑ์ → ห้องต้องถามคำถามทีม แล้วเรียก teamResolved() */
+  teamQuestion?: boolean;
 }
 
 export class BattleError extends Error {}
@@ -143,6 +162,12 @@ export class BattleError extends Error {}
 export class BattleSession {
   turn = 1;
   ended: BattleResult | null = null;
+  /** บอส: เฟส 1 → (คำถามทีม) → เฟส 2 */
+  bossPhase = 1;
+  /** โล่แตก — ใช้กับการโจมตีของผู้เล่นในเทิร์นถัดไปเทิร์นเดียว */
+  shieldBroken = false;
+  /** ถามคำถามทีมไปแล้ว (ถามครั้งเดียวต่อการต่อสู้) */
+  private teamAsked = false;
 
   constructor(
     private readonly reg: Registry,
@@ -232,10 +257,64 @@ export class BattleSession {
     const p = this.participant(playerId);
     if (!this.options.canFlee) throw new BattleError("หนีจากการต่อสู้นี้ไม่ได้");
     if (p.phase === "out") return false;
-    p.phase = "out";
-    p.outcome = "fled";
-    if (this.participants.every((x) => x.phase === "out")) this.ended = this.participants.some((x) => x.outcome === "lose") ? "lose" : "fled";
+    this.markOut(p, "fled");
     return true;
+  }
+
+  /**
+   * ออกจากการต่อสู้ (หนี / หลุดการเชื่อมต่อ / ออกจากดันเจี้ยน) โดยไม่สนว่าหนีได้ไหม
+   * ถ้าเพื่อนที่เหลือพร้อมแล้วและรอคนนี้อยู่ → เดินเทิร์นเลย (คืนผลเทิร์น)
+   */
+  leave(playerId: string): TurnOutcome | null {
+    const p = this.participant(playerId);
+    if (p.phase === "out" || this.ended) return null;
+    this.markOut(p, "fled");
+    if (this.ended) return { turn: this.turn, events: [], ended: this.ended };
+    return this.tryResolve();
+  }
+
+  private markOut(p: Participant, outcome: "lose" | "fled") {
+    p.phase = "out";
+    p.outcome = outcome;
+    p.questionId = undefined;
+    p.pendingMove = undefined;
+    if (this.participants.every((x) => x.phase === "out")) this.ended = this.participants.some((x) => x.outcome === "lose") ? "lose" : "fled";
+  }
+
+  /** หลังมีคนออก: ถ้าคนที่เหลือพร้อมหมดแล้ว → เดินเทิร์น */
+  resolvePending(): TurnOutcome | null {
+    if (this.ended) return null;
+    return this.tryResolve();
+  }
+
+  /** ผู้เข้าร่วมที่ยังสู้อยู่ */
+  live(): Participant[] {
+    return this.participants.filter((p) => p.phase !== "out");
+  }
+
+  /**
+   * ผลคำถามทีมของบอส (หัวข้อ 8.3): ผ่าน → โล่แตก (ดาเมจเทิร์นถัดไป ×shieldMultiplier)
+   * แล้วบอสเข้าเฟส 2 ได้ท่าใหม่เสมอ · ทุกคนกลับไปเลือกท่า
+   */
+  teamResolved(passed: boolean): TurnOutcome {
+    const events: BattleEvent[] = [];
+    if (passed) {
+      this.shieldBroken = true;
+      events.push({ kind: "shield", broken: true });
+    }
+    if (this.options.boss && this.bossPhase === 1) {
+      this.bossPhase = 2;
+      const before = new Set(this.wild.moves);
+      this.wild.moves = [...this.options.boss.phase2Moves];
+      events.push({ kind: "boss_phase", phase: 2, newMoves: this.wild.moves.filter((m) => !before.has(m)) });
+    }
+    for (const p of this.live()) p.phase = "awaiting_action";
+    return { turn: this.turn, events, ended: null };
+  }
+
+  /** กำลังรอคำถามทีมอยู่ไหม */
+  get awaitingTeam(): boolean {
+    return this.live().some((p) => p.phase === "awaiting_team");
   }
 
   private requirePhase(playerId: string, phase: Participant["phase"]): Participant {
@@ -309,7 +388,8 @@ export class BattleSession {
       }
     }
 
-    // 4) จบเทิร์น: ลดคูลดาวน์/ผลเสริม
+    // 4) จบเทิร์น: ลดคูลดาวน์/ผลเสริม · โล่แตกใช้ได้เทิร์นเดียว
+    this.shieldBroken = false;
     for (const c of [this.wild, ...this.participants.flatMap((p) => p.team)]) {
       for (const k of Object.keys(c.cooldowns)) c.cooldowns[k] = Math.max(0, c.cooldowns[k]! - 1);
       c.mods = c.mods.map((m) => ({ ...m, turns: m.turns - 1 })).filter((m) => m.turns > 0);
@@ -324,6 +404,14 @@ export class BattleSession {
     if (this.wild.hp <= 0) this.ended = "win";
     else if (this.participants.every((p) => p.phase === "out"))
       this.ended = this.participants.some((p) => p.outcome === "lose") ? "lose" : "fled";
+
+    // บอส HP ถึงเกณฑ์ครั้งแรก → คำถามทีม (หัวข้อ 8.3)
+    const boss = this.options.boss;
+    if (!this.ended && boss && !this.teamAsked && this.wild.hp <= this.wild.maxHp * boss.teamQuestionAtHp) {
+      this.teamAsked = true;
+      for (const p of this.live()) p.phase = "awaiting_team";
+      return { turn, events, ended: null, teamQuestion: true };
+    }
     return { turn, events, ended: this.ended };
   }
 
@@ -339,6 +427,8 @@ export class BattleSession {
     for (const passive of me.passives) if (passive.kind === "streak_damage" && p.streak >= passive.minStreak) extra *= 1 + passive.bonus;
     // เครื่องรางธาตุ: ท่าธาตุนั้นแรงขึ้น (หัวข้อ 9.1)
     extra *= 1 + (me.effects.elementBoost[move.element] ?? 0) / 100;
+    // โล่บอสแตกจากคำถามทีม (หัวข้อ 8.3)
+    if (this.shieldBroken && this.options.boss) extra *= this.options.boss.shieldMultiplier;
     const hit = this.hit(me, this.wild, move.id, action.answer, extra);
     events.push({ kind: "attack", side: "player", attacker: me.id, target: this.wild.id, moveId: move.id, missed: false, damage: hit.damage, effectiveness: hit.effectiveness, targetHp: this.wild.hp });
     this.afterHit(me, this.wild, move.id, "player", events);
@@ -445,15 +535,90 @@ export class BattleSession {
 
   view(playerId: string): BattleStateView {
     const p = this.participant(playerId);
-    return {
+    const wild = this.combatantView(this.wild);
+    if (this.options.polluted) wild.polluted = true;
+    if (this.options.boss) Object.assign(wild, { boss: true, polluted: true, bossPhase: this.bossPhase, shieldBroken: this.shieldBroken });
+    const phase: BattleStateView["phase"] =
+      this.ended || p.phase === "out"
+        ? "ended"
+        : p.phase === "awaiting_answer"
+          ? "awaiting_answer"
+          : p.phase === "awaiting_team"
+            ? "awaiting_team"
+            : p.phase === "ready"
+              ? "waiting"
+              : "awaiting_action";
+    const view: BattleStateView = {
       battleId: this.id,
-      wild: this.combatantView(this.wild),
+      wild,
       team: p.team.map((c) => this.combatantView(c)),
       active: p.active,
-      phase: this.ended || p.phase === "out" ? "ended" : p.phase === "awaiting_answer" ? "awaiting_answer" : "awaiting_action",
+      phase,
       turn: this.turn,
       canFlee: this.options.canFlee,
       background: this.options.background,
     };
+    if (this.participants.length > 1) {
+      view.allies = this.participants
+        .filter((x) => x !== p)
+        .map((x) => {
+          const a = this.active(x);
+          return {
+            playerId: x.playerId,
+            nickname: x.nickname,
+            speciesId: a.speciesId,
+            form: a.form,
+            hp: a.hp,
+            maxHp: a.maxHp,
+            out: x.phase === "out",
+            thinking: x.phase === "awaiting_action" || x.phase === "awaiting_answer" || x.phase === "awaiting_team",
+          };
+        });
+    }
+    return view;
+  }
+
+  /**
+   * เหตุการณ์ในเทิร์นในมุมของผู้เล่นคนหนึ่ง: การกระทำของเพื่อน/มอนของเพื่อน → ข้อความ "ally" สั้น ๆ
+   * (client วาดเฉพาะมอนของตัวเองกับมอนป่า)
+   */
+  eventsFor(playerId: string, events: BattleEvent[]): BattleEvent[] {
+    if (this.participants.length <= 1) return events;
+    const mine = new Set(this.participant(playerId).team.map((c) => c.id));
+    const owner = new Map<string, string>();
+    for (const x of this.participants) for (const c of x.team) owner.set(c.id, x.playerId);
+    const out: BattleEvent[] = [];
+    for (const e of events) {
+      switch (e.kind) {
+        case "attack":
+          if (e.side === "player" && !mine.has(e.attacker)) {
+            // เพื่อนโจมตี: แสดงดาเมจที่มอนป่า (อัปเดต HP มอนป่าด้วย)
+            out.push({ kind: "ally", playerId: owner.get(e.attacker) ?? "", action: e.missed ? "miss" : "attack", damage: e.damage, moveId: e.moveId, wildHp: e.targetHp });
+          } else if (e.side === "wild" && !mine.has(e.target)) {
+            out.push({ kind: "ally", playerId: owner.get(e.target) ?? "", action: "hit", damage: e.damage, moveId: e.moveId });
+          } else out.push(e);
+          break;
+        case "heal":
+        case "stat":
+          if (e.side === "player" && !mine.has(e.target)) break;
+          out.push(e);
+          break;
+        case "decay":
+          if (!mine.has(e.target) && e.target !== this.wild.id) break;
+          out.push(e);
+          break;
+        case "faint":
+          if (e.side === "player" && !mine.has(e.target)) out.push({ kind: "ally", playerId: owner.get(e.target) ?? "", action: "faint" });
+          else out.push(e);
+          break;
+        case "switch":
+          if (!mine.has(e.from) && !mine.has(e.to)) out.push({ kind: "ally", playerId: owner.get(e.to) ?? "", action: "switch" });
+          else out.push(e);
+          break;
+        default:
+          out.push(e);
+      }
+    }
+    return out;
   }
 }

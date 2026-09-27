@@ -45,6 +45,7 @@
         "nutrient_cycles"
       ],
       "battleBackground": "mushroom_forest",
+      "entranceProp": "dungeon_root_cave",
       "guaranteedRewards": {
         "coins": 150,
         "exp": 200,
@@ -94,6 +95,7 @@
         "succession"
       ],
       "battleBackground": "volcano",
+      "entranceProp": "dungeon_crater_gate",
       "guaranteedRewards": {
         "coins": 180,
         "exp": 250,
@@ -146,6 +148,7 @@
         "energy_flow"
       ],
       "battleBackground": "beach",
+      "entranceProp": "dungeon_sea_cave",
       "guaranteedRewards": {
         "coins": 200,
         "exp": 300,
@@ -223,6 +226,7 @@
       "includeCalculation": true,
       "minDifficulty": 3,
       "battleBackground": "temple",
+      "entranceProp": "temple_gate",
       "guaranteedRewards": {
         "coins": 400,
         "exp": 600,

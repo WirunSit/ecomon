@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { getStateCallbacks } from "colyseus.js";
+import { getStateCallbacks, type Room } from "colyseus.js";
 import {
   checkStep,
   CLOSE_CODES,
@@ -13,6 +13,8 @@ import {
   type BattleStateView,
   type ChatBroadcast,
   type CorrectionMessage,
+  type DungeonDeniedMessage,
+  type DungeonEnterMessage,
   type NoticeMessage,
   type PlayerProfile,
 } from "@ecomon/shared";
@@ -22,7 +24,9 @@ import { InputController } from "../input/InputController";
 import { connection, type PlayerView, type WorldRoom } from "../net/connection";
 import { session } from "../net/session";
 import { profile } from "../state/profile";
-import { npcTextureKey } from "../assets";
+import { dungeonEntranceProp, npcTextureKey, propTextureKey } from "../assets";
+import { DungeonPanel } from "../ui/dungeon/DungeonPanel";
+import type { DungeonSceneData } from "./DungeonScene";
 import { BagPanel } from "../ui/collection/BagPanel";
 import { CatalogPanel } from "../ui/collection/CatalogPanel";
 import { CollectionPanel } from "../ui/collection/CollectionPanel";
@@ -80,8 +84,14 @@ export class WorldScene extends Phaser.Scene {
   private lab!: LabPanel;
   /** NPC บนแผนที่ (ภาพ + ตำแหน่ง) และปุ่ม "คุย" เมื่อยืนใกล้ */
   private npcs: { id: string; x: number; y: number; container: Phaser.GameObjects.Container }[] = [];
+  /** ประตูดันเจี้ยน (ภาพ + ป้ายจำนวนคนในปาร์ตี้ที่รออยู่) */
+  private entrances: { id: string; x: number; y: number; container: Phaser.GameObjects.Container; party: Phaser.GameObjects.Text }[] = [];
   private npcPrompt?: HTMLButtonElement;
   private nearNpc?: string;
+  private nearEntrance?: string;
+  private dungeonPanel!: DungeonPanel;
+  /** อยู่ในดันเจี้ยน (ฉาก Dungeon ซ้อนบนฉากนี้) */
+  private inDungeon = false;
   private dev?: DevPanel;
   private blocker?: HTMLElement;
   private unlocks = movementUnlocks([], registry.items.all);
@@ -102,6 +112,7 @@ export class WorldScene extends Phaser.Scene {
     this.encounterUntil = 0;
     this.remotes = new Map();
     this.wild = new Map();
+    this.inDungeon = false;
     const ready = () => !!this.room.state.players?.get(this.room.sessionId);
     if (ready()) this.build();
     else {
@@ -120,6 +131,7 @@ export class WorldScene extends Phaser.Scene {
     const map = this.loaded.game;
     const view = new MapView(this, this.loaded);
     this.npcs = this.createNpcs(map);
+    this.entrances = this.createEntrances(map);
 
     const self = room.state.players.get(room.sessionId)!;
     this.player = new PlayerAvatar(this, map.tileSize, self.x, self.y, terrainAt(map, self.x, self.y), self.avatar);
@@ -149,6 +161,7 @@ export class WorldScene extends Phaser.Scene {
     this.catalog = new CatalogPanel(say);
     const bag = new BagPanel(say);
     this.shop = new ShopPanel(say);
+    this.dungeonPanel = new DungeonPanel(room, say);
     this.npcPrompt = h("button", { className: "npc-prompt interactive" });
     this.npcPrompt.type = "button";
     this.npcPrompt.style.display = "none";
@@ -216,6 +229,10 @@ export class WorldScene extends Phaser.Scene {
     room.onMessage(MSG.profile, (p: PlayerProfile) => profile.set(p));
     room.onMessage(MSG.notice, (n: NoticeMessage) => this.onNotice(n));
 
+    // ---- ดันเจี้ยน: server ปฏิเสธ (บอกชื่อคนที่ยังไม่พร้อม) / ได้ที่นั่งในห้องดันเจี้ยน ----
+    room.onMessage(MSG.dungeonDenied, (m: DungeonDeniedMessage) => this.dungeonPanel.onDenied(m));
+    room.onMessage(MSG.dungeonEnter, (m: DungeonEnterMessage) => void this.enterDungeon(m));
+
     // ---- การต่อสู้ (ส่งต่อให้ฉาก Battle ผ่าน BattleLink) ----
     room.onMessage(MSG.battleState, (s: BattleStateView) => this.onBattleState(s));
     room.onMessage(MSG.battleQuestion, (msg) => this.battle?.push({ type: "question", msg }));
@@ -230,9 +247,9 @@ export class WorldScene extends Phaser.Scene {
 
     const unsubscribe = profile.subscribe((p) => (this.unlocks = movementUnlocks(p.keyItems, registry.items.all)));
     const onKey = (e: KeyboardEvent) => {
-      if (FullPanel.isOpen || this.evolution?.isOpen || this.battle || e.target instanceof HTMLInputElement) return;
+      if (FullPanel.isOpen || this.evolution?.isOpen || this.battle || this.inDungeon || e.target instanceof HTMLInputElement) return;
       if (e.code === "Escape" || e.code === "KeyM") this.menu.toggle();
-      if ((e.code === "KeyE" || e.code === "Space" || e.code === "Enter") && this.nearNpc && !this.menu.isOpen) {
+      if ((e.code === "KeyE" || e.code === "Space" || e.code === "Enter") && (this.nearNpc || this.nearEntrance) && !this.menu.isOpen) {
         e.preventDefault();
         this.talk();
       }
@@ -252,6 +269,8 @@ export class WorldScene extends Phaser.Scene {
       this.evolution?.dispose();
       this.npcPrompt?.remove();
       this.npcs.forEach((n) => n.container.destroy());
+      this.entrances.forEach((n) => n.container.destroy());
+      if (this.scene.isActive("Dungeon") || this.scene.isPaused("Dungeon")) this.scene.stop("Dungeon");
       this.dev?.destroy();
       this.blocker?.remove();
       if (this.scene.isActive("Battle") || this.scene.isPaused("Battle")) this.scene.stop("Battle");
@@ -262,6 +281,39 @@ export class WorldScene extends Phaser.Scene {
     this.updateDevInfo();
     // กลับเข้าห้องระหว่างต่อสู้ (reload/หลุด) → ขอสถานะการต่อสู้ที่ค้างอยู่
     room.send(MSG.battleResync);
+    // รีเฟรชหน้าระหว่างอยู่ในดันเจี้ยน → กลับเข้าห้องดันเจี้ยนเดิม
+    if (session.dungeonToken) {
+      void connection.reconnectDungeon().then((d) => {
+        if (d && this.scene.isActive()) this.startDungeon(d);
+      });
+    }
+  }
+
+  // ---------- ดันเจี้ยน ----------
+
+  private async enterDungeon(m: DungeonEnterMessage) {
+    this.dungeonPanel.close();
+    try {
+      this.startDungeon(await connection.enterDungeon(m.reservation));
+    } catch (e) {
+      this.toast.show(e instanceof Error ? e.message : UI.notice.dungeon_error!, 3000);
+    }
+  }
+
+  private startDungeon(dungeonRoom: Room) {
+    if (this.inDungeon) return;
+    this.inDungeon = true;
+    this.setBattleMode(true);
+    const data: DungeonSceneData = {
+      room: dungeonRoom,
+      onDone: (end) => {
+        this.inDungeon = false;
+        this.setBattleMode(false);
+        this.encounterUntil = 0;
+        if (end) profile.set(end.profile);
+      },
+    };
+    this.scene.launch("Dungeon", data);
   }
 
   override update(time: number) {
@@ -271,7 +323,8 @@ export class WorldScene extends Phaser.Scene {
     this.updateRemotes();
     this.sortByDepth();
     this.updateNpcPrompt();
-    if (this.blocker || this.battle || time < this.encounterUntil) return;
+    this.updateEntrances();
+    if (this.blocker || this.battle || this.inDungeon || time < this.encounterUntil) return;
 
     const dir = this.menu.isOpen || FullPanel.isOpen || this.evolution?.isOpen ? null : this.controls.direction();
     if (dir) this.lastInputAt = time;
@@ -403,19 +456,58 @@ export class WorldScene extends Phaser.Scene {
     });
   }
 
-  /** ยืนใกล้ NPC (ระยะ interactRadius) → แสดงปุ่มคุย */
+  /** วางประตูดันเจี้ยนตาม marker type "dungeon" (ภาพ entranceProp + ชื่อ + ป้ายปาร์ตี้ที่รออยู่) */
+  private createEntrances(map: LoadedMap["game"]) {
+    const T = map.tileSize;
+    return map.markers.flatMap((m) => {
+      const d = registry.dungeons.find(m.name);
+      if (m.type !== "dungeon" || !d) return [];
+      const key = propTextureKey(dungeonEntranceProp(d.id));
+      const parts: Phaser.GameObjects.GameObject[] = [];
+      if (this.textures.exists(key)) {
+        const img = this.add.image(0, T / 2 + 2, key).setOrigin(0.5, 1);
+        img.setScale((T * 2.2) / img.width);
+        parts.push(img);
+      } else parts.push(this.add.rectangle(0, 0, T, T, 0x3a2f4a).setStrokeStyle(2, 0xb58fd6));
+      const label = this.add
+        .text(0, -T * 1.6, `🏰 ${d.name}`, { fontFamily: "Kanit, sans-serif", fontSize: "12px", color: "#f0c8ff", stroke: "#1b2130", strokeThickness: 3 })
+        .setOrigin(0.5, 1)
+        .setResolution(2);
+      const party = this.add
+        .text(0, -T * 2.2, "", { fontFamily: "Kanit, sans-serif", fontSize: "13px", color: "#ffe28a", stroke: "#1b2130", strokeThickness: 3 })
+        .setOrigin(0.5, 1)
+        .setResolution(2);
+      const container = this.add.container(m.x * T + T / 2, m.y * T + T / 2, [...parts, label, party]);
+      container.setDepth(depthForY(container.y, 0));
+      return [{ id: d.id, x: m.x, y: m.y, container, party }];
+    });
+  }
+
+  /** ป้ายจำนวนคนในปาร์ตี้ที่รอหน้าทางเข้า (เพื่อนในห้องเห็นแล้วเดินมาเข้าร่วมได้) */
+  private updateEntrances() {
+    for (const e of this.entrances) {
+      const lobby = this.room.state.lobbies?.get(e.id);
+      const text = lobby ? `👥 ${lobby.members.length}/${balance.coop.maxParticipants}` : "";
+      if (e.party.text !== text) e.party.setText(text);
+    }
+  }
+
+  /** ยืนใกล้ NPC หรือประตูดันเจี้ยน (ระยะ interactRadius) → แสดงปุ่มคุย/เข้า */
   private updateNpcPrompt() {
     const r = balance.world.interactRadius;
-    const busy = !!this.battle || this.menu.isOpen || FullPanel.isOpen || this.evolution?.isOpen;
-    const near = busy ? undefined : this.npcs.find((n) => Math.abs(n.x - this.player.tileX) <= r && Math.abs(n.y - this.player.tileY) <= r);
-    if (near?.id === this.nearNpc) return;
+    const busy = !!this.battle || this.inDungeon || this.menu.isOpen || FullPanel.isOpen || this.evolution?.isOpen;
+    const close = (n: { x: number; y: number }) => Math.abs(n.x - this.player.tileX) <= r && Math.abs(n.y - this.player.tileY) <= r;
+    const near = busy ? undefined : this.npcs.find(close);
+    const gate = busy || near ? undefined : this.entrances.find(close);
+    if (near?.id === this.nearNpc && gate?.id === this.nearEntrance) return;
     this.nearNpc = near?.id;
+    this.nearEntrance = gate?.id;
     if (!this.npcPrompt) return;
-    this.npcPrompt.style.display = near ? "" : "none";
+    this.npcPrompt.style.display = near || gate ? "" : "none";
     if (near) {
       const npc = registry.npcs.get(near.id);
       this.npcPrompt.textContent = `${npc.lab ? UI.lab.talk(npc.name) : UI.shop.talk(npc.name)} (E)`;
-    }
+    } else if (gate) this.npcPrompt.textContent = `${UI.dungeon.enter(registry.dungeons.get(gate.id).name)} (E)`;
   }
 
   /** ยืนใกล้ NPC ที่มีบริการนี้อยู่ไหม (ใช้เปิดห้องแล็บแบบผสมได้) — server ตรวจระยะซ้ำตอนทำจริง */
@@ -430,6 +522,7 @@ export class WorldScene extends Phaser.Scene {
     const npc = this.nearNpc ? registry.npcs.find(this.nearNpc) : undefined;
     if (npc?.shop) void this.shop.open(npc.id);
     else if (npc?.lab) void this.lab.open({ atLab: true });
+    else if (this.nearEntrance) void this.dungeonPanel.open(this.nearEntrance);
   }
 
   /** คู่หูที่เดินตาม + ฉายา ตาม state จาก server */
@@ -453,7 +546,7 @@ export class WorldScene extends Phaser.Scene {
     for (const { avatar, view } of this.remotes.values()) {
       this.applyLooks(avatar, view);
       avatar.setConnected(view.connected);
-      avatar.setBattling(view.inBattle);
+      avatar.setBattling(view.inBattle || view.inDungeon);
       if (avatar.isMoving) continue;
       const dx = view.x - avatar.tileX;
       const dy = view.y - avatar.tileY;

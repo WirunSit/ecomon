@@ -52,7 +52,8 @@ export class QuestionPanel {
     private readonly battle = true,
   ) {}
 
-  show(msg: BattleQuestionMessage, submit: (a: SubmittedAnswer) => void) {
+  /** @param call ข้อความหัวแผง (ไม่ส่ง = "ตอบให้ถูกเพื่อโจมตี!") เช่นคำถามทีมของบอส */
+  show(msg: BattleQuestionMessage, submit: (a: SubmittedAnswer) => void, call?: string) {
     this.stopTimer();
     const q = msg.question;
     const topic = registry.topics.find(q.topic);
@@ -114,7 +115,7 @@ export class QuestionPanel {
     body.append(
       h("div", { className: "q-head" }, [
         h("span", { className: "q-topic", text: topic?.name ?? q.topic }),
-        h("span", { className: "q-call", text: this.battle ? UI.battle.question : "" }),
+        h("span", { className: `q-call${call ? " team" : ""}`, text: call ?? (this.battle ? UI.battle.question : "") }),
         item,
       ]),
       ...(msg.timeLimitSec !== null ? [timer] : []),

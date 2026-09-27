@@ -38,8 +38,8 @@ export interface SpawnArea extends z.infer<typeof SpawnAreaProps> {
 }
 
 /**
- * จุดพิเศษใน object layer `markers`: player_start, recovery (จุดฟื้นฟู), npc (name = id ใน npcs.json ยืนขวางทาง)
- * (อนาคต: ทางเข้าดันเจี้ยน)
+ * จุดพิเศษใน object layer `markers`: player_start, recovery (จุดฟื้นฟู), npc (name = id ใน npcs.json ยืนขวางทาง),
+ * dungeon (name = id ใน dungeons.json ประตูขวางทาง ยืนข้าง ๆ แล้วเปิดหน้าทางเข้า)
  */
 export interface MapMarker {
   objectId: number;
@@ -193,9 +193,10 @@ export function buildGameMap(id: string, tiled: TiledMap): { map?: GameMap; prob
     props: tiledProps(o.properties),
   }));
 
-  // NPC ยืนอยู่ = เดินผ่านไม่ได้ (ใช้กติกาเดียวกันทั้ง client และ server)
+  // NPC ยืนอยู่ / ประตูดันเจี้ยน = เดินผ่านไม่ได้ (ใช้กติกาเดียวกันทั้ง client และ server)
   for (const m of markers) {
-    if (m.type === "npc" && m.x >= 0 && m.y >= 0 && m.x < width && m.y < height) terrain[m.y * width + m.x] = TERRAIN_CODES.indexOf("blocked");
+    if ((m.type === "npc" || m.type === "dungeon") && m.x >= 0 && m.y >= 0 && m.x < width && m.y < height)
+      terrain[m.y * width + m.x] = TERRAIN_CODES.indexOf("blocked");
   }
 
   // property ของ tile: gid → { prop, propWidth, propSize }

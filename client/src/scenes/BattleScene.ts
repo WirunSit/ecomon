@@ -4,6 +4,7 @@ import {
   type BagResponse,
   type BattleEndMessage,
   type BattleEvent,
+  type BattleQuestionMessage,
   type BattleResultMessage,
   type BattleStateView,
   type BattleTurnMessage,
@@ -12,7 +13,6 @@ import {
 import { backgroundImageUrl, backgroundTextureKey, monsterTexture, vfxImageUrl, vfxTextureKey } from "../assets";
 import type { BattleIncoming, BattleLink } from "../battle/BattleLink";
 import { registry, speciesName } from "../content";
-import type { WorldRoom } from "../net/connection";
 import { BattleCards } from "../ui/battle/BattleCards";
 import { BattleDock } from "../ui/battle/BattleDock";
 import { showEndPanel } from "../ui/battle/EndPanel";
@@ -23,8 +23,13 @@ import { showPicker } from "../ui/Picker";
 import { UI } from "../ui/strings";
 import { Toast } from "../ui/Toast";
 
+/** ห้องที่รับคำสั่งการต่อสู้ (ห้องโลก หรือห้องดันเจี้ยน — ใช้ข้อความชุดเดียวกัน) */
+export interface BattleRoom {
+  send(type: string, message?: unknown): void;
+}
+
 export interface BattleSceneData {
-  room: WorldRoom;
+  room: BattleRoom;
   state: BattleStateView;
   link: BattleLink;
   /** ปิดฉากต่อสู้แล้ว (end = ผลการต่อสู้ หรือ null ถ้าถูกปิดเพราะหลุด) */
@@ -37,6 +42,11 @@ const SPOT = {
   player: { x: 255, y: 340, size: 200 },
 } as const;
 const ELEMENT_FRAMES = [1, 2, 3, 4];
+/** บอสใหญ่กว่ามอนป่าปกติ (ภาพร่าง 3 ขยาย — จอ 960x540 ขยายได้ราว 1.4 เท่า) */
+const BOSS_SCALE = 1.4;
+/** สีมลพิษ (คูณกับภาพเดิม) + ไอพิษสีม่วงรอบตัว */
+const POLLUTION_TINT = 0x8660b0;
+const MIASMA_COLOR = 0x5e2386;
 const TEXT_STYLE = { fontFamily: "Kanit, sans-serif", fontSize: "28px", fontStyle: "bold", color: "#ffffff", stroke: "#1b2130", strokeThickness: 6 };
 
 type Side = "player" | "wild";
@@ -46,7 +56,7 @@ type Side = "player" | "wild";
  * ข้อความจาก server เข้าคิวแล้วเล่นทีละอย่าง: เฉลย → รอกด "ต่อไป" → อนิเมชันเทิร์น → เลือกท่าถัดไป / สรุปผล
  */
 export class BattleScene extends Phaser.Scene {
-  private room!: WorldRoom;
+  private room!: BattleRoom;
   private state!: BattleStateView;
   private onClose!: (end: BattleEndMessage | null) => void;
   private cards!: BattleCards;
@@ -56,6 +66,7 @@ export class BattleScene extends Phaser.Scene {
   /** ภาพมอนแต่ละฝั่ง (หายใจด้วยการขยับ y ของภาพ) อยู่ใน holder ที่ใช้เคลื่อนที่/จางหาย */
   private sprites!: Record<Side, Phaser.GameObjects.Image>;
   private holders!: Record<Side, Phaser.GameObjects.Container>;
+  private miasma!: Phaser.GameObjects.Ellipse;
   private tasks: (() => Promise<void>)[] = [];
   private stock = new Map<string, number>();
   private running = false;
@@ -104,8 +115,11 @@ export class BattleScene extends Phaser.Scene {
       this.add.ellipse(s.x, s.y - 4, s.size * 0.8, s.size * 0.2, 0x000000, 0.25);
     }
     this.sprites = { wild: this.add.image(0, 0, "__DEFAULT").setOrigin(0.5, 1).setFlipX(true), player: this.add.image(0, 0, "__DEFAULT").setOrigin(0.5, 1) };
+    // ไอพิษรอบมอนมลพิษ/บอส (หัวข้อ 8, 14.1 — ทำด้วยโค้ด ไม่ต้องมีภาพใหม่)
+    this.miasma = this.add.ellipse(0, -SPOT.wild.size * 0.45, SPOT.wild.size * 1.1, SPOT.wild.size * 0.95, MIASMA_COLOR, 0.5).setVisible(false);
+    this.tweens.add({ targets: this.miasma, alpha: 0.28, duration: 900, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
     this.holders = {
-      wild: this.add.container(SPOT.wild.x, SPOT.wild.y, [this.sprites.wild]),
+      wild: this.add.container(SPOT.wild.x, SPOT.wild.y, [this.miasma, this.sprites.wild]),
       player: this.add.container(SPOT.player.x, SPOT.player.y, [this.sprites.player]),
     };
 
@@ -167,7 +181,27 @@ export class BattleScene extends Phaser.Scene {
           await showEndPanel(m.msg);
           this.close(m.msg);
         });
+      case "team":
+        return this.enqueue(async () => this.showTeamQuestion(m.msg));
+      case "teamResult":
+        return this.enqueue(async () => {
+          await this.question.showResult(m.msg.result);
+          const t = UI.dungeon;
+          this.dock.message(`${t.teamResult(m.msg.correct, m.msg.total)} · ${m.msg.passed ? t.shieldBroken : t.shieldHeld}`);
+          await this.wait(1200);
+        });
     }
+  }
+
+  /** คำถามทีมของบอส: ทุกคนได้ข้อเดียวกัน ตอบแล้วรอผลของทีม */
+  private showTeamQuestion(q: BattleQuestionMessage) {
+    this.question.show(
+      q,
+      (a) => {
+        this.room.send(MSG.teamAnswer, { instanceId: q.instanceId, ...a });
+      },
+      UI.dungeon.teamQuestion,
+    );
   }
 
   private enqueue(task: () => Promise<void>) {
@@ -204,18 +238,51 @@ export class BattleScene extends Phaser.Scene {
     this.setMonster("player", me);
     this.cards.wild.show(state.wild);
     this.cards.player.show(me, state.team);
+    this.cards.setAllies(state.allies);
+  }
+
+  /** ขนาดภาพ: บอสดันเจี้ยนขยายใหญ่ (หัวข้อ 8, 14.1 บอสมลพิษทำด้วยโค้ด) */
+  private sizeOf(side: Side, c: CombatantView): number {
+    return SPOT[side].size * (side === "wild" && c.boss ? BOSS_SCALE : 1);
   }
 
   private setMonster(side: Side, c: CombatantView, pose: "idle" | "attack" = "idle") {
     const sprite = this.sprites[side];
     const tex = monsterTexture(this, c.speciesId, c.form, pose);
     sprite.setTexture(tex.key, tex.frame);
-    sprite.setScale(SPOT[side].size / Math.max(sprite.width, sprite.height));
+    sprite.setScale(this.sizeOf(side, c) / Math.max(sprite.width, sprite.height));
+    this.applyTint(side);
     this.holders[side].setAlpha(c.hp > 0 ? 1 : 0);
   }
 
-  /** ให้เลือกท่า หรือแสดงคำถามที่ค้างอยู่ (หลัง reconnect) */
+  /** มอนมลพิษ/บอสย้อมสีม่วงหม่นด้วยโค้ด (ไม่ต้องมีภาพใหม่) */
+  private applyTint(side: Side) {
+    const sprite = this.sprites[side];
+    const polluted = side === "wild" && !!this.state.wild.polluted;
+    if (polluted) sprite.setTint(POLLUTION_TINT);
+    else sprite.clearTint();
+    if (side === "wild") {
+      const scale = this.state.wild.boss ? BOSS_SCALE : 1;
+      this.miasma.setVisible(polluted).setPosition(0, -SPOT.wild.size * 0.45 * scale);
+      this.miasma.setDisplaySize(SPOT.wild.size * 1.1 * scale, SPOT.wild.size * 0.95 * scale);
+    }
+  }
+
+  /** ให้เลือกท่า หรือแสดงคำถามที่ค้างอยู่ (หลัง reconnect) · รอเพื่อน · คำถามทีม */
   private prompt(state: BattleStateView) {
+    if (state.phase === "waiting") {
+      this.dock.message(UI.dungeon.waitingAllies);
+      return;
+    }
+    if (state.phase === "awaiting_team") {
+      if (state.question) this.showTeamQuestion(state.question);
+      else this.dock.message(UI.dungeon.waitingAllies);
+      return;
+    }
+    if (state.phase === "ended" && state.allies?.some((a) => !a.out)) {
+      this.dock.message(UI.dungeon.knockedOut);
+      return;
+    }
     if (state.phase === "awaiting_action") {
       this.dock.showActions(state, {
         move: (moveId) => this.room.send(MSG.battleAction, { type: "move", moveId }),
@@ -306,10 +373,39 @@ export class BattleScene extends Phaser.Scene {
     return side === "wild" ? this.cards.wild : this.cards.player;
   }
 
+  private allyName(playerId: string): string {
+    return this.state.allies?.find((a) => a.playerId === playerId)?.nickname ?? "";
+  }
+
   private async playEvent(e: BattleEvent) {
     switch (e.kind) {
       case "attack":
         return this.playAttack(e);
+      case "ally": {
+        // เพื่อนทำอะไรบางอย่าง: ข้อความสั้น ๆ + อัปเดต HP มอนป่าถ้าเพื่อนโจมตี
+        this.dock.message(UI.dungeon.ally[e.action]?.(this.allyName(e.playerId), e.damage ?? 0) ?? "");
+        if (e.wildHp !== undefined) {
+          this.state.wild.hp = e.wildHp;
+          this.cards.wild.setHp(e.wildHp, this.state.wild.maxHp);
+          if (e.action === "attack") {
+            this.cards.wild.flash();
+            await this.floatText("wild", `-${e.damage ?? 0}`, "#ffe9a8", 24);
+          }
+        }
+        await this.wait(350);
+        return;
+      }
+      case "shield":
+        this.dock.message(UI.dungeon.shieldBroken);
+        this.cameras.main.flash(250, 255, 255, 255);
+        await this.floatText("wild", "🛡💥", "#ffe28a", 36);
+        await this.wait(500);
+        return;
+      case "boss_phase":
+        this.dock.message(UI.dungeon.phase2);
+        this.cameras.main.shake(400, 0.01);
+        await this.wait(900);
+        return;
       case "heal": {
         if (e.source === "item" && e.itemId) {
           const target = this.combatant(e.target);
@@ -399,7 +495,7 @@ export class BattleScene extends Phaser.Scene {
       }
       const t = this.sprites[other];
       t.setTintFill(0xffffff);
-      this.time.delayedCall(90, () => t.clearTint());
+      this.time.delayedCall(90, () => this.applyTint(other));
       this.cameras.main.shake(140, e.effectiveness === "super" ? 0.012 : 0.006);
       const color = e.effectiveness === "super" ? "#ffd84a" : e.effectiveness === "weak" ? "#c9c2b0" : "#ffffff";
       await this.floatText(other, `-${e.damage}`, color, e.effectiveness === "super" ? 36 : 30);

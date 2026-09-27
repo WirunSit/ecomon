@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { BattleScene } from "./scenes/BattleScene";
 import { BootScene } from "./scenes/BootScene";
+import { DungeonScene } from "./scenes/DungeonScene";
 import { LobbyScene } from "./scenes/LobbyScene";
 import { LoginScene } from "./scenes/LoginScene";
 import { PreviewScene } from "./scenes/PreviewScene";
@@ -31,9 +32,11 @@ async function start() {
       width: GAME_WIDTH,
       height: GAME_HEIGHT,
     },
-    scene: [BootScene, LoginScene, StarterScene, LobbyScene, WorldScene, BattleScene, PreviewScene],
+    scene: [BootScene, LoginScene, StarterScene, LobbyScene, WorldScene, DungeonScene, BattleScene, PreviewScene],
   });
   setThumbnailSource(game);
+  // ตอนพัฒนา: เปิดให้เครื่องมือทดสอบเข้าถึงเกมได้ (เช่นเดินเฟรมเองตอนแท็บถูกซ่อน) — ไม่มีใน build จริง
+  if (import.meta.env.DEV) Object.assign(window, { __ecomon: { game } });
 }
 
 void start();

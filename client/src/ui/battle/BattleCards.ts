@@ -1,4 +1,4 @@
-import type { CombatantView } from "@ecomon/shared";
+import type { AllyView, CombatantView } from "@ecomon/shared";
 import { registry, speciesName } from "../../content";
 import { h, uiRoot } from "../overlay";
 import { UI } from "../strings";
@@ -38,6 +38,8 @@ class Card {
       .filter(([, v]) => v)
       .map(([k, v]) => h("span", { className: `badge ${v! > 0 ? "up" : "down"}`, text: `${UI.battle.stat[k]} ${v! > 0 ? "+" : ""}${v}%` }));
     if (c.decay > 0) badges.push(h("span", { className: "badge decay", text: UI.battle.decay(c.decay) }));
+    if (c.boss) badges.push(h("span", { className: "badge boss", text: `${UI.dungeon.boss} ${c.bossPhase === 2 ? "2" : "1"}/2` }));
+    if (c.shieldBroken) badges.push(h("span", { className: "badge up", text: "🛡💥" }));
     this.status.replaceChildren(...badges);
     this.pips.replaceChildren(...(team ?? []).map((m) => h("i", { className: `pip ${m.hp <= 0 ? "out" : m.id === c.id ? "active" : ""}` })));
   }
@@ -56,15 +58,30 @@ class Card {
   }
 }
 
-/** การ์ดมอนผู้เล่น (ซ้ายบน) และมอนป่า (ขวาบน) */
+/** การ์ดมอนผู้เล่น (ซ้ายบน) และมอนป่า (ขวาบน) + เพื่อนร่วมต่อสู้ใต้การ์ดเรา */
 export class BattleCards {
   readonly el: HTMLElement;
   readonly player = new Card("player");
   readonly wild = new Card("wild");
+  private readonly allies = h("div", { className: "bcard-allies" });
 
   constructor() {
-    this.el = h("div", { className: "battle-cards" }, [this.player.el, this.wild.el]);
+    this.el = h("div", { className: "battle-cards" }, [h("div", { className: "bcard-col" }, [this.player.el, this.allies]), this.wild.el]);
     uiRoot().append(this.el);
+  }
+
+  /** เพื่อนในปาร์ตี้: ชื่อ มอนที่ออกสู้ แถบ HP · กำลังคิด = ⏳ · ออกแล้ว = จาง */
+  setAllies(allies: AllyView[] | undefined) {
+    this.allies.replaceChildren(
+      ...(allies ?? []).map((a) => {
+        const ratio = a.maxHp > 0 ? Math.max(0, Math.min(1, a.hp / a.maxHp)) : 0;
+        return h("div", { className: `ally-row${a.out ? " out" : ""}` }, [
+          h("span", { className: "ally-name", text: `${a.thinking && !a.out ? "⏳ " : ""}${a.nickname}` }),
+          h("small", { text: speciesName(a.speciesId, a.form) }),
+          h("div", { className: "hpbar" }, [h("i", { className: ratio > 0.5 ? "" : ratio > 0.2 ? "mid" : "low", style: { width: `${ratio * 100}%` } })]),
+        ]);
+      }),
+    );
   }
 
   destroy() {

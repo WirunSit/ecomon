@@ -358,12 +358,60 @@
      "width": 0,
      "x": 720,
      "y": 656
+    },
+    {
+     "height": 0,
+     "id": 8,
+     "name": "root_cave",
+     "point": true,
+     "rotation": 0,
+     "type": "dungeon",
+     "visible": true,
+     "width": 0,
+     "x": 432,
+     "y": 688
+    },
+    {
+     "height": 0,
+     "id": 9,
+     "name": "dormant_crater",
+     "point": true,
+     "rotation": 0,
+     "type": "dungeon",
+     "visible": true,
+     "width": 0,
+     "x": 336,
+     "y": 688
+    },
+    {
+     "height": 0,
+     "id": 10,
+     "name": "cloud_bay",
+     "point": true,
+     "rotation": 0,
+     "type": "dungeon",
+     "visible": true,
+     "width": 0,
+     "x": 240,
+     "y": 688
+    },
+    {
+     "height": 0,
+     "id": 11,
+     "name": "balance_temple",
+     "point": true,
+     "rotation": 0,
+     "type": "dungeon",
+     "visible": true,
+     "width": 0,
+     "x": 144,
+     "y": 688
     }
    ]
   }
  ],
  "nextlayerid": 7,
- "nextobjectid": 8,
+ "nextobjectid": 12,
  "orientation": "orthogonal",
  "properties": [
   {

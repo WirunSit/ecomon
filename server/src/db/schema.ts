@@ -37,6 +37,9 @@ export const players = sqliteTable(
     /** ผสมแล้วยังไม่ได้ระดับสูงขึ้นติดกันกี่ครั้ง แยกตามระดับพ่อแม่ (pity หัวข้อ 7.1) */
     pityNormal: integer("pity_normal").notNull().default(0),
     pityRare: integer("pity_rare").notNull().default(0),
+    /** เศษพลังชีวิตจากดันเจี้ยน (หัวข้อ 8.4) */
+    shardsRare: integer("shards_rare").notNull().default(0),
+    shardsLegend: integer("shards_legend").notNull().default(0),
     mapId: text("map_id"),
     x: integer("x"),
     y: integer("y"),
@@ -152,6 +155,26 @@ export const playerRecipes = sqliteTable(
     discoveredAt: integer("discovered_at").notNull(),
   },
   (t) => [primaryKey({ columns: [t.playerId, t.result] })],
+);
+
+/**
+ * การเข้าดันเจี้ยน (หัวข้อ 8.2) — นับคูลดาวน์ตอนเข้า (ชนะหรือแพ้ก็นับ) ใช้เวลาของ server
+ * result: null = ยังอยู่ข้างใน / clear / fail / left
+ */
+export const dungeonEntries = sqliteTable(
+  "dungeon_entries",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    playerId: text("player_id")
+      .notNull()
+      .references(() => players.id, { onDelete: "cascade" }),
+    dungeonId: text("dungeon_id").notNull(),
+    partySize: integer("party_size").notNull(),
+    enteredAt: integer("entered_at").notNull(),
+    finishedAt: integer("finished_at"),
+    result: text("result"),
+  },
+  (t) => [index("dungeon_entries_player").on(t.playerId, t.enteredAt)],
 );
 
 export const questProgress = sqliteTable(

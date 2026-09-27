@@ -1,4 +1,12 @@
-import type { BattleEndMessage, BattleQuestionMessage, BattleResultMessage, BattleStateView, BattleTurnMessage, HelperResult } from "@ecomon/shared";
+import type {
+  BattleEndMessage,
+  BattleQuestionMessage,
+  BattleResultMessage,
+  BattleStateView,
+  BattleTurnMessage,
+  HelperResult,
+  TeamResultMessage,
+} from "@ecomon/shared";
 
 export type BattleIncoming =
   | { type: "state"; msg: BattleStateView }
@@ -7,10 +15,13 @@ export type BattleIncoming =
   | { type: "turn"; msg: BattleTurnMessage }
   | { type: "end"; msg: BattleEndMessage }
   | { type: "helper"; msg: HelperResult }
-  | { type: "notice"; text: string };
+  | { type: "notice"; text: string }
+  /** คำถามทีมของบอส (ทุกคนตอบข้อเดียวกัน) และผลของทีม */
+  | { type: "team"; msg: BattleQuestionMessage }
+  | { type: "teamResult"; msg: TeamResultMessage };
 
 /**
- * ท่อส่งข้อความการต่อสู้จาก WorldScene (เจ้าของ room listener) ไปยัง BattleScene
+ * ท่อส่งข้อความการต่อสู้จากฉากที่เป็นเจ้าของ room listener (โลก/ดันเจี้ยน) ไปยัง BattleScene
  * ข้อความที่มาก่อน scene พร้อมจะถูกเก็บไว้แล้วส่งให้ทีเดียวเมื่อ scene ต่อสาย
  */
 export class BattleLink {

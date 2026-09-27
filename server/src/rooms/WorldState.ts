@@ -1,4 +1,4 @@
-import { MapSchema, Schema, type } from "@colyseus/schema";
+import { ArraySchema, MapSchema, Schema, type } from "@colyseus/schema";
 
 /** ผู้เล่น 1 คนในห้อง (ตำแหน่งเป็นหน่วยช่อง) — ทุกคนในห้องเห็น */
 export class PlayerState extends Schema {
@@ -17,6 +17,20 @@ export class PlayerState extends Schema {
   @type("number") partnerForm = 1;
   /** ฉายาที่เลือกใช้ (id ใน collection-rewards.json) "" = ไม่มี */
   @type("string") title = "";
+  /** อยู่ในดันเจี้ยน (ตัวละครยืนรอหน้าทางเข้า เดินไม่ได้) */
+  @type("boolean") inDungeon = false;
+}
+
+/** ปาร์ตี้ที่รอหน้าทางเข้าดันเจี้ยน (หัวข้อ 8.2) — 1 ปาร์ตี้ต่อ 1 ทางเข้าต่อห้อง */
+export class DungeonLobbyState extends Schema {
+  @type("string") dungeonId = "";
+  /** sessionId ของหัวหน้า (คนเปิด) */
+  @type("string") leader = "";
+  @type(["string"]) members = new ArraySchema<string>();
+  /** บอสที่เลือก ("" = ยังไม่เลือก / ไม่ต้องเลือก) */
+  @type("string") boss = "";
+  /** เวลาของ server ที่ปาร์ตี้หมดอายุถ้ายังไม่เริ่ม */
+  @type("number") expiresAt = 0;
 }
 
 /** มอนป่า 1 ตัวบนแผนที่ (หัวข้อ 10.3) — มอนป่าเป็นร่าง 1 เสมอ (หัวข้อ 5.2) */
@@ -37,4 +51,6 @@ export class WorldState extends Schema {
   @type("string") code = "";
   @type({ map: PlayerState }) players = new MapSchema<PlayerState>();
   @type({ map: WildMonsterState }) wild = new MapSchema<WildMonsterState>();
+  /** dungeonId → ปาร์ตี้ที่รอหน้าทางเข้า */
+  @type({ map: DungeonLobbyState }) lobbies = new MapSchema<DungeonLobbyState>();
 }

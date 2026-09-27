@@ -36,11 +36,11 @@ export function showEndPanel(end: BattleEndMessage): Promise<void> {
     }
     lines.push(h("li", { text: b.score(end.correct, end.answered) }));
     lines.push(h("li", { text: b.playerExp(end.playerExp) }));
-    lines.push(h("li", { className: "coins", text: b.coins(end.coins) }));
+    if (end.coins > 0 || !end.stage) lines.push(h("li", { className: "coins", text: b.coins(end.coins) }));
     for (const m of end.monsterExp) if (m.exp > 0) lines.push(h("li", { className: "muted", text: b.monsterExp(nameOf(end, m.uid), m.exp) }));
   } else if (end.result === "lose") {
     title = b.lose;
-    hero = h("p", { className: "end-hint", text: b.loseHint });
+    hero = h("p", { className: "end-hint", text: end.stage ? UI.dungeon.failHint : b.loseHint });
     if (end.answered > 0) lines.push(h("li", { text: b.score(end.correct, end.answered) }));
     if (end.playerExp > 0) lines.push(h("li", { text: b.playerExp(end.playerExp) }));
   } else {
@@ -58,7 +58,9 @@ export function showEndPanel(end: BattleEndMessage): Promise<void> {
   }
   if (end.playerLevelUp) lines.push(h("li", { className: "up", text: b.playerLevelUp(end.playerLevelUp.from, end.playerLevelUp.to) }));
 
-  const done = h("button", { className: "btn primary big", text: b.backToMap });
+  // ในดันเจี้ยน: ชนะระลอก → ไปห้องถัดไป · จบบอส/แพ้ → ดูผลดันเจี้ยน
+  const label = end.stage === "wave" && end.result === "win" ? UI.dungeon.nextRoom : end.stage ? UI.dungeon.seeRewards : b.backToMap;
+  const done = h("button", { className: "btn primary big", text: label });
   done.type = "button";
   const el = h("div", { className: "modal-backdrop interactive end-backdrop" }, [
     h("div", { className: `panel end-panel ${end.result}` }, [

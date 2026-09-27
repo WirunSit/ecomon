@@ -6,6 +6,7 @@ import type { BreedingService } from "./services/breeding";
 import type { CatalogService } from "./services/catalog";
 import type { GameEvents } from "./services/events";
 import type { CollectionService } from "./services/collection";
+import type { DungeonService } from "./services/dungeons";
 import type { EvolutionService } from "./services/evolution";
 import type { InventoryService } from "./services/inventory";
 import type { ShopService } from "./services/shop";
@@ -27,6 +28,7 @@ export interface Services {
   evolution: EvolutionService;
   shop: ShopService;
   breeding: BreedingService;
+  dungeons: DungeonService;
 }
 
 let current: Services | null = null;

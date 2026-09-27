@@ -376,7 +376,115 @@ export const MSG = {
   battleResync: "battle:resync",
   /** client → server: ใช้ไอเท็มตัวช่วยตอบ · server → client: ผล (HelperResult) */
   battleHelper: "battle:helper",
+
+  // ---- ปาร์ตี้หน้าทางเข้าดันเจี้ยน (ในห้องโลก หัวข้อ 8.2) ----
+  /** client → server: เปิดปาร์ตี้หน้าทางเข้า { dungeonId } (คนเปิดเป็นหัวหน้า) */
+  dungeonOpen: "dungeon:open",
+  /** client → server: เข้าร่วมปาร์ตี้ที่เปิดอยู่ { dungeonId } */
+  dungeonJoin: "dungeon:join",
+  /** client → server: ออกจากปาร์ตี้ (หัวหน้าออก = ยุบปาร์ตี้) */
+  dungeonLeave: "dungeon:leave",
+  /** client → server (หัวหน้า): เลือกบอส { species } (วิหารสมดุล) */
+  dungeonBoss: "dungeon:boss",
+  /** client → server (หัวหน้า): เข้าดันเจี้ยน */
+  dungeonStart: "dungeon:start",
+  /** server → client: ที่นั่งในห้องดันเจี้ยน (DungeonEnterMessage) */
+  dungeonEnter: "dungeon:enter",
+  /** server → client: เข้าไม่ได้ พร้อมรายชื่อคนที่ยังไม่พร้อม (DungeonDeniedMessage) */
+  dungeonDenied: "dungeon:denied",
+
+  // ---- ในห้องดันเจี้ยน ----
+  /** server → client: ความคืบหน้า (DungeonStateView) */
+  dungeonState: "dungeon:state",
+  /** server → client: คำถามทีม ทุกคนได้ข้อเดียวกัน (BattleQuestionMessage) */
+  teamQuestion: "team:question",
+  /** client → server: คำตอบคำถามทีม (BattleAnswerMessage) */
+  teamAnswer: "team:answer",
+  /** server → client: ผลคำถามทีม (TeamResultMessage) */
+  teamResult: "team:result",
+  /** server → client: จบดันเจี้ยน + รางวัล (DungeonEndMessage) */
+  dungeonEnd: "dungeon:end",
 } as const;
+
+export const DUNGEON_ROOM = "dungeon";
+
+export const DungeonOpenMessage = z.object({ dungeonId: Id });
+export const DungeonBossMessage = z.object({ species: Id });
+
+export interface DungeonEnterMessage {
+  dungeonId: string;
+  /** seat reservation ของ Colyseus (client ใช้ consumeSeatReservation) */
+  reservation: unknown;
+}
+
+export type DungeonNotReadyReason = "level" | "cooldown" | "busy" | "far" | "offline";
+
+export interface DungeonDeniedMessage {
+  players: { nickname: string; reason: DungeonNotReadyReason; required?: number; readyAt?: number }[];
+  serverNow: number;
+}
+
+/** ความคืบหน้าในดันเจี้ยน: ห้อง 1..n (ระลอกมอนมลพิษ) แล้วห้องบอส */
+export interface DungeonStateView {
+  dungeonId: string;
+  /** ห้องที่เท่าไร (0 = ระลอกแรก) และจำนวนห้องทั้งหมด (ระลอก + บอส) */
+  stage: number;
+  stages: number;
+  kind: "waiting" | "wave" | "boss" | "done";
+  /** บอสที่เลือก (ดันเจี้ยนที่ให้เลือก) */
+  boss: string;
+  members: { sessionId: string; nickname: string; avatar: number; connected: boolean }[];
+}
+
+export interface TeamResultMessage {
+  /** ผลของตัวเอง (เฉลย + คำอธิบาย) */
+  result: BattleResultMessage;
+  correct: number;
+  total: number;
+  /** ตอบถูกเกินสัดส่วนที่กำหนด → โล่บอสแตก */
+  passed: boolean;
+}
+
+export interface DungeonRewards {
+  /** มอนที่ดรอป (เลเวล dropLevel ร่าง 1) */
+  drop?: MonsterSummary & { newSpecies: boolean; boxed: boolean };
+  /** ไม่ได้มอน → ได้เศษพลังชีวิต 1 ชิ้นของระดับนี้ */
+  shard?: "rare" | "legend";
+  shards: { rare: number; legend: number };
+  coins: number;
+  exp: number;
+  /** ของจากหีบรางวัลการันตี */
+  items: { itemId: string; tier?: string; qty: number }[];
+  playerLevelUp?: { from: number; to: number };
+  catalogUnlocks: CatalogUnlock[];
+}
+
+export interface DungeonEndMessage {
+  dungeonId: string;
+  result: "clear" | "fail";
+  rewards?: DungeonRewards;
+  profile: PlayerProfile;
+}
+
+/** สถานะดันเจี้ยนของผู้เล่น (GET /api/dungeons) */
+export interface DungeonsResponse {
+  /** เข้าได้ครั้งถัดไปเมื่อไร (ms ของ server) ≤ serverNow = เข้าได้เลย */
+  nextEntryAt: number;
+  serverNow: number;
+  entriesPerWindow: number;
+  shards: { rare: number; legend: number };
+}
+
+/** แลกเศษพลังชีวิตเป็นมอนสเตอร์ที่ต้องการ (หัวข้อ 8.4) */
+export const ShardExchangeRequest = z.object({ speciesId: Id });
+export type ShardExchangeRequest = z.infer<typeof ShardExchangeRequest>;
+
+export interface ShardExchangeResponse {
+  monster: MonsterSummary & { newSpecies: boolean; boxed: boolean };
+  shards: { rare: number; legend: number };
+  catalogUnlocks: CatalogUnlock[];
+  profile: PlayerProfile;
+}
 
 export const MoveMessage = z.object({ dir: z.enum(DIRECTIONS) });
 export type MoveMessage = { dir: Direction };
@@ -425,6 +533,26 @@ export interface CombatantView {
   mods: Partial<Record<"hp" | "atk" | "def" | "spd", number>>;
   /** ชั้นสถานะ "ย่อยสลาย" */
   decay: number;
+  /** มอนมลพิษในดันเจี้ยน (ย้อมสีด้วยโค้ด) · บอส (ขยายใหญ่) หัวข้อ 8 */
+  polluted?: boolean;
+  boss?: boolean;
+  /** บอส: เฟส 1/2 · โล่แตก (ดาเมจเทิร์นถัดไป ×shieldBreakDamageMultiplier) */
+  bossPhase?: number;
+  shieldBroken?: boolean;
+}
+
+/** เพื่อนที่สู้ด้วยกัน (co-op / ดันเจี้ยน) */
+export interface AllyView {
+  playerId: string;
+  nickname: string;
+  speciesId: string;
+  form: number;
+  hp: number;
+  maxHp: number;
+  /** หมดแรงทั้งทีม หรือออกจากการต่อสู้แล้ว */
+  out: boolean;
+  /** กำลังรอคำตอบของคนนี้ */
+  thinking: boolean;
 }
 
 export interface BattleStateView {
@@ -432,13 +560,15 @@ export interface BattleStateView {
   wild: CombatantView;
   team: CombatantView[];
   active: number;
-  /** awaiting_action = เลือกท่าได้ · awaiting_answer = กำลังตอบคำถาม · ended */
-  phase: "awaiting_action" | "awaiting_answer" | "ended";
+  /** awaiting_action = เลือกท่าได้ · awaiting_answer = กำลังตอบคำถาม · awaiting_team = คำถามทีม · waiting = รอเพื่อน · ended */
+  phase: "awaiting_action" | "awaiting_answer" | "awaiting_team" | "waiting" | "ended";
   turn: number;
   canFlee: boolean;
   background: string;
   /** คำถามที่ค้างอยู่ (ถ้ากำลังตอบ) */
   question?: BattleQuestionMessage;
+  /** เพื่อนร่วมต่อสู้ (ไม่รวมตัวเอง) */
+  allies?: AllyView[];
 }
 
 export const BattleActionMessage = z.discriminatedUnion("type", [
@@ -495,7 +625,21 @@ export type BattleEvent =
   | { kind: "stat"; side: BattleSide; target: string; stat: "hp" | "atk" | "def" | "spd"; percent: number }
   | { kind: "decay"; target: string; stacks: number }
   | { kind: "faint"; side: BattleSide; target: string }
-  | { kind: "switch"; side: "player"; from: string; to: string; forced: boolean };
+  | { kind: "switch"; side: "player"; from: string; to: string; forced: boolean }
+  /** เพื่อน (co-op) ทำอะไรบางอย่างในเทิร์นนี้ — client แสดงเป็นข้อความสั้น */
+  | {
+      kind: "ally";
+      playerId: string;
+      /** attack/miss = เพื่อนโจมตี · hit = มอนป่าโจมตีเพื่อน · faint = มอนเพื่อนหมดแรง */
+      action: "attack" | "miss" | "hit" | "faint" | "switch" | "item" | "out";
+      damage?: number;
+      moveId?: string;
+      /** HP มอนป่าหลังเพื่อนโจมตี */
+      wildHp?: number;
+    }
+  /** บอส: คำถามทีมผ่าน → โล่แตก · เข้าเฟส 2 ได้ท่าใหม่ */
+  | { kind: "shield"; broken: boolean }
+  | { kind: "boss_phase"; phase: number; newMoves: string[] };
 
 export interface BattleTurnMessage {
   turn: number;
@@ -526,4 +670,6 @@ export interface BattleEndMessage {
   /** รางวัลสมุดภาพที่เพิ่งได้จากการจับครั้งนี้ */
   catalogUnlocks: CatalogUnlock[];
   profile: PlayerProfile;
+  /** การต่อสู้ในดันเจี้ยน: ผ่านห้องนี้แล้วไปห้องถัดไป (wave) หรือจบบอส (boss) */
+  stage?: "wave" | "boss";
 }

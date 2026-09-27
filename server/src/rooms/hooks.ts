@@ -1,7 +1,7 @@
 // ทางเชื่อมจาก REST ไปยังห้องที่ผู้เล่นอยู่ (process เดียว) — เช่น ตั้งคู่หูจากหน้าคลังแล้วเพื่อนในห้องเห็นทันที
 import { matchMaker } from "@colyseus/core";
 import { MSG, type NoticeMessage, type PlayerProfile } from "@ecomon/shared";
-import { activePlayers } from "./presence";
+import { activePlayers, inDungeon } from "./presence";
 import type { WorldRoom } from "./WorldRoom";
 
 function roomOf(playerId: string): { room: WorldRoom; sessionId: string } | undefined {
@@ -11,8 +11,9 @@ function roomOf(playerId: string): { room: WorldRoom; sessionId: string } | unde
   return room ? { room, sessionId: at.sessionId } : undefined;
 }
 
-/** ผู้เล่นกำลังต่อสู้อยู่ในห้องไหม */
+/** ผู้เล่นกำลังต่อสู้อยู่ในห้องไหม (อยู่ในดันเจี้ยนนับว่าต่อสู้อยู่ — จัดทีม/สวมของไม่ได้) */
 export function playerInBattle(playerId: string): boolean {
+  if (inDungeon.has(playerId)) return true;
   const r = roomOf(playerId);
   return r ? r.room.isInBattle(r.sessionId) : false;
 }
@@ -28,6 +29,12 @@ export function playerSpot(playerId: string): { mapId: string; x: number; y: num
 export function profileChanged(playerId: string, profile: PlayerProfile) {
   const r = roomOf(playerId);
   r?.room.refreshPlayer(r.sessionId, profile);
+}
+
+/** ออกจากดันเจี้ยนแล้ว (จบ/ล้มเหลว/ออกกลางทาง) → ห้องโลกให้เดินได้อีก · ล้มเหลว = กลับจุดฟื้นฟู */
+export function dungeonDone(playerId: string, result: "clear" | "fail" | "left") {
+  const r = roomOf(playerId);
+  r?.room.dungeonDone(r.sessionId, result);
 }
 
 /** ส่งข้อความแจ้งเตือนสั้น ๆ ให้ผู้เล่น (ถ้าออนไลน์อยู่ในห้อง) เช่น ไข่พร้อมฟัก */
