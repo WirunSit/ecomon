@@ -11,7 +11,8 @@
       "monsterLevel": null,
       "spawnTables": [],
       "topics": [],
-      "battleBackground": "meadow"
+      "battleBackground": "meadow",
+      "mapColor": "#d9b77e"
     },
     {
       "id": "meadow",
@@ -32,7 +33,8 @@
         "eco_components",
         "food_chain"
       ],
-      "battleBackground": "meadow"
+      "battleBackground": "meadow",
+      "mapColor": "#8fd16a"
     },
     {
       "id": "forest",
@@ -56,7 +58,8 @@
       "dungeons": [
         "root_cave"
       ],
-      "battleBackground": "mushroom_forest"
+      "battleBackground": "mushroom_forest",
+      "mapColor": "#3f7f45"
     },
     {
       "id": "lake",
@@ -77,7 +80,8 @@
       "topics": [
         "nutrient_cycles"
       ],
-      "battleBackground": "lotus_pond"
+      "battleBackground": "lotus_pond",
+      "mapColor": "#6fc6d9"
     },
     {
       "id": "canyon",
@@ -98,7 +102,8 @@
         "energy_flow"
       ],
       "requiresItem": "mushroom_flashlight",
-      "battleBackground": "rocky_canyon"
+      "battleBackground": "rocky_canyon",
+      "mapColor": "#9a948a"
     },
     {
       "id": "volcano",
@@ -121,7 +126,8 @@
       "dungeons": [
         "dormant_crater"
       ],
-      "battleBackground": "volcano"
+      "battleBackground": "volcano",
+      "mapColor": "#b0503a"
     },
     {
       "id": "coast",
@@ -148,7 +154,8 @@
       "dungeons": [
         "cloud_bay"
       ],
-      "battleBackground": "beach"
+      "battleBackground": "beach",
+      "mapColor": "#f2dfa7"
     },
     {
       "id": "valley",
@@ -177,7 +184,8 @@
       "dungeons": [
         "balance_temple"
       ],
-      "battleBackground": "meadow"
+      "battleBackground": "meadow",
+      "mapColor": "#e2c65a"
     }
   ]
 }

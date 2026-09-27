@@ -821,3 +821,9 @@ button.equip-slot.filled { border-style: solid; }
   .dlg-text { font-size: 16px; }
   .quest-tracker { top: 50px; max-width: 38%; }
 }
+
+/* ---------- แผนที่เกาะ ---------- */
+.world-map { display: block; margin: 0 auto; max-width: 100%; height: auto; border-radius: 10px; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35); image-rendering: pixelated; }
+.map-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 14px; margin-top: 8px; font-size: 13px; color: var(--ui-muted); }
+.map-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.map-legend i { width: 11px; height: 11px; border-radius: 50%; border: 1.5px solid #1b2130; }

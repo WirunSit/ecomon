@@ -78,6 +78,8 @@ export const ZoneDef = z.strictObject({
   requiresItem: Id.nullable().default(null),
   dungeons: z.array(Id).default([]),
   battleBackground: Id,
+  /** สีของโซนบนแผนที่ย่อ */
+  mapColor: HexColor.default("#6fae5a"),
 });
 export type ZoneDef = z.infer<typeof ZoneDef>;
 export const ZonesFileSchema = z.strictObject({ zones: z.array(ZoneDef).min(1) });

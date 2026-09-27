@@ -34,6 +34,8 @@ export const players = sqliteTable(
     frameId: text("frame_id"),
     /** ได้รางวัลสมุดภาพไปแล้วกี่ขั้น */
     catalogRewards: integer("catalog_rewards").notNull().default(0),
+    /** ใช้แผนที่นักสำรวจแล้วเห็นจุดเกิดมอนบนแผนที่ย่อถึงเวลานี้ (ms ของ server) */
+    revealSpawnsUntil: integer("reveal_spawns_until"),
     /** ผสมแล้วยังไม่ได้ระดับสูงขึ้นติดกันกี่ครั้ง แยกตามระดับพ่อแม่ (pity หัวข้อ 7.1) */
     pityNormal: integer("pity_normal").notNull().default(0),
     pityRare: integer("pity_rare").notNull().default(0),

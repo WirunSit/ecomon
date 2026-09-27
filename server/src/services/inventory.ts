@@ -87,6 +87,14 @@ export class InventoryService {
         out.drops = drops;
         return;
       }
+      if (effect.kind === "reveal_spawns") {
+        // แผนที่นักสำรวจ: ต่อเวลาจากที่เหลืออยู่ (หัวข้อ 9.2)
+        takeItem(db, playerId, item.id, "");
+        const now = Date.now();
+        const cur = db.select({ until: players.revealSpawnsUntil }).from(players).where(eq(players.id, playerId)).get()?.until ?? 0;
+        db.update(players).set({ revealSpawnsUntil: Math.max(now, cur) + effect.minutes * 60_000 }).where(eq(players.id, playerId)).run();
+        return;
+      }
       if (effect.kind !== "heal" && effect.kind !== "revive" && effect.kind !== "give_exp")
         throw new GameError("not_ready", "ไอเท็มนี้ยังใช้ไม่ได้ในเวอร์ชันนี้");
       if (!req.uid) throw new GameError("need_target", "เลือกมอนสเตอร์ที่จะใช้ก่อน");

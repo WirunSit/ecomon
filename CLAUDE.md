@@ -160,6 +160,8 @@ tools/    validate.ts, make-placeholders.ts, make-test-map.ts (อนาคต: 
 - เนื้อเรื่อง 8 บท (1 บท/โซน) รางวัลบทก่อนคือ key item ของโซนถัดไป · บทพูดใน `quests.intro/outro` และ `npcs.greeting`
 - client: `ui/quests/` DialoguePanel (ภาพหน้าอก + บทพูด + รับ/ส่งเควส + ร้าน/แล็บ) · QuestLogPanel · QuestTracker · `state/quests.ts`
 - แผนที่ไม่มีภาพพื้น (ยังไม่ได้รัน render-maps) → วาด tile แต่ของประดับยังเป็นภาพขนาดจริง (`MapView`)
+- แผนที่เกาะ `ui/world/MapPanel.ts` (ปุ่มแผนที่ / กด N) สีโซนจาก `zones.mapColor` · ไอเท็ม effect `reveal_spawns` ตั้ง
+  `players.reveal_spawns_until` (เวลาของ server, ใช้ซ้อนต่อเวลา) → profile ส่ง `revealSpawnsUntil` + `serverNow` ให้แผนที่นับถอยหลัง
 
 ## ข้อตกลงของ content
 

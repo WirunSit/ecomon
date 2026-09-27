@@ -11,7 +11,7 @@ export class Hud {
   private readonly zoneEl = h("span", { className: "hud-zone" });
   private readonly roomEl = h("span", { className: "hud-zone hud-room" });
 
-  constructor(opts: { onMenu: () => void; onChat?: () => void; onPartner?: () => void }) {
+  constructor(opts: { onMenu: () => void; onChat?: () => void; onPartner?: () => void; onMap?: () => void }) {
     const name = h("span", { className: "hud-name" });
     const level = h("span", { className: "hud-level" });
     const coins = h("span", { className: "hud-coins-value" });
@@ -31,6 +31,9 @@ export class Hud {
       h("span", { text: UI.menu }),
     ]);
     menuBtn.addEventListener("click", opts.onMenu);
+    const mapBtn = h("button", { className: "hud-menu-btn interactive", text: UI.worldMap.button });
+    if (opts.onMap) mapBtn.addEventListener("click", opts.onMap);
+    else mapBtn.style.display = "none";
     const chatBtn = h("button", { className: "hud-menu-btn interactive", text: `💬 ${UI.chat}` });
     if (opts.onChat) chatBtn.addEventListener("click", opts.onChat);
     else chatBtn.style.display = "none";
@@ -45,6 +48,7 @@ export class Hud {
       this.roomEl,
       this.zoneEl,
       partnerBtn,
+      mapBtn,
       chatBtn,
       menuBtn,
     ]);

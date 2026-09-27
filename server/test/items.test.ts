@@ -96,6 +96,22 @@ describe("ไอเท็มใช้แล้วหมด (หัวข้อ 9
   });
 });
 
+describe("แผนที่นักสำรวจ (หัวข้อ 9.2)", () => {
+  it("ใช้แล้วเห็นจุดเกิดมอน 10 นาที (เวลาของ server) · ใช้ซ้ำต่อเวลา", async () => {
+    const { token, profile } = await t.newPlayer("explorer");
+    expect(profile.revealSpawnsUntil).toBeNull();
+    give(profile.id, "explorer_map", 2);
+    const minutes = (registry.items.get("explorer_map") as { effect: { minutes: number } }).effect.minutes;
+    let r = await t.api<UseItemResponse>("/items/use", { token, body: { itemId: "explorer_map" } });
+    expect(r.status).toBe(200);
+    const first = r.body.profile.revealSpawnsUntil!;
+    expect(first - r.body.profile.serverNow).toBeGreaterThan((minutes - 1) * 60_000);
+    r = await t.api<UseItemResponse>("/items/use", { token, body: { itemId: "explorer_map" } });
+    expect(r.body.profile.revealSpawnsUntil! - first).toBe(minutes * 60_000);
+    expect(bagQty(r.body.bag, "explorer_map")).toBe(0);
+  });
+});
+
 describe("พัฒนาร่าง (หัวข้อ 4.3)", () => {
   it("ยังไม่ถึงเลเวลพัฒนาไม่ได้ · ตอบถูกติดกัน 3 ข้อจากหัวข้อที่ผิดบ่อยที่สุด → ร่างใหม่ + ท่าใหม่ + สมุดภาพ", async () => {
     const { token, profile } = await t.newPlayer("evolver");

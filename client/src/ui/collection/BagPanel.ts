@@ -74,7 +74,7 @@ export class BagPanel {
       tags.push(...item.usableIn.map((u) => T.usableIn[u] ?? u));
       const effect = item.effect.kind;
       if (!item.usableIn.includes("field")) actions.push(h("small", { className: "muted", text: T.fieldOnly }));
-      else if (effect === "open_chest") actions.push(button(T.open, () => void this.use(it.itemId), "btn small primary"));
+      else if (effect === "open_chest" || effect === "reveal_spawns") actions.push(button(T.open, () => void this.use(it.itemId), "btn small primary"));
       else if (effect === "heal" || effect === "revive" || effect === "give_exp") actions.push(button(T.use, () => void this.pickMonster(it, "use"), "btn small primary"));
       else actions.push(h("small", { className: "muted", text: T.soon }));
     }
@@ -140,7 +140,9 @@ export class BagPanel {
       profile.set(r.profile);
       this.bag = r.bag;
       this.render();
-      if (r.drops) {
+      const used = registry.items.get(itemId);
+      if (used.category === "consumable" && used.effect.kind === "reveal_spawns") this.toast(UI.worldMap.used(used.effect.minutes));
+      else if (r.drops) {
         showPicker(T.chest, r.drops.map((d) => ({
           icon: itemIcon(d.itemId, d.tier ?? "", 32),
           label: `${registry.items.find(d.itemId)?.name ?? d.itemId} ${T.qty(d.qty)}`,

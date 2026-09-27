@@ -74,6 +74,8 @@ export class PlayerService {
       needsStarter: monsterCount === 0,
       titleId: player.titleId,
       frameId: player.frameId,
+      revealSpawnsUntil: player.revealSpawnsUntil && player.revealSpawnsUntil > Date.now() ? player.revealSpawnsUntil : null,
+      serverNow: Date.now(),
     };
   }
 

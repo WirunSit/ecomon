@@ -35,6 +35,7 @@ import { DungeonPanel } from "../ui/dungeon/DungeonPanel";
 import { DialoguePanel } from "../ui/quests/DialoguePanel";
 import { QuestLogPanel } from "../ui/quests/QuestLogPanel";
 import { QuestTracker } from "../ui/quests/QuestTracker";
+import { MapPanel } from "../ui/world/MapPanel";
 import { objectiveText } from "../ui/quests/questText";
 import { questStore } from "../state/quests";
 import type { DungeonSceneData } from "./DungeonScene";
@@ -95,6 +96,7 @@ export class WorldScene extends Phaser.Scene {
   private dialogue!: DialoguePanel;
   private questLog!: QuestLogPanel;
   private tracker!: QuestTracker;
+  private worldMap!: MapPanel;
   /** โซนที่ยืนอยู่ (แสดงบน HUD) */
   private currentZone?: string;
   private zoneToastUntil = 0;
@@ -201,7 +203,12 @@ export class WorldScene extends Phaser.Scene {
       },
     );
     this.chat = new QuickChatPanel((msg) => room.send(MSG.chat, msg));
-    this.hud = new Hud({ onMenu: () => this.menu.toggle(), onChat: () => this.chat.toggle(), onPartner: () => this.teamQuick.toggle() });
+    this.worldMap = new MapPanel({
+      map,
+      me: () => ({ x: this.player.tileX, y: this.player.tileY }),
+      others: () => [...this.remotes.values()].map((r) => ({ x: r.view.x, y: r.view.y, name: r.view.nickname })),
+    });
+    this.hud = new Hud({ onMenu: () => this.menu.toggle(), onChat: () => this.chat.toggle(), onPartner: () => this.teamQuick.toggle(), onMap: () => this.worldMap.toggle() });
     this.currentZone = undefined;
     this.updateZone();
     this.tracker = new QuestTracker(() => void this.questLog.open());
@@ -272,6 +279,7 @@ export class WorldScene extends Phaser.Scene {
     const onKey = (e: KeyboardEvent) => {
       if (FullPanel.isOpen || this.evolution?.isOpen || this.dialogue.isOpen || this.battle || this.inDungeon || e.target instanceof HTMLInputElement) return;
       if (e.code === "Escape" || e.code === "KeyM") this.menu.toggle();
+      if (e.code === "KeyN" && !this.menu.isOpen) this.worldMap.toggle();
       if ((e.code === "KeyE" || e.code === "Space" || e.code === "Enter") && (this.nearNpc || this.nearEntrance) && !this.menu.isOpen) {
         e.preventDefault();
         this.talk();

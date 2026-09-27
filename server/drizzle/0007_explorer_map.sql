@@ -1,0 +1,1 @@
+ALTER TABLE `players` ADD `reveal_spawns_until` integer;
