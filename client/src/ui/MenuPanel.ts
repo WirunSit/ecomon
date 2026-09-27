@@ -4,8 +4,15 @@ import { h, uiRoot } from "./overlay";
 import { UI } from "./strings";
 
 /** เมนูหลัก (modal) — หน้าต่าง ๆ จะเปิดใช้ทีละเฟส */
+export interface MenuAction {
+  label: string;
+  run: () => void;
+}
+
 export class MenuPanel {
   private el?: HTMLElement;
+
+  constructor(private readonly actions: MenuAction[] = []) {}
 
   get isOpen() {
     return !!this.el;
@@ -35,6 +42,14 @@ export class MenuPanel {
         keyItems.length
           ? h("ul", { className: "key-items" }, keyItems.map((i) => h("li", {}, [h("b", { text: i.name }), ` — ${i.description}`])))
           : h("p", { className: "muted", text: UI.noKeyItems }),
+        h("div", { className: "menu-actions" }, this.actions.map((a) => {
+          const b = h("button", { className: "btn", text: a.label });
+          b.addEventListener("click", () => {
+            this.close();
+            a.run();
+          });
+          return b;
+        })),
       ]),
     ]);
     this.el.addEventListener("click", (e) => {

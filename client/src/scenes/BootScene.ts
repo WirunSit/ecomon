@@ -3,7 +3,7 @@ import { FALLBACK_TEXTURE, fallbackUrl, monsterImageUrl, monsterTextureKey, tile
 import { loadedMap, registry } from "../content";
 import { createPlaceholderTextures } from "../textures/placeholders";
 
-/** โหลดภาพทั้งหมดที่ต้องใช้ แล้วไปฉากถัดไป (?scene=preview เพื่อเปิดหน้าตรวจ content ของเฟส 0) */
+/** โหลดภาพทั้งหมดที่ต้องใช้ แล้วไปหน้า login (?scene=preview เพื่อเปิดหน้าตรวจ content ของเฟส 0) */
 export class BootScene extends Phaser.Scene {
   constructor() {
     super("Boot");
@@ -35,7 +35,7 @@ export class BootScene extends Phaser.Scene {
 
   create() {
     createPlaceholderTextures(this);
-    const next = new URLSearchParams(location.search).get("scene") === "preview" ? "Preview" : "World";
+    const next = new URLSearchParams(location.search).get("scene") === "preview" ? "Preview" : "Login";
     this.scene.start(next);
   }
 }

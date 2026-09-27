@@ -8,3 +8,7 @@ coverage/
 asset-src/_preview/
 *.sqlite
 *.db
+*.sqlite-wal
+*.sqlite-shm
+server/data/
+!.env.example

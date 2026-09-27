@@ -52,6 +52,7 @@ const pairKey = (a: string, b: string) => (a < b ? `${a}+${b}` : `${b}+${a}`);
 export class Registry {
   readonly balance: GameContent["balance"];
   readonly breeding: GameContent["breeding"];
+  readonly quickChat: GameContent["quickChat"];
   readonly monsters: IdTable<MonsterSpecies>;
   readonly moves: IdTable<GameContent["moves"][number]>;
   readonly items: IdTable<GameContent["items"][number]>;
@@ -74,6 +75,7 @@ export class Registry {
   constructor(readonly content: GameContent) {
     this.balance = content.balance;
     this.breeding = content.breeding;
+    this.quickChat = content.quickChat;
     this.monsters = new IdTable("มอนสเตอร์", [...content.monsters].sort((a, b) => a.dex - b.dex));
     this.moves = new IdTable("ท่า", content.moves);
     this.items = new IdTable("ไอเท็ม", content.items);

@@ -4,6 +4,7 @@ import { FALLBACK_TEXTURE, monsterTextureKey, type Pose } from "../assets";
 import { registry } from "../content";
 
 const monsters = registry.enabledMonsters();
+import { api } from "../net/api";
 import { h, uiRoot } from "../ui/overlay";
 
 const RARITY_LABEL: Record<MonsterSpecies["rarity"], string> = { normal: "Normal", rare: "Rare", legend: "Legend" };
@@ -91,8 +92,7 @@ export class PreviewScene extends Phaser.Scene {
     ]);
     uiRoot().append(this.hud);
 
-    fetch("/api/health")
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+    api<{ content: { monsters: number; questions: number }; maxClients: number }>("/health")
       .then((data: { content: { monsters: number; questions: number }; maxClients: number }) => {
         dot.classList.add("ok");
         status.textContent = `server พร้อม · ห้องละ ${data.maxClients} คน · คำถาม ${data.content.questions} ข้อ`;

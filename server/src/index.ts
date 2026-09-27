@@ -1,33 +1,17 @@
-import { Server } from "@colyseus/core";
-import { WebSocketTransport } from "@colyseus/ws-transport";
-import express from "express";
-import { createServer } from "node:http";
+import { createGameServer } from "./app";
 import { registry } from "./content";
-import { WorldRoom } from "./rooms/WorldRoom";
 
-const PORT = Number(process.env.PORT ?? 2567);
+const server = createGameServer();
+const port = await server.listen();
+const { config } = server;
+console.log(
+  `[server] EcoMon Quest พร้อมที่ http://localhost:${port} · มอนสเตอร์ ${registry.monsters.size} สายพันธุ์ · ฐานข้อมูล ${config.databasePath}` +
+    (config.seedClassCode ? ` · รหัสห้องเรียนทดลอง ${config.seedClassCode}` : "") +
+    (config.devTools ? " · เปิดโหมดทดสอบ" : ""),
+);
 
-const app = express();
-app.use(express.json());
-
-/** ใช้ตรวจว่า server ทำงานและโหลด content สำเร็จ (client แสดงสถานะจากตรงนี้) */
-app.get("/api/health", (_req, res) => {
-  res.json({
-    ok: true,
-    content: {
-      monsters: registry.monsters.size,
-      moves: registry.moves.size,
-      items: registry.items.size,
-      questions: registry.questions.size,
-      maps: registry.maps.size,
-    },
-    maxClients: registry.balance.world.maxClients,
+for (const sig of ["SIGINT", "SIGTERM"] as const) {
+  process.once(sig, () => {
+    void server.close().then(() => process.exit(0));
   });
-});
-
-const httpServer = createServer(app);
-const gameServer = new Server({ transport: new WebSocketTransport({ server: httpServer }) });
-gameServer.define("world", WorldRoom);
-
-await gameServer.listen(PORT);
-console.log(`[server] EcoMon Quest พร้อมที่ http://localhost:${PORT} (ws) · content: มอนสเตอร์ ${registry.monsters.size} สายพันธุ์`);
+}

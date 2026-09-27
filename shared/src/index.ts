@@ -11,3 +11,4 @@ export * from "./formulas/battle";
 export * from "./formulas/exp";
 export * from "./formulas/breeding";
 export * from "./formulas/dungeon";
+export * from "./protocol";

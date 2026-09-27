@@ -1,41 +1,36 @@
-import { balance } from "../content";
-import { UI } from "../ui/strings";
-
-/**
- * ข้อมูลผู้เล่นที่ client แสดงผล
- * เฟส 1 เก็บในเครื่องชั่วคราว — TODO(เฟส 3): รับจาก server หลัง login (server เป็นเจ้าของข้อมูล)
- */
-export interface PlayerProfile {
-  nickname: string;
-  level: number;
-  coins: number;
-  /** id ของ key item ที่มี (ห่วงยาง เรือ ไฟฉาย) */
-  keyItems: string[];
-}
+import type { PlayerProfile } from "@ecomon/shared";
 
 type Listener = (p: Readonly<PlayerProfile>) => void;
 
+/**
+ * ข้อมูลผู้เล่นที่ client แสดงผล — ได้จาก server เท่านั้น (login, /api/me, ข้อความ "profile")
+ * client ห้ามแก้ค่าเอง server เป็นเจ้าของข้อมูล
+ */
 class ProfileStore {
-  private state: PlayerProfile = {
-    nickname: UI.defaultNickname,
-    level: 1,
-    coins: balance.player.startCoins,
-    keyItems: [],
-  };
+  private state: PlayerProfile | null = null;
   private listeners = new Set<Listener>();
 
   get(): Readonly<PlayerProfile> {
+    if (!this.state) throw new Error("ยังไม่ได้เข้าสู่ระบบ");
     return this.state;
   }
 
-  update(patch: Partial<PlayerProfile>) {
-    this.state = { ...this.state, ...patch };
-    this.listeners.forEach((l) => l(this.state));
+  get loaded() {
+    return this.state !== null;
+  }
+
+  set(p: PlayerProfile) {
+    this.state = p;
+    this.listeners.forEach((l) => l(p));
+  }
+
+  clear() {
+    this.state = null;
   }
 
   subscribe(l: Listener): () => void {
     this.listeners.add(l);
-    l(this.state);
+    if (this.state) l(this.state);
     return () => this.listeners.delete(l);
   }
 }

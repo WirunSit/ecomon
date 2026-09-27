@@ -1,6 +1,9 @@
 import Phaser from "phaser";
 import { BootScene } from "./scenes/BootScene";
+import { LobbyScene } from "./scenes/LobbyScene";
+import { LoginScene } from "./scenes/LoginScene";
 import { PreviewScene } from "./scenes/PreviewScene";
+import { StarterScene } from "./scenes/StarterScene";
 import { WorldScene } from "./scenes/WorldScene";
 
 /** ความละเอียดฐาน 960x540 ขยายแบบคงสัดส่วน */
@@ -26,7 +29,7 @@ async function start() {
       width: GAME_WIDTH,
       height: GAME_HEIGHT,
     },
-    scene: [BootScene, WorldScene, PreviewScene],
+    scene: [BootScene, LoginScene, StarterScene, LobbyScene, WorldScene, PreviewScene],
   });
 }
 

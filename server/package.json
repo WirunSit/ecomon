@@ -5,16 +5,24 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "start": "tsx src/index.ts"
+    "start": "tsx src/index.ts",
+    "db:generate": "drizzle-kit generate",
+    "create-class": "tsx src/scripts/create-class.ts"
   },
   "dependencies": {
-    "@ecomon/shared": "*",
     "@colyseus/core": "^0.16.0",
-    "@colyseus/ws-transport": "^0.16.0",
     "@colyseus/schema": "^3.0.0",
+    "@colyseus/ws-transport": "^0.16.0",
+    "@ecomon/shared": "*",
+    "better-sqlite3": "^13.0.3",
+    "cors": "^2.8.6",
+    "drizzle-orm": "^0.45.3",
     "express": "^4.21.0"
   },
   "devDependencies": {
-    "@types/express": "^4.17.21"
+    "@types/better-sqlite3": "^9.6.0",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^4.17.21",
+    "drizzle-kit": "^0.31.11"
   }
 }

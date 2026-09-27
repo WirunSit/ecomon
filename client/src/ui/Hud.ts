@@ -8,8 +8,9 @@ export class Hud {
   readonly el: HTMLElement;
   private readonly unsubscribe: () => void;
   private readonly zoneEl = h("span", { className: "hud-zone" });
+  private readonly roomEl = h("span", { className: "hud-zone hud-room" });
 
-  constructor(onMenu: () => void) {
+  constructor(opts: { onMenu: () => void; onChat?: () => void }) {
     const name = h("span", { className: "hud-name" });
     const level = h("span", { className: "hud-level" });
     const coins = h("span", { className: "hud-coins-value" });
@@ -19,7 +20,10 @@ export class Hud {
       h("span", { className: "burger" }, [h("i"), h("i"), h("i")]),
       h("span", { text: UI.menu }),
     ]);
-    menuBtn.addEventListener("click", onMenu);
+    menuBtn.addEventListener("click", opts.onMenu);
+    const chatBtn = h("button", { className: "hud-menu-btn interactive", text: `💬 ${UI.chat}` });
+    if (opts.onChat) chatBtn.addEventListener("click", opts.onChat);
+    else chatBtn.style.display = "none";
 
     this.el = h("div", { className: "hud" }, [
       h("div", { className: "hud-card" }, [
@@ -28,7 +32,9 @@ export class Hud {
         h("span", { className: "hud-coins", style: { marginLeft: "8px" } }, [h("span", { className: "coin-icon" }), coins]),
       ]),
       h("span", { className: "spacer" }),
+      this.roomEl,
       this.zoneEl,
+      chatBtn,
       menuBtn,
     ]);
     if (coinItem) this.el.querySelector(".hud-coins")?.setAttribute("title", coinItem.name);
@@ -44,6 +50,12 @@ export class Hud {
   setZone(name: string | undefined) {
     this.zoneEl.textContent = name ?? "";
     this.zoneEl.style.display = name ? "" : "none";
+  }
+
+  /** รหัสห้อง + จำนวนคน ให้เพื่อนใช้เข้าห้องเดียวกัน */
+  setRoom(text: string | undefined) {
+    this.roomEl.textContent = text ?? "";
+    this.roomEl.style.display = text ? "" : "none";
   }
 
   destroy() {

@@ -1,7 +1,6 @@
 // ข้อความ UI ทั่วไปของ client (ไม่ใช่เนื้อหาเกม — เนื้อหาเกมอยู่ใน content/)
 
 export const UI = {
-  defaultNickname: "นักนิเวศฝึกหัด",
   level: (lv: number) => `Lv. ${lv}`,
   menu: "เมนู",
   close: "ปิด",
@@ -17,6 +16,43 @@ export const UI = {
   ],
   needItem: (itemName: string, itemDesc: string) => `ยังไปต่อไม่ได้ ต้องมี "${itemName}" ก่อน (${itemDesc})`,
   cannotPass: "ไปทางนั้นไม่ได้",
+  login: {
+    title: "เข้าสู่เกาะนิเวศา",
+    classCode: "รหัสห้องเรียน",
+    classCodeHint: "ขอรหัสจากครู",
+    nickname: "ชื่อเล่น",
+    pin: "PIN 4 หลัก",
+    pinHint: "ครั้งแรก: ตั้ง PIN เองแล้วจำไว้ใช้ครั้งต่อไป",
+    submit: "เข้าเล่น",
+    checking: "กำลังตรวจสอบ…",
+  },
+  starter: {
+    title: "เลือกมอนสเตอร์คู่หู",
+    subtitle: "เลือกได้ 1 ตัว คู่หูจะร่วมผจญภัยไปกับเธอ",
+    choose: (name: string) => `เลือก${name}`,
+  },
+  lobby: {
+    hello: (name: string) => `สวัสดี ${name}`,
+    partner: (name: string, lv: number) => `คู่หู: ${name} Lv. ${lv}`,
+    quick: "จับคู่อัตโนมัติ",
+    quickHint: "เข้าห้องที่ว่างของห้องเรียนเดียวกัน",
+    create: "สร้างห้องใหม่",
+    createHint: "ได้รหัส 6 หลักไว้ชวนเพื่อน",
+    code: "รหัสห้อง 6 หลัก",
+    join: "เข้าห้อง",
+    logout: "ออกจากระบบ",
+    reconnecting: "กำลังกลับเข้าห้องเดิม…",
+  },
+  room: {
+    chip: (code: string, n: number, max: number) => `ห้อง ${code} · ${n}/${max}`,
+    leave: "ออกจากห้อง",
+    logout: "ออกจากระบบ",
+    replaced: "บัญชีนี้เข้าเล่นจากที่อื่น จึงถูกให้ออกจากห้อง",
+    reconnecting: "การเชื่อมต่อหลุด กำลังเชื่อมต่อใหม่…",
+    reconnectFailed: "เชื่อมต่อห้องเดิมไม่สำเร็จ",
+    left: "ออกจากห้องแล้ว",
+  },
+  chat: "แชท",
   dev: {
     title: "โหมดทดสอบ",
     give: "ให้",

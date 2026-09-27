@@ -110,3 +110,10 @@ export const NpcDef = z.strictObject({
 });
 export type NpcDef = z.infer<typeof NpcDef>;
 export const NpcsFileSchema = z.strictObject({ npcs: z.array(NpcDef).min(1) });
+
+/** content/quick-chat.json — แชทแบบข้อความสำเร็จรูป + อีโมตเท่านั้น (หัวข้อ 2 ความปลอดภัยของนักเรียน) */
+export const QuickChatFileSchema = z.strictObject({
+  messages: z.array(z.strictObject({ id: Id, text: Text.max(40) })).min(1),
+  emotes: z.array(z.strictObject({ id: Id, symbol: z.string().min(1).max(8) })).min(1),
+});
+export type QuickChat = z.infer<typeof QuickChatFileSchema>;

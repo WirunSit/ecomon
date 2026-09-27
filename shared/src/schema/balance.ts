@@ -145,6 +145,9 @@ export const BalanceSchema = z.strictObject({
     expPerWin: NonNeg,
     expFirstCatch: NonNeg,
     startCoins: z.number().int().nonnegative(),
+    /** มอนตั้งต้นให้เลือก 1 ตัวตอนเล่นครั้งแรก (เฟส 3) */
+    starters: z.array(z.string()).min(1),
+    starterLevel: PosInt,
   }),
   equipment: z.strictObject({
     tierMultiplier: z.record(z.enum(["common", "good", "rare"]), Positive),
@@ -159,6 +162,10 @@ export const BalanceSchema = z.strictObject({
     spawnPerExtraPlayer: NonNeg,
     /** ความเร็วเดิน (ช่อง/วินาที) — server ใช้ค่าเดียวกันตรวจกันวาร์ป */
     walkTilesPerSec: Positive,
+    /** แผนที่ที่ผู้เล่นใหม่เริ่ม (id ใน content/maps) */
+    startMap: z.string().min(1),
+    /** เว้นระยะส่งแชทสำเร็จรูป (วินาที) กันสแปม */
+    chatCooldownSec: NonNeg,
     /** ความเร็วเมื่ออยู่ในน้ำ (ห่วงยาง/เรือ) เป็นสัดส่วนของความเร็วเดิน */
     waterSpeedFactor: Positive,
   }),

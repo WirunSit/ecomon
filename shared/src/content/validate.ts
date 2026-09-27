@@ -393,6 +393,22 @@ export function validateContent(c: GameContent, origins: ContentOrigins, opts: V
       warn(F.topics, ["topics", i], `หัวข้อ "${t.id}" ยังไม่มีคำถามที่ครูอนุมัติ (approved)`);
   });
 
+  // ---------- player / world settings ----------
+  b.player.starters.forEach((id, i) => {
+    const s = species.get(id);
+    if (!s) err(F.balance, ["player", "starters", i], `ไม่มีมอนสเตอร์ "${id}"`);
+    else if (s.rarity !== "normal") err(F.balance, ["player", "starters", i], "มอนตั้งต้นต้องเป็นระดับ Normal");
+  });
+  if (new Set(b.player.starters).size !== b.player.starters.length) err(F.balance, ["player", "starters"], "มอนตั้งต้นซ้ำ");
+  if (b.player.starterLevel > b.stats.maxLevel) err(F.balance, ["player", "starterLevel"], "เกินเลเวลสูงสุด");
+  if (!c.maps.some((m) => m.id === b.world.startMap)) err(F.balance, ["world", "startMap"], `ไม่มีแผนที่ "${b.world.startMap}" ใน content/maps`);
+  else if (!c.maps.find((m) => m.id === b.world.startMap)!.markers.some((m) => m.type === "player_start"))
+    err(F.balance, ["world", "startMap"], "แผนที่เริ่มต้นต้องมีจุด player_start");
+
+  // ---------- quick chat ----------
+  uniqueIds(c.quickChat.messages, (i) => [F.quickChat, ["messages", i]]);
+  uniqueIds(c.quickChat.emotes, (i) => [F.quickChat, ["emotes", i]]);
+
   // ---------- maps ----------
   c.maps.forEach((map, i) => {
     const file = origins.maps[i]!;

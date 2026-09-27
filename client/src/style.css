@@ -182,3 +182,96 @@ html, body {
   .hud-zone { display: none; }
   .hud-menu-btn span:last-child { display: none; }
 }
+
+/* ---------- หน้าจอ login / เลือกมอน / ล็อบบี้ (เฟส 3) ---------- */
+.screen {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  overflow: auto;
+  background: radial-gradient(circle at 30% 20%, #2f4a3a 0%, #1b2130 70%);
+}
+.screen-card {
+  width: min(400px, 100%);
+  padding: 20px 22px;
+  background: #283044;
+  border-radius: 18px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
+  text-align: center;
+}
+.screen.wide .screen-card { width: min(760px, 100%); }
+.screen-card h1.logo { margin: 0; font-size: 30px; color: var(--ui-accent); letter-spacing: 0.5px; }
+.screen-card h2 { margin: 4px 0 12px; font-size: 20px; font-weight: 600; }
+.screen-card .muted { color: var(--ui-muted); margin: 4px 0; }
+.form { display: flex; flex-direction: column; gap: 10px; text-align: left; }
+.field { display: flex; flex-direction: column; gap: 3px; font-size: 14px; }
+.field small, .lobby-actions small { color: var(--ui-muted); font-size: 12px; }
+.field input, .code-row input {
+  font: inherit;
+  font-size: 17px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 2px solid #3c465c;
+  background: #1f2636;
+  color: var(--ui-fg);
+  user-select: text;
+  -webkit-user-select: text;
+}
+.field input:focus, .code-row input:focus { outline: none; border-color: var(--ui-accent); }
+.form-error { min-height: 1.2em; margin: 4px 0; color: #ff9a8a; font-size: 14px; }
+.btn {
+  font: inherit;
+  font-size: 16px;
+  padding: 9px 16px;
+  min-height: 44px;
+  border: 0;
+  border-radius: 12px;
+  background: #3c465c;
+  color: var(--ui-fg);
+  cursor: pointer;
+}
+.btn:hover:not(:disabled) { filter: brightness(1.12); }
+.btn:disabled { opacity: 0.55; cursor: progress; }
+.btn.primary { background: #4c9a45; color: #fff; font-weight: 600; }
+.btn.big { width: 100%; font-size: 18px; }
+.btn.link { background: none; color: var(--ui-muted); text-decoration: underline; min-height: 32px; }
+.lobby-actions { display: grid; gap: 12px; margin: 12px 0; }
+.lobby-actions > div { display: flex; flex-direction: column; gap: 3px; }
+.code-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; font-size: 14px; }
+.code-row input { width: 8.5em; text-align: center; letter-spacing: 3px; }
+.starter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-top: 12px; }
+.starter-card { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 12px; border-radius: 14px; background: #323b52; }
+.starter-card h3 { margin: 0; font-size: 18px; }
+.starter-img { width: 120px; height: 120px; object-fit: contain; }
+.chips { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; }
+.chip { padding: 0 8px; border-radius: 999px; font-size: 12px; color: #1b2130; }
+.chip.light { background: #c9c2b0; }
+.menu-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 14px; }
+.hud-room { color: var(--ui-fg); font-variant-numeric: tabular-nums; }
+
+.chat-panel {
+  position: absolute;
+  right: max(12px, env(safe-area-inset-right));
+  top: 60px;
+  width: min(300px, calc(100% - 24px));
+  padding: 10px;
+  background: #283044;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+.chat-emotes { display: flex; gap: 6px; justify-content: space-between; margin-bottom: 8px; }
+.chat-emote { font-size: 22px; width: 40px; height: 40px; border: 0; border-radius: 10px; background: #323b52; cursor: pointer; }
+.chat-msgs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.chat-msg { font: inherit; font-size: 14px; padding: 8px; border: 0; border-radius: 10px; background: #323b52; color: var(--ui-fg); cursor: pointer; }
+.chat-msg:hover, .chat-emote:hover { background: #3f4a66; }
+
+.blocker { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(10, 14, 22, 0.65); font-size: 18px; }
+
+@media (max-height: 420px) {
+  .screen-card { padding: 12px 16px; }
+  .screen-card h1.logo { font-size: 22px; }
+  .starter-img { width: 72px; height: 72px; }
+  .form { gap: 6px; }
+}

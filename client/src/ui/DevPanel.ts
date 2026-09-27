@@ -5,7 +5,7 @@ import { UI } from "./strings";
 
 /**
  * แผงทดสอบ (เปิดเมื่อรัน npm run dev หรือใส่ ?dev=1)
- * ให้/เอาออก key item เพื่อทดสอบการลงน้ำ และแสดงพิกัด + ภูมิประเทศ
+ * ให้/เอาออก key item เพื่อทดสอบการลงน้ำ (server ต้องเปิด DEV_TOOLS) และแสดงพิกัด + ภูมิประเทศ
  * TODO(เฟส 10): key item จะได้จากเควสหลักแทน
  */
 export class DevPanel {
@@ -17,16 +17,12 @@ export class DevPanel {
     return import.meta.env.DEV || new URLSearchParams(location.search).has("dev");
   }
 
-  constructor() {
+  /** @param onToggle ส่งคำขอให้ server ให้/เอาออก key item (server เป็นคนเปลี่ยนข้อมูล) */
+  constructor(onToggle: (itemId: string) => void) {
     const keyItems = registry.items.all.filter((i) => i.category === "key");
     const buttons = keyItems.map((item) => {
       const b = h("button", { className: "interactive" });
-      b.addEventListener("click", () => {
-        const owned = new Set(profile.get().keyItems);
-        if (owned.has(item.id)) owned.delete(item.id);
-        else owned.add(item.id);
-        profile.update({ keyItems: [...owned] });
-      });
+      b.addEventListener("click", () => onToggle(item.id));
       return { item, b };
     });
     this.el = h("div", { className: "dev-panel" }, [h("b", { text: UI.dev.title }), this.info, ...buttons.map((x) => x.b)]);

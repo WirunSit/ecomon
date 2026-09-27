@@ -8,6 +8,7 @@ import type {
   MonsterSpecies,
   MoveDef,
   NpcDef,
+  QuickChat,
   QuestDef,
   Question,
   RoleDef,
@@ -34,6 +35,7 @@ export interface GameContent {
   spawnTables: SpawnTable[];
   quests: QuestDef[];
   questions: Question[];
+  quickChat: QuickChat;
   /** แผนที่จาก content/maps/<id>.tmj */
   maps: GameMap[];
 }

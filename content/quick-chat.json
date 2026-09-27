@@ -1,0 +1,62 @@
+{
+  "messages": [
+    {
+      "id": "hello",
+      "text": "สวัสดี!"
+    },
+    {
+      "id": "help",
+      "text": "มาช่วยหน่อย"
+    },
+    {
+      "id": "dungeon",
+      "text": "ไปดันเจี้ยนกัน"
+    },
+    {
+      "id": "follow",
+      "text": "ตามมาทางนี้"
+    },
+    {
+      "id": "wait",
+      "text": "รอแป๊บนะ"
+    },
+    {
+      "id": "thanks",
+      "text": "ขอบคุณ"
+    },
+    {
+      "id": "great",
+      "text": "เก่งมาก!"
+    },
+    {
+      "id": "bye",
+      "text": "ไปก่อนนะ"
+    }
+  ],
+  "emotes": [
+    {
+      "id": "wave",
+      "symbol": "👋"
+    },
+    {
+      "id": "smile",
+      "symbol": "😄"
+    },
+    {
+      "id": "thumbs",
+      "symbol": "👍"
+    },
+    {
+      "id": "heart",
+      "symbol": "❤️"
+    },
+    {
+      "id": "wow",
+      "symbol": "😮"
+    },
+    {
+      "id": "party",
+      "symbol": "🎉"
+    }
+  ]
+}

@@ -26,7 +26,9 @@
 
 ```
 client/   Phaser 3 + Vite + HTML overlay (ฟอนต์ Kanit/Sarabun) — ความละเอียดฐาน 960x540
-server/   Node + Colyseus 0.16 (WorldRoom สูงสุด balance.world.maxClients คน) + express (/api/*)
+server/   Node + Colyseus 0.16 + express (/api/*) + SQLite ผ่าน Drizzle ORM
+          src/app.ts (ประกอบ server) · src/rooms (WorldRoom) · src/services (auth, players) · src/db (schema)
+          src/http/routes.ts (REST) · drizzle/ (migration ที่ generate แล้ว ห้ามแก้มือ)
 shared/   zod schema (shared/src/schema), parser/validator ของ content, registry (shared/src/registry.ts),
           สูตรคำนวณ (shared/src/formulas: stats, battle, exp, breeding, dungeon, rng),
           กติกาโลก (shared/src/world: ภูมิประเทศ + checkStep การเดิน)
@@ -50,6 +52,16 @@ tools/    validate.ts, make-placeholders.ts, make-test-map.ts (อนาคต: 
 | `npm run build` | validate แล้ว build client |
 
 **ก่อน commit ทุกครั้ง:** `npm run validate && npm test && npm run typecheck` ต้องผ่าน
+
+## Server / ฐานข้อมูล
+
+- สัญญา client ↔ server (REST body, ชื่อข้อความในห้อง, รหัสปิดการเชื่อมต่อ) อยู่ใน `shared/src/protocol.ts` เท่านั้น
+- ข้อความจาก client ต้อง parse ด้วย zod ก่อนใช้เสมอ (`MoveMessage`, `ChatMessage` ...) แล้วตรวจกับ content/สถานะบน server
+- ตำแหน่ง/ข้อมูลผู้เล่นเป็นของ server: client ทำนายการเดินได้ แต่ต้องยอมรับ `correction` จาก server
+- แก้ตาราง → แก้ `server/src/db/schema.ts` แล้ว `npm run db:generate -w server` (ห้ามเขียน migration เอง)
+- เวลาเก็บเป็น ms epoch ของ server · PIN เก็บเป็น scrypt hash · token เก็บเป็น sha256
+- เทสต์ server เปิด server จริงบนพอร์ตสุ่ม + SQLite ในหน่วยความจำ (`server/test/helpers.ts`) · vitest ใช้ pool แบบ threads
+  เพราะ Colyseus เรียก `process.send`
 
 ## ข้อตกลงของ content
 
@@ -83,4 +95,5 @@ tools/    validate.ts, make-placeholders.ts, make-test-map.ts (อนาคต: 
 - [x] เฟส 0 — ตั้งโปรเจคและกติกา
 - [x] เฟส 1 — โลกและการเดิน
 - [x] เฟส 2 — สูตรคำนวณและ registry
-- [ ] เฟส 3 เป็นต้นไป — ดู docs/GAME_PLAN.md หัวข้อ 13
+- [x] เฟส 3 — Server, ห้อง 5 คน, login, บันทึกข้อมูล
+- [ ] เฟส 4 เป็นต้นไป — ดู docs/GAME_PLAN.md หัวข้อ 13
