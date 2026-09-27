@@ -17,7 +17,8 @@
     "typecheck": "tsc -p shared && tsc -p server && tsc -p client && tsc -p tools",
     "test": "vitest run",
     "make-test-map": "tsx tools/make-test-map.ts",
-    "assets": "python3 tools/slice_sheets.py"
+    "assets": "python3 tools/slice_sheets.py && python3 tools/render_maps.py",
+    "render-maps": "python3 tools/render_maps.py"
   },
   "devDependencies": {
     "@napi-rs/canvas": "^1.0.0",

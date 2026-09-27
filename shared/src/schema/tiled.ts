@@ -62,6 +62,13 @@ export const TiledTileset = z.object({
   tileheight: z.number().int().positive(),
   image: z.string(),
   columns: z.number().int().positive(),
+  /**
+   * property ราย tile (ตั้งใน Tiled: Tileset → เลือก tile → Custom Properties)
+   * - material: ชนิดพื้นที่ tools/render_maps.py ใช้วาดพื้น (เช่น grass, sand) ดู asset-src/terrain.yaml
+   * - prop / propWidth / propSize / propJitter: ช่องชน (collision) วาดเป็นของประดับขนาดจริง
+   *   (เช่น prop "round_tree,pine_tree" สุ่มแบบตามพิกัด กว้าง 1 ช่อง แสดง 70px ขยับได้ ±propJitter px)
+   */
+  tiles: z.array(z.object({ id: z.number().int().nonnegative(), properties: z.array(TiledProperty).optional() })).optional(),
 });
 
 export const TiledMapSchema = z.object({

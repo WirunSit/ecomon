@@ -8,12 +8,11 @@ import fallbackUrl from "../../assets/monsters/_fallback.png?url";
 const monsterImages = import.meta.glob<string>("../../assets/monsters/*/f1_idle.png", { eager: true, query: "?url", import: "default" });
 const tileImages = import.meta.glob<string>("../../assets/tiles/*.png", { eager: true, query: "?url", import: "default" });
 const characterImages = import.meta.glob<string>("../../assets/characters/*/*.png", { eager: true, query: "?url", import: "default" });
-// เพิ่มชื่อไฟล์ที่นี่เมื่อเริ่มใช้ภาพใหม่ (glob ทั้งโฟลเดอร์จะพาภาพที่ยังไม่ใช้ไปอยู่ใน build ด้วย)
-const propImages = import.meta.glob<string>(["../../assets/props/swim_ring.png", "../../assets/props/leaf_boat.png"], {
-  eager: true,
-  query: "?url",
-  import: "default",
-});
+// ?url ได้แค่ที่อยู่ไฟล์ — ภาพจะถูกดาวน์โหลดเมื่อ Phaser โหลดจริงเท่านั้น (โหลดเฉพาะของประดับที่แผนที่ใช้)
+const propImages = import.meta.glob<string>("../../assets/props/*.png", { eager: true, query: "?url", import: "default" });
+// ภาพพื้นที่วาดด้วย tools/render_maps.py
+const groundMeta = import.meta.glob<GroundMeta>("../../assets/maps/*/ground.json", { eager: true, import: "default" });
+const groundImages = import.meta.glob<string>("../../assets/maps/*/*.webp", { eager: true, query: "?url", import: "default" });
 const uiImages = import.meta.glob<string>(["../../assets/ui/title.png"], { eager: true, query: "?url", import: "default" });
 
 export type Pose = "idle" | "attack";
@@ -74,6 +73,32 @@ export function characterImageUrl(avatar: number, dir: "down" | "up" | "right", 
 
 export function propImageUrl(id: string): string | undefined {
   return propImages[`../../assets/props/${id}.png`];
+}
+
+export function propTextureKey(id: string): string {
+  return `prop_${id}`;
+}
+
+// ---------- ภาพพื้นแผนที่ (tools/render_maps.py) ----------
+
+export interface GroundMeta {
+  map: string;
+  width: number;
+  height: number;
+  tileSize: number;
+  chunks: { x: number; y: number; w: number; h: number; file: string }[];
+  source: string;
+}
+
+/** ภาพพื้นของแผนที่ (แบ่งเป็นชิ้น) หรือ undefined ถ้ายังไม่ได้รัน npm run render-maps */
+export function mapGround(mapId: string): { meta: GroundMeta; chunks: { key: string; url: string; x: number; y: number }[] } | undefined {
+  const meta = groundMeta[`../../assets/maps/${mapId}/ground.json`];
+  if (!meta) return undefined;
+  const chunks = meta.chunks.flatMap((c) => {
+    const url = groundImages[`../../assets/maps/${mapId}/${c.file}`];
+    return url ? [{ key: `ground_${mapId}_${c.file}`, url, x: c.x, y: c.y }] : [];
+  });
+  return chunks.length === meta.chunks.length ? { meta, chunks } : undefined;
 }
 
 export function uiImageUrl(id: string): string | undefined {

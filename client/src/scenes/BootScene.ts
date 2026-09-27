@@ -5,7 +5,9 @@ import {
   fallbackUrl,
   MONSTER_ATLAS,
   MONSTER_ATLAS_URL,
+  mapGround,
   propImageUrl,
+  propTextureKey,
   tileImageUrl,
   tilesetTextureKey,
 } from "../assets";
@@ -33,6 +35,16 @@ export class BootScene extends Phaser.Scene {
     ] as const) {
       const url = propImageUrl(id);
       if (url) this.load.image(key, url);
+    }
+
+    // ภาพพื้นที่วาดไว้แล้ว + ของประดับที่แผนที่ใช้
+    for (const map of registry.maps.all) {
+      for (const c of mapGround(map.id)?.chunks ?? []) this.load.image(c.key, c.url);
+    }
+    for (const id of new Set(registry.maps.all.flatMap((m) => m.props.map((p) => p.prop)))) {
+      const url = propImageUrl(id);
+      if (url) this.load.image(propTextureKey(id), url);
+      else console.error(`ไม่พบภาพของประดับ assets/props/${id}.png`);
     }
 
     const tilesetFiles = new Set(registry.maps.all.flatMap((m) => loadedMap(m.id).tilesetImages.map((t) => t.file)));

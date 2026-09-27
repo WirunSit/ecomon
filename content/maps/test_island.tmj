@@ -351,7 +351,169 @@
    "spacing": 0,
    "tilecount": 12,
    "tileheight": 32,
-   "tilewidth": 32
+   "tilewidth": 32,
+   "tiles": [
+    {
+     "id": 0,
+     "properties": [
+      {
+       "name": "material",
+       "type": "string",
+       "value": "grass"
+      }
+     ]
+    },
+    {
+     "id": 1,
+     "properties": [
+      {
+       "name": "material",
+       "type": "string",
+       "value": "flowers"
+      }
+     ]
+    },
+    {
+     "id": 2,
+     "properties": [
+      {
+       "name": "material",
+       "type": "string",
+       "value": "tall_grass"
+      }
+     ]
+    },
+    {
+     "id": 3,
+     "properties": [
+      {
+       "name": "material",
+       "type": "string",
+       "value": "path"
+      }
+     ]
+    },
+    {
+     "id": 4,
+     "properties": [
+      {
+       "name": "material",
+       "type": "string",
+       "value": "sand"
+      }
+     ]
+    },
+    {
+     "id": 5,
+     "properties": [
+      {
+       "name": "material",
+       "type": "string",
+       "value": "shallow"
+      }
+     ]
+    },
+    {
+     "id": 6,
+     "properties": [
+      {
+       "name": "material",
+       "type": "string",
+       "value": "deep"
+      }
+     ]
+    },
+    {
+     "id": 7,
+     "properties": [
+      {
+       "name": "material",
+       "type": "string",
+       "value": "bridge"
+      }
+     ]
+    },
+    {
+     "id": 8,
+     "properties": [
+      {
+       "name": "prop",
+       "type": "string",
+       "value": "round_tree,round_tree,pine_tree,round_tree,pine_tree,blossom_tree"
+      },
+      {
+       "name": "propSize",
+       "type": "int",
+       "value": 70
+      },
+      {
+       "name": "propJitter",
+       "type": "int",
+       "value": 5
+      }
+     ]
+    },
+    {
+     "id": 9,
+     "properties": [
+      {
+       "name": "prop",
+       "type": "string",
+       "value": "mossy_rock,boulder"
+      },
+      {
+       "name": "propSize",
+       "type": "int",
+       "value": 42
+      },
+      {
+       "name": "propJitter",
+       "type": "int",
+       "value": 3
+      }
+     ]
+    },
+    {
+     "id": 10,
+     "properties": [
+      {
+       "name": "prop",
+       "type": "string",
+       "value": "round_bush,round_bush,flowering_bush"
+      },
+      {
+       "name": "propSize",
+       "type": "int",
+       "value": 40
+      },
+      {
+       "name": "propJitter",
+       "type": "int",
+       "value": 4
+      }
+     ]
+    },
+    {
+     "id": 11,
+     "properties": [
+      {
+       "name": "prop",
+       "type": "string",
+       "value": "village_house"
+      },
+      {
+       "name": "propWidth",
+       "type": "int",
+       "value": 2
+      },
+      {
+       "name": "propSize",
+       "type": "int",
+       "value": 92
+      }
+     ]
+    }
+   ]
   }
  ],
  "tilewidth": 32,

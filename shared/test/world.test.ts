@@ -172,3 +172,35 @@ describe("ตัวตรวจแผนที่", () => {
     expect(errs.some((e) => e.message.includes("จุดเริ่มผู้เล่น"))).toBe(true);
   });
 });
+
+describe("ของประดับจากเลเยอร์ collision (property ของ tile)", () => {
+  const map = content.maps.find((m) => m.id === "test_island")!;
+
+  it("ทุกช่อง collision ที่มี prop ถูกแปลงเป็นของประดับ บ้านกว้าง 2 ช่องรวมเป็นหลังเดียว", () => {
+    const houses = map.props.filter((p) => p.prop === "village_house");
+    expect(houses.length).toBe(4);
+    expect(houses.every((h) => h.width === 2 && h.size === 92)).toBe(true);
+    for (const p of map.props) expect(terrainAt(map, p.x, p.y)).toBe("blocked");
+  });
+
+  it("เลือกแบบของประดับตามพิกัด (คงที่ทุกครั้ง) และขยับไม่เกิน propJitter", () => {
+    const again = parseContent(files).content!.maps.find((m) => m.id === "test_island")!;
+    expect(again.props).toEqual(map.props);
+    const trees = map.props.filter((p) => ["round_tree", "pine_tree", "blossom_tree"].includes(p.prop));
+    expect(new Set(trees.map((t) => t.prop)).size).toBeGreaterThan(1);
+    for (const t of trees) {
+      expect(Math.abs(t.offsetX)).toBeLessThanOrEqual(5);
+      expect(Math.abs(t.offsetY)).toBeLessThanOrEqual(5);
+    }
+  });
+
+  it("ของประดับหลายช่องที่วางไม่ครบถูกแจ้ง error", () => {
+    const json = JSON.parse(files[MAP_FILE]!);
+    const collision = json.layers.find((l: any) => l.name === "collision");
+    const houseGid = json.tilesets[0].firstgid + json.tilesets[0].tiles.find((t: any) => t.properties.some((p: any) => p.value === "village_house")).id;
+    const i = collision.data.indexOf(houseGid);
+    collision.data[i + 1] = 0; // เหลือบ้านช่องเดียว
+    const p = parseContent({ ...files, [MAP_FILE]: JSON.stringify(json) });
+    expect(p.issues.some((x) => x.severity === "error" && x.message.includes("village_house"))).toBe(true);
+  });
+});

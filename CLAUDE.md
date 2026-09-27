@@ -46,7 +46,8 @@ tools/    validate.ts, make-placeholders.ts, make-test-map.ts (อนาคต: 
 | `npm run dev` | เปิด server (:2567) + client (:5173) พร้อมกัน |
 | `npm run validate` | ตรวจ content ทั้งหมด (schema + อ้างอิงข้ามไฟล์ + ภาพ) error = ล้ม, `--strict` ให้ warning ล้มด้วย |
 | `npm run placeholders` | วาดภาพ placeholder มอนสเตอร์ทุกร่าง (ไม่เขียนทับภาพจริง ยกเว้น `--force`) |
-| `npm run assets` | ตัด sheet ใน asset-src/ → assets/ + atlas (client/public/atlas) + tileset + contact sheet ตรวจทาน |
+| `npm run assets` | ตัด sheet ใน asset-src/ → assets/ + atlas (client/public/atlas) + tileset + contact sheet แล้ววาดภาพพื้นแผนที่ |
+| `npm run render-maps` | วาดภาพพื้นของแผนที่ใหม่ (หลังแก้แผนที่ใน Tiled หรือ asset-src/terrain.yaml) |
 | `npm run make-test-map` | สร้างแผนที่ทดสอบ + tileset placeholder (ไม่เขียนทับ ยกเว้น `--force`) |
 | `npm test` | vitest |
 | `npm run typecheck` | tsc ทุก workspace |
@@ -84,6 +85,11 @@ tools/    validate.ts, make-placeholders.ts, make-test-map.ts (อนาคต: 
   - `spawns`: สี่เหลี่ยม มี property `table`, `terrain`, `maxActive`, `respawnSec`, `wander` (หัวข้อ 10.3)
   - `markers`: จุด type `player_start` (อนาคต: NPC, ทางเข้าดันเจี้ยน, จุดฟื้นฟู)
 - map property `zone` = id โซนใน zones.json
+- property ของ tile ใน tileset: `material` (ชนิดพื้นที่วาด เช่น grass, sand — ดู asset-src/terrain.yaml)
+  และสำหรับช่องชน `prop` (ภาพ assets/props, ใส่หลายแบบคั่น , ได้) `propWidth` `propSize` `propJitter`
+- **ภาพพื้น** วาดด้วย `npm run render-maps` (tools/render_maps.py) เป็นภาพเดียวขอบโค้ง → assets/maps/<id>/
+  แก้แผนที่หรือ terrain.yaml แล้วต้องรันใหม่ (validate เตือนถ้าภาพพื้นเก่า) · ถ้าไม่มีภาพพื้น เกมวาดเป็น tile แทน
+- ของประดับวาดเป็นภาพขนาดจริงเรียงหน้าหลังด้วย `depthForY()` (client/src/world/MapView.ts) ใช้สูตรเดียวกับตัวละครและมอน
 - กติกาเดินได้/ไม่ได้อยู่ที่ `checkStep()` ใน shared เท่านั้น client ห้ามตัดสินจาก tile ของ Phaser
 
 ## ภาพ

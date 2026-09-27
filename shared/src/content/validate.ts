@@ -420,6 +420,10 @@ export function validateContent(c: GameContent, origins: ContentOrigins, opts: V
     for (const s of start) {
       if (terrainAt(map, s.x, s.y) !== "land") err(file, ["layers"], `จุดเริ่มผู้เล่น #${s.objectId} ต้องอยู่บนช่องบกที่เดินได้`);
     }
+    if (opts.assetExists) {
+      for (const id of new Set(map.props.map((p) => p.prop)))
+        if (!opts.assetExists(`props/${id}.png`)) warn(file, ["tilesets"], `ไม่มีภาพของประดับ assets/props/${id}.png`);
+    }
     map.spawns.forEach((sp) => {
       const where = `จุดเกิด #${sp.objectId}`;
       const table = tables.get(sp.table);

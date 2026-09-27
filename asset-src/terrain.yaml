@@ -1,0 +1,90 @@
+# วิธีวาดพื้นแผนที่ (tools/render_maps.py) — ชนิดพื้นของแต่ละช่องมาจาก property "material" ของ tile ใน Tiled
+# ภาพพื้นผิวมาจาก assets/tiles/src/<texture>.png (ตัดจาก S08 ด้วย npm run assets)
+#
+# วิธีวาด: เอาชิ้นเล็ก ๆ ของภาพพื้นผิวมาวางกระจายแบบสุ่ม (texture bombing) จึงไม่เห็นลายซ้ำเป็นตาราง
+# แล้วผสมพื้นแต่ละชนิดด้วย mask ขอบนุ่มที่มี noise → ขอบโค้งเป็นธรรมชาติ ไม่เป็นขั้นบันได
+#
+# ฟิลด์ของ material:
+#   texture    ชื่อภาพพื้นผิว
+#   patch      ขนาดชิ้นที่วางบนแผนที่ (px) — ใหญ่ = ลายหยาบ/รายละเอียดน้อย
+#   rotate     หมุนชิ้นได้ 90° (false = กลับซ้ายขวาอย่างเดียว เช่นหญ้าที่ต้องตั้งขึ้น)
+#   blur       ความนุ่มของขอบ (หน่วย: ช่อง)
+#   noise      ความขรุขระของขอบ (0 = เรียบ)
+#   feather    ความกว้างการไล่สีตรงขอบ (0–0.5)
+#   soften     ลดความตัดกันของลาย (0–1) ให้พื้นไม่ยุบยับแย่งสายตาจากตัวละคร
+#   crisp      true = วาดทีละช่องแบบคม (สะพาน)
+#   shadow     เงาใต้วัตถุ (px)
+# ลำดับใน materials = ลำดับการวาด (ล่าง → บน) · ตัวแรกคือพื้นฐานทั้งแผนที่
+
+tileSize: 32
+chunk: 2048
+seed: 20260927
+# สีพื้นทั่วทั้งแผนที่แปรผันเล็กน้อยตามตำแหน่ง (กันความจืด)
+variation: 0.07
+
+materials:
+  grass:
+    texture: short_grass
+    patch: 128
+    rotate: true
+    soften: 0.4
+  flowers:
+    texture: grass_flowers
+    patch: 104
+    soften: 0.15
+    rotate: true
+    blur: 0.9
+    noise: 0.55
+    feather: 0.18
+  tall_grass:
+    texture: tall_grass
+    patch: 96
+    rotate: false
+    blur: 0.55
+    noise: 0.35
+    feather: 0.08
+  path:
+    texture: dirt_path
+    patch: 96
+    rotate: true
+    blur: 0.45
+    noise: 0.3
+    feather: 0.07
+  sand:
+    texture: dry_sand
+    patch: 120
+    rotate: true
+    blur: 0.6
+    noise: 0.3
+    feather: 0.06
+  shallow:
+    texture: shallow_water
+    patch: 144
+    rotate: true
+    soften: 0.2
+    blur: 0.55
+    noise: 0.25
+    feather: 0.03
+  deep:
+    texture: deep_water
+    patch: 144
+    rotate: true
+    soften: 0.15
+    blur: 1.1
+    noise: 0.2
+    feather: 0.22
+  bridge:
+    texture: wooden_bridge
+    crisp: true
+    shadow: 5
+
+# ริมน้ำ: ทรายเปียก (ฝั่งบก) + ฟองคลื่น (เส้นขอบ) + น้ำใสขึ้นใกล้ฝั่ง
+shore:
+  water: [shallow, deep]
+  wet: [121, 99, 64]
+  wetWidth: 7
+  wetAlpha: 0.35
+  foam: [255, 255, 250]
+  foamWidth: 2.5
+  foamAlpha: 0.85
+  shoreGlow: 10

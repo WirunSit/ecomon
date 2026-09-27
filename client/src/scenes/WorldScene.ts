@@ -25,7 +25,7 @@ import { h, uiRoot } from "../ui/overlay";
 import { chatText, QuickChatPanel } from "../ui/QuickChatPanel";
 import { Toast } from "../ui/Toast";
 import { UI } from "../ui/strings";
-import { MapView } from "../world/MapView";
+import { depthForY, MapView } from "../world/MapView";
 import { PlayerAvatar } from "../world/PlayerAvatar";
 import { WildMonsterSprite, type WildView } from "../world/WildMonsterSprite";
 import { logoutTo } from "./LobbyScene";
@@ -208,7 +208,7 @@ export class WorldScene extends Phaser.Scene {
 
   /** ของที่อยู่ต่ำกว่าบนจอ (y มากกว่า) วาดทับของที่อยู่สูงกว่า */
   private sortByDepth() {
-    const set = (c: Phaser.GameObjects.Container, bias: number) => c.setDepth(10 + c.y / 10_000 + bias);
+    const set = (c: Phaser.GameObjects.Container, bias: number) => c.setDepth(depthForY(c.y, bias));
     set(this.player.container, 0.00002);
     for (const r of this.remotes.values()) set(r.avatar.container, 0.00001);
     for (const w of this.wild.values()) set(w.container, 0);

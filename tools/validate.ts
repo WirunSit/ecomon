@@ -1,11 +1,34 @@
 // npm run validate — ตรวจไฟล์ใน content/ ทั้งหมด (schema + ความสัมพันธ์ข้ามไฟล์ + ภาพ)
 // ออกด้วยรหัส 1 ถ้ามี error, warning ไม่ทำให้ล้ม (ใส่ --strict เพื่อให้ warning ล้มด้วย)
-import { ASSETS_DIR, formatIssue, loadContent } from "@ecomon/shared/node";
+import { createHash } from "node:crypto";
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+import { ASSETS_DIR, CONTENT_DIR, formatIssue, loadContent, REPO_ROOT, type ContentIssue } from "@ecomon/shared/node";
 
 const strict = process.argv.includes("--strict");
 const quiet = process.argv.includes("--quiet");
 
 const result = loadContent({ assetsDir: ASSETS_DIR });
+
+/** ภาพพื้นที่วาดด้วย tools/render_maps.py ต้องตรงกับไฟล์แผนที่และ asset-src/terrain.yaml ล่าสุด (hash เดียวกับฝั่ง Python) */
+function groundIssues(): ContentIssue[] {
+  const terrain = readFileSync(join(REPO_ROOT, "asset-src", "terrain.yaml"));
+  return (result.content?.maps ?? []).flatMap((map): ContentIssue[] => {
+    const file = `maps/${map.id}.tmj`;
+    const metaPath = join(ASSETS_DIR, "maps", map.id, "ground.json");
+    const hash = createHash("sha1")
+      .update(Buffer.concat([readFileSync(join(CONTENT_DIR, file)), Buffer.from("\n"), terrain]))
+      .digest("hex");
+    if (!existsSync(metaPath))
+      return [{ severity: "warning", file, path: [], message: "ยังไม่มีภาพพื้น (เกมจะวาดเป็น tile) — รัน npm run render-maps" }];
+    const meta = JSON.parse(readFileSync(metaPath, "utf8")) as { source?: string };
+    return meta.source === hash
+      ? []
+      : [{ severity: "warning", file, path: [], message: "ภาพพื้นเก่ากว่าแผนที่หรือ terrain.yaml — รัน npm run render-maps" }];
+  });
+}
+
+result.issues.push(...groundIssues());
 const errors = result.issues.filter((i) => i.severity === "error");
 const warnings = result.issues.filter((i) => i.severity === "warning");
 

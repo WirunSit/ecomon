@@ -7,6 +7,8 @@ import { validateContent } from "./content/validate";
 import { createRegistry, type Registry } from "./registry";
 import type { ContentFiles, ContentIssue, ContentOrigins, GameContent } from "./content/types";
 
+export type { ContentIssue };
+
 /** รากของ repo (ecomon/) */
 export const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 export const CONTENT_DIR = join(REPO_ROOT, "content");

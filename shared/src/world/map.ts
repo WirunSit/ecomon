@@ -48,6 +48,30 @@ export interface MapMarker {
   props: Record<string, string | number | boolean>;
 }
 
+/** ของประดับบนแผนที่ (ต้นไม้ หิน บ้าน) ที่วาดจากช่องในเลเยอร์ collision ตาม property ของ tile */
+export interface MapProp {
+  /** ชื่อภาพใน assets/props/<prop>.png */
+  prop: string;
+  /** ช่องซ้ายสุดของฐาน */
+  x: number;
+  /** แถวของฐาน (ภาพวาดชิดขอบล่างของแถวนี้) */
+  y: number;
+  /** ฐานกว้างกี่ช่อง */
+  width: number;
+  /** ความกว้างที่แสดงบนจอ (px) */
+  size: number;
+  /** ขยับตำแหน่งภาพเล็กน้อย (px) ให้แนวต้นไม้ไม่เรียงเป๊ะเกินไป */
+  offsetX: number;
+  offsetY: number;
+}
+
+/** hash ของพิกัด (คงที่ ทุกเครื่องได้ค่าเดียวกัน) ใช้เลือกแบบของประดับ/ขยับตำแหน่ง */
+function coordHash(x: number, y: number, salt = 0): number {
+  let h = (Math.imul(x, 73856093) ^ Math.imul(y, 19349663) ^ Math.imul(salt, 83492791)) >>> 0;
+  h = Math.imul(h ^ (h >>> 16), 0x45d9f3b) >>> 0;
+  return (h ^ (h >>> 16)) >>> 0;
+}
+
 /** แผนที่ในรูปที่ gameplay ใช้ ทั้ง client และ server (ไม่ขึ้นกับ Phaser) */
 export interface GameMap {
   id: string;
@@ -60,6 +84,8 @@ export interface GameMap {
   terrain: Uint8Array;
   spawns: SpawnArea[];
   markers: MapMarker[];
+  /** ของประดับที่วาดเป็นภาพขนาดจริง (ใช้แสดงผลเท่านั้น การชนใช้ terrain) */
+  props: MapProp[];
 }
 
 export interface MapProblem {
@@ -164,9 +190,43 @@ export function buildGameMap(id: string, tiled: TiledMap): { map?: GameMap; prob
     props: tiledProps(o.properties),
   }));
 
+  // property ของ tile: gid → { prop, propWidth, propSize }
+  const tileProps = new Map<number, Record<string, string | number | boolean>>();
+  for (const ts of tiled.tilesets) for (const t of ts.tiles ?? []) tileProps.set(ts.firstgid + t.id, tiledProps(t.properties));
+
+  const props: MapProp[] = [];
+  const collisionIndex = layerIndex(MAP_LAYERS.collision);
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const gid = collision.data[y * width + x]! & 0x1fffffff;
+      const p = gid ? tileProps.get(gid) : undefined;
+      if (!p || typeof p.prop !== "string") continue;
+      const w = typeof p.propWidth === "number" ? Math.max(1, Math.round(p.propWidth)) : 1;
+      // ของที่กว้างหลายช่อง (เช่นบ้าน 2 ช่อง) ต้องวาง tile เดียวกันติดกันในแถว
+      let run = 1;
+      while (run < w && x + run < width && (collision.data[y * width + x + run]! & 0x1fffffff) === gid) run++;
+      if (run < w)
+        problems.push({ path: ["layers", collisionIndex, "data", y * width + x], message: `ของประดับ "${p.prop}" ที่ (${x}, ${y}) ต้องวางติดกัน ${w} ช่อง` });
+      // prop ใส่ได้หลายแบบคั่นด้วย , → เลือกตามพิกัด (เช่น "round_tree,pine_tree") · propJitter = ขยับสุ่มได้กี่ px
+      const variants = p.prop.split(",").map((v) => v.trim()).filter(Boolean);
+      const jitter = typeof p.propJitter === "number" ? p.propJitter : 0;
+      const shift = (salt: number) => (jitter ? (coordHash(x, y, salt) % (2 * jitter + 1)) - jitter : 0);
+      props.push({
+        prop: variants[coordHash(x, y) % variants.length]!,
+        x,
+        y,
+        width: w,
+        size: typeof p.propSize === "number" ? p.propSize : w * tiled.tilewidth,
+        offsetX: shift(1),
+        offsetY: shift(2),
+      });
+      x += run - 1;
+    }
+  }
+
   const zone = tiledProps(tiled.properties).zone;
   return {
-    map: { id, width, height, tileSize, zone: typeof zone === "string" ? zone : undefined, terrain, spawns, markers },
+    map: { id, width, height, tileSize, zone: typeof zone === "string" ? zone : undefined, terrain, spawns, markers, props },
     problems,
   };
 }

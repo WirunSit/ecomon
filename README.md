@@ -54,7 +54,8 @@ npm run build         # validate + build client สำหรับ deploy
 ## แก้แผนที่
 
 เปิด `content/maps/test_island.tmj` ด้วย [Tiled](https://www.mapeditor.org/) ได้เลย กติกาเลเยอร์อยู่ใน [`CLAUDE.md`](CLAUDE.md)
-บันทึกแล้วรัน `npm run validate` เพื่อตรวจ
+บันทึกแล้วรัน `npm run render-maps` (วาดภาพพื้นใหม่ให้ขอบโค้งเป็นธรรมชาติ) และ `npm run validate` เพื่อตรวจ
+ปรับหน้าตาพื้นแต่ละชนิด (ขนาดลาย ความนุ่มของขอบ ฟองคลื่นริมน้ำ) ได้ที่ `asset-src/terrain.yaml`
 
 ## เพิ่มมอนสเตอร์หรือคำถาม
 

@@ -33,6 +33,25 @@ const TILE = {
   house: 12,
 } as const;
 const COLS = 4;
+
+/**
+ * property ราย tile: material = ชนิดพื้นที่ tools/render_maps.py วาด (asset-src/terrain.yaml)
+ * prop = ช่องชนที่วาดเป็นของประดับขนาดจริง (assets/props/<prop>.png) กว้าง propWidth ช่อง แสดง propSize px
+ */
+const TILE_PROPS: [number, Record<string, string | number>][] = [
+  [TILE.grass, { material: "grass" }],
+  [TILE.flowers, { material: "flowers" }],
+  [TILE.tallGrass, { material: "tall_grass" }],
+  [TILE.path, { material: "path" }],
+  [TILE.sand, { material: "sand" }],
+  [TILE.shallow, { material: "shallow" }],
+  [TILE.deep, { material: "deep" }],
+  [TILE.bridge, { material: "bridge" }],
+  [TILE.tree, { prop: "round_tree,round_tree,pine_tree,round_tree,pine_tree,blossom_tree", propSize: 70, propJitter: 5 }],
+  [TILE.rock, { prop: "mossy_rock,boulder", propSize: 42, propJitter: 3 }],
+  [TILE.bush, { prop: "round_bush,round_bush,flowering_bush", propSize: 40, propJitter: 4 }],
+  [TILE.house, { prop: "village_house", propWidth: 2, propSize: 92 }],
+];
 const TILE_COUNT = Object.keys(TILE).length;
 
 // ---------- tileset ----------
@@ -288,6 +307,10 @@ function makeMap() {
         columns: COLS, firstgid: 1, image: `../../assets/tiles/${TILESET_NAME}.png`,
         imageheight: Math.ceil(TILE_COUNT / COLS) * T, imagewidth: COLS * T, margin: 0, name: TILESET_NAME,
         spacing: 0, tilecount: TILE_COUNT, tileheight: T, tilewidth: T,
+        tiles: TILE_PROPS.map(([gid, props]) => ({
+          id: gid - 1,
+          properties: Object.entries(props).map(([name, value]) => prop(name, value)),
+        })),
       },
     ],
     tilewidth: T,
