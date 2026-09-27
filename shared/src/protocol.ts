@@ -1,7 +1,7 @@
 // สัญญาระหว่าง client ↔ server (REST + ข้อความในห้อง Colyseus) — ใช้ชุดเดียวกันทั้งสองฝั่ง
 import { z } from "zod";
 import { Id, type Stats } from "./schema/common";
-import type { ClientQuestion } from "./schema/question";
+import type { ClientQuestion, Question } from "./schema/question";
 import type { MonsterEquipment } from "./formulas/items";
 import { DIRECTIONS, type Direction } from "./world/movement";
 
@@ -767,4 +767,110 @@ export interface BattleEndMessage {
   profile: PlayerProfile;
   /** การต่อสู้ในดันเจี้ยน: ผ่านห้องนี้แล้วไปห้องถัดไป (wave) หรือจบบอส (boss) */
   stage?: "wave" | "boss";
+}
+
+// ---------- หน้าครู (หัวข้อ 11.6) — REST /api/teacher/* ใช้ token ของครู (แยกจากนักเรียน) ----------
+
+export const TeacherUsername = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .regex(/^[a-z0-9_.-]{3,32}$/, "ชื่อผู้ใช้เป็นภาษาอังกฤษตัวเล็ก ตัวเลข _ . - ยาว 3–32 ตัว");
+export const TeacherPassword = z.string().min(8, "รหัสผ่านต้องยาวอย่างน้อย 8 ตัวอักษร").max(128);
+
+export const TeacherLoginRequest = z.object({ username: TeacherUsername, password: z.string().min(1).max(128) });
+export type TeacherLoginRequest = z.infer<typeof TeacherLoginRequest>;
+/** สมัครบัญชีครูต้องมีรหัสเชิญของโรงเรียน (ตั้งที่ server: TEACHER_INVITE_CODE) */
+export const TeacherRegisterRequest = z.object({
+  username: TeacherUsername,
+  password: TeacherPassword,
+  displayName: z.string().trim().min(1, "กรอกชื่อที่แสดง").max(40),
+  inviteCode: z.string().trim().min(1, "กรอกรหัสเชิญ").max(64),
+});
+export type TeacherRegisterRequest = z.infer<typeof TeacherRegisterRequest>;
+
+/** ตั้งค่าห้องเรียน: ตัวจับเวลา · หัวข้อที่สอนถึง (null = ทุกหัวข้อ) · เข้าดันเจี้ยนกี่ครั้งต่อชั่วโมง (null = ตาม balance) */
+export const ClassroomSettings = z.object({
+  timerEnabled: z.boolean(),
+  topics: z.array(Id).min(1, "เลือกอย่างน้อย 1 หัวข้อ").nullable(),
+  dungeonEntries: z.number().int().min(1).max(20).nullable(),
+});
+export type ClassroomSettings = z.infer<typeof ClassroomSettings>;
+
+export const CreateClassroomRequest = z.object({ name: z.string().trim().min(1, "กรอกชื่อห้องเรียน").max(40) });
+export const ClaimClassroomRequest = z.object({ code: ClassCode });
+
+export interface ClassroomView {
+  id: string;
+  code: string;
+  name: string;
+  students: number;
+  settings: ClassroomSettings;
+}
+
+export interface TeacherView {
+  id: string;
+  username: string;
+  displayName: string;
+  classrooms: ClassroomView[];
+  /** ค่าเริ่มต้นของเกม (ใช้แสดงในหน้าตั้งค่า) */
+  defaults: { dungeonEntries: number; dungeonWindowMinutes: number };
+  /** หัวข้อบทเรียนทั้งหมด (ใช้เลือกหัวข้อที่สอนถึง) */
+  topics: { id: string; name: string }[];
+}
+
+export interface TeacherLoginResponse {
+  token: string;
+  teacher: TeacherView;
+}
+
+/** ผลรายหัวข้อของนักเรียน 1 คน · mastery = ค่าความชำนาญ 0–100 (null = ยังไม่เคยตอบ) */
+export interface MasteryCell {
+  answered: number;
+  correct: number;
+  mastery: number | null;
+}
+
+export interface MissedQuestionView {
+  questionId: string;
+  topic: string;
+  stem: string;
+  answered: number;
+  wrong: number;
+}
+
+/** ตารางนักเรียน × หัวข้อ + ข้อที่ผิดบ่อย 10 ข้อ */
+export interface ClassReport {
+  classroom: ClassroomView;
+  topics: { id: string; name: string }[];
+  students: {
+    playerId: string;
+    nickname: string;
+    level: number;
+    lastSeenAt: number;
+    answered: number;
+    correct: number;
+    cells: Record<string, MasteryCell>;
+  }[];
+  missed: MissedQuestionView[];
+  generatedAt: number;
+}
+
+/** คำถาม 1 ข้อในหน้าครู (มีเฉลย) · source: ไฟล์ content หรือครูนำเข้า */
+export interface QuestionAdminView {
+  question: Question;
+  source: "content" | "custom";
+  answered: number;
+  correct: number;
+}
+
+export const QuestionStatusRequest = z.object({ status: z.enum(["draft", "approved", "retired"]) });
+export const QuestionImportRequest = z.object({ csv: z.string().min(1).max(2_000_000), dryRun: z.boolean().optional() });
+
+export interface QuestionImportResponse {
+  dryRun: boolean;
+  added: string[];
+  updated: string[];
+  /** row = แถวใน spreadsheet (หัวตาราง = แถว 1) */
+  errors: { row: number; messages: string[] }[];
 }

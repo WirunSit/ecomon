@@ -860,3 +860,7 @@ button.equip-slot.filled { border-style: solid; }
 .qt-title { display: inline-flex; align-items: center; gap: 4px; }
 .qt-title .ui-ico { width: 16px; height: 16px; }
 .badge.lock .ui-ico { width: 16px; height: 16px; }
+
+/* ลิงก์หน้าครูใต้ฟอร์ม login */
+.teacher-link { display: block; margin-top: 10px; text-align: center; font-size: 13px; color: var(--ui-muted); text-decoration: none; }
+.teacher-link:hover { color: var(--ui-fg); text-decoration: underline; }

@@ -59,7 +59,7 @@ export function apiRouter(s: Services) {
         monsters: registry.monsters.size,
         moves: registry.moves.size,
         items: registry.items.size,
-        questions: registry.questions.size,
+        questions: s.questions.bank.all().length,
         maps: registry.maps.size,
       },
       maxClients: registry.balance.world.maxClients,

@@ -73,7 +73,7 @@ export class BattleController {
   start(client: Client, playerId: string, wildId: string): boolean {
     if (this.battles.has(client.sessionId)) return false;
     const { questions } = services();
-    if (questions.pool().length === 0) {
+    if (questions.pool(playerId).length === 0) {
       client.send(MSG.notice, { code: "no_questions" } satisfies NoticeMessage);
       return false;
     }

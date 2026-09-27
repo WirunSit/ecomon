@@ -15,5 +15,12 @@ export default defineConfig({
   build: {
     target: "es2022",
     chunkSizeWarningLimit: 2000,
+    // 2 หน้า: เกม (index.html) และหน้าครู (teacher.html)
+    rollupOptions: {
+      input: {
+        main: fileURLToPath(new URL("index.html", import.meta.url)),
+        teacher: fileURLToPath(new URL("teacher.html", import.meta.url)),
+      },
+    },
   },
 });

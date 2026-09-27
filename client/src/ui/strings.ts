@@ -27,6 +27,7 @@ export const UI = {
     submit: "เข้าเล่น",
     checking: "กำลังตรวจสอบ…",
     classCodeExample: "เช่น DEMO01",
+    teacherLink: "สำหรับครู →",
     invalid: "ข้อมูลไม่ถูกต้อง",
   },
   starter: {

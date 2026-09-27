@@ -39,12 +39,14 @@ export class DungeonService {
     private readonly players: PlayerService,
     private readonly catalog: CatalogService,
     private readonly events: GameEvents,
+    /** ครูตั้งจำนวนครั้งเข้าดันเจี้ยนของห้องเรียนได้ (null = ตาม balance) */
+    private readonly classEntries: (playerId: string) => number | null = () => null,
     private readonly rng: Rng = defaultRng,
   ) {}
 
-  /** จำนวนครั้งที่เข้าได้ต่อช่วงเวลา (ครูปรับได้ในเฟส 13) */
-  entriesPerWindow(_playerId: string): number {
-    return registry.balance.dungeon.entriesPerWindow;
+  /** จำนวนครั้งที่เข้าได้ต่อช่วงเวลา (ครูปรับรายห้องเรียนได้ หัวข้อ 11.6) */
+  entriesPerWindow(playerId: string): number {
+    return this.classEntries(playerId) ?? registry.balance.dungeon.entriesPerWindow;
   }
 
   private recentEntries(playerId: string, now: number): number[] {

@@ -69,7 +69,9 @@ export class LoginScene extends Phaser.Scene {
       submit.click();
     });
 
-    const screen = openScreen(this, [h("h1", { className: "logo", text: "EcoMon Quest" }), h("h2", { text: UI.login.title }), form], "title-bg");
+    const teacher = h("a", { className: "teacher-link", text: UI.login.teacherLink });
+    teacher.href = "./teacher.html";
+    const screen = openScreen(this, [h("h1", { className: "logo", text: "EcoMon Quest" }), h("h2", { text: UI.login.title }), form, teacher], "title-bg");
     const art = uiImageUrl("title");
     if (art) screen.style.setProperty("--title-art", `url("${art}")`);
     (last ? pin : classCode).focus();

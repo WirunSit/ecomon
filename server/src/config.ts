@@ -28,6 +28,8 @@ export interface ServerConfig {
   dungeonStageBreakMs: number;
   /** แผนที่ของห้องโลก (ไม่ตั้ง = balance.world.startMap) — เทสต์ใช้แผนที่ทดสอบเล็ก */
   startMap?: string;
+  /** รหัสเชิญสำหรับสมัครบัญชีครู (null = ปิดการสมัคร) — ตอนพัฒนาใช้ DEVTEACHER */
+  teacherInviteCode: string | null;
 }
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env, overrides: Partial<ServerConfig> = {}): ServerConfig {
@@ -47,6 +49,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env, overrides: Part
     questionTimer: env.QUESTION_TIMER !== "0",
     dungeonStageBreakMs: 4000,
     startMap: env.START_MAP || undefined,
+    teacherInviteCode: env.TEACHER_INVITE_CODE || (production ? null : "DEVTEACHER"),
     ...overrides,
   };
 }

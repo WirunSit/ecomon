@@ -2,6 +2,7 @@ import { STAT_KEYS, type MoveTier } from "../schema";
 import { SINGLE_FILES } from "./parse";
 import { terrainAt } from "../world/map";
 import type { ContentIssue, ContentOrigins, GameContent } from "./types";
+import { questionProblems } from "./questionCsv";
 
 export interface ValidateOptions {
   /** ตรวจว่ามีไฟล์ asset (path สัมพัทธ์กับ assets/) ถ้าไม่ส่งมาจะข้ามการตรวจภาพ */
@@ -423,9 +424,8 @@ export function validateContent(c: GameContent, origins: ContentOrigins, opts: V
     const expectedFile = `questions/${q.topic}.json`;
     if (file !== expectedFile) err(file, [...path, "topic"], `คำถามหัวข้อ "${q.topic}" ต้องอยู่ในไฟล์ ${expectedFile}`);
     topicRef(file, [...path, "topic"], q.topic);
-    if ((q.type === "mcq" || q.type === "image_mcq") && new Set(q.choices).size !== q.choices.length)
-      err(file, [...path, "choices"], "ตัวเลือกซ้ำกัน");
-    if (q.type === "image_mcq" && !q.image) err(file, [...path, "image"], "image_mcq ต้องมีภาพ");
+    // กติกาเดียวกับตอนนำเข้า CSV
+    for (const problem of questionProblems(q)) err(file, path, problem);
     if (q.status === "approved") approvedPerTopic.set(q.topic, (approvedPerTopic.get(q.topic) ?? 0) + 1);
   });
   c.topics.forEach((t, i) => {

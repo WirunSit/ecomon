@@ -25,6 +25,11 @@ import { ShopService } from "./services/shop";
 import { PlayerService } from "./services/players";
 import { QuestionService } from "./services/questions";
 import { QuestService } from "./services/quests";
+import { ClassroomService } from "./services/classrooms";
+import { QuestionBank } from "./services/questionBank";
+import { ReportService } from "./services/reports";
+import { TeacherService } from "./services/teachers";
+import { IMPORT_BODY_LIMIT, teacherRouter } from "./http/teacherRoutes";
 
 export interface GameServer {
   config: ServerConfig;
@@ -43,7 +48,9 @@ export function createGameServer(overrides: Partial<ServerConfig> = {}): GameSer
   const catalog = new CatalogService(db, events);
   const players = new PlayerService(db, catalog, events);
   const collection = new CollectionService(db, players, events);
-  const questions = new QuestionService(db, config, events);
+  const classrooms = new ClassroomService(db);
+  const bank = new QuestionBank(db);
+  const questions = new QuestionService(db, config, events, bank, (id) => classrooms.forPlayer(id));
   const inventory = new InventoryService(db, players, collection);
   const breeding = new BreedingService(db, players, collection, catalog, events, notifyPlayer);
   const s: Services = {
@@ -60,8 +67,11 @@ export function createGameServer(overrides: Partial<ServerConfig> = {}): GameSer
     questions,
     evolution: new EvolutionService(db, questions, players, catalog, events),
     breeding,
-    dungeons: new DungeonService(db, players, catalog, events),
+    dungeons: new DungeonService(db, players, catalog, events, (id) => classrooms.forPlayer(id).dungeonEntries),
     quests: new QuestService(db, players, catalog, breeding, events, { send: sendToPlayer, zoneOf: playerZone }),
+    classrooms,
+    teachers: new TeacherService(db, config, classrooms),
+    reports: new ReportService(db, classrooms, bank),
   };
   setServices(s);
   // เลเวลผู้เล่นขึ้น → แจ้งให้ client แสดงสิ่งที่ปลดล็อก (หัวข้อ 9.3)
@@ -69,12 +79,16 @@ export function createGameServer(overrides: Partial<ServerConfig> = {}): GameSer
 
   if (config.seedClassCode) ensureClassroom(db, config.seedClassCode, "ห้องเรียนทดลอง");
   s.auth.pruneExpiredSessions();
+  s.teachers.pruneExpiredSessions();
   s.dungeons.closeStale();
 
   const app = express();
   app.set("trust proxy", 1);
   app.use(cors({ origin: config.clientOrigin === "*" ? true : config.clientOrigin.split(",") }));
+  // นำเข้า CSV คำถามของครูใหญ่กว่าคำขออื่น (ต้องมาก่อนตัวจำกัด 32kb)
+  app.use("/api/teacher/questions/import", express.json({ limit: IMPORT_BODY_LIMIT }));
   app.use(express.json({ limit: "32kb" }));
+  app.use("/api/teacher", teacherRouter(s));
   app.use("/api", apiRouter(s));
   app.use(errorHandler);
 

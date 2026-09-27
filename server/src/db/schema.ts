@@ -2,12 +2,46 @@
 // ค่าพลังไม่เก็บ คำนวณสดจาก species + level + form + equipment (หัวข้อ 6.4)
 // เวลาเก็บเป็นมิลลิวินาที (epoch) ของ server
 import { index, integer, primaryKey, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
-import type { MonsterEquipment } from "@ecomon/shared";
+import type { MonsterEquipment, Question } from "@ecomon/shared";
+
+/** ครู (หัวข้อ 11.6) — login แยกจากนักเรียน ใช้ชื่อผู้ใช้ + รหัสผ่าน (scrypt) */
+export const teachers = sqliteTable("teachers", {
+  id: text("id").primaryKey(),
+  /** ชื่อผู้ใช้ตัวพิมพ์เล็ก (ไม่ซ้ำ) */
+  username: text("username").notNull().unique(),
+  displayName: text("display_name").notNull(),
+  passwordHash: text("password_hash").notNull(),
+  failedCount: integer("failed_count").notNull().default(0),
+  lockedUntil: integer("locked_until"),
+  createdAt: integer("created_at").notNull(),
+});
+
+export const teacherSessions = sqliteTable(
+  "teacher_sessions",
+  {
+    /** sha256 ของ token */
+    tokenHash: text("token_hash").primaryKey(),
+    teacherId: text("teacher_id")
+      .notNull()
+      .references(() => teachers.id, { onDelete: "cascade" }),
+    createdAt: integer("created_at").notNull(),
+    expiresAt: integer("expires_at").notNull(),
+  },
+  (t) => [index("teacher_sessions_teacher").on(t.teacherId)],
+);
 
 export const classrooms = sqliteTable("classrooms", {
   id: text("id").primaryKey(),
   code: text("code").notNull().unique(),
   name: text("name").notNull(),
+  /** ครูเจ้าของห้อง (null = ยังไม่มีครูดูแล เช่นห้องทดลองที่สร้างอัตโนมัติ) */
+  teacherId: text("teacher_id").references(() => teachers.id, { onDelete: "set null" }),
+  /** ตั้งค่าห้องเรียน (หัวข้อ 11.6): เปิด/ปิดตัวจับเวลา */
+  timerEnabled: integer("timer_enabled", { mode: "boolean" }).notNull().default(true),
+  /** หัวข้อที่ใช้ได้ (ตามที่สอนถึง) — null = ทุกหัวข้อ */
+  topics: text("topics", { mode: "json" }).$type<string[] | null>(),
+  /** จำนวนครั้งเข้าดันเจี้ยนต่อช่วงเวลา — null = ตาม balance */
+  dungeonEntries: integer("dungeon_entries"),
   createdAt: integer("created_at").notNull(),
 });
 
@@ -232,3 +266,21 @@ export const topicMastery = sqliteTable(
   },
   (t) => [primaryKey({ columns: [t.playerId, t.topic] })],
 );
+
+/** คำถามที่ครูนำเข้าผ่านหน้าครู (CSV) — เก็บทั้งข้อเป็น JSON ตาม schema Question · สถานะอยู่ในข้อมูลนั้น */
+export const customQuestions = sqliteTable("custom_questions", {
+  id: text("id").primaryKey(),
+  topic: text("topic").notNull(),
+  data: text("data", { mode: "json" }).$type<Question>().notNull(),
+  createdBy: text("created_by").references(() => teachers.id, { onDelete: "set null" }),
+  createdAt: integer("created_at").notNull(),
+  updatedAt: integer("updated_at").notNull(),
+});
+
+/** สถานะที่ครูตั้งให้คำถามในไฟล์ content (อนุมัติ/ถอน) — ทับค่า status ในไฟล์ */
+export const questionStatus = sqliteTable("question_status", {
+  questionId: text("question_id").primaryKey(),
+  status: text("status").$type<Question["status"]>().notNull(),
+  updatedBy: text("updated_by").references(() => teachers.id, { onDelete: "set null" }),
+  updatedAt: integer("updated_at").notNull(),
+});

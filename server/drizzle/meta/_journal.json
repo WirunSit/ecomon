@@ -57,6 +57,13 @@
       "when": 1790549005487,
       "tag": "0007_explorer_map",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1790550776353,
+      "tag": "0008_teacher",
+      "breakpoints": true
     }
   ]
 }

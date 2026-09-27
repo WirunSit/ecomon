@@ -13,6 +13,9 @@ import type { ShopService } from "./services/shop";
 import type { PlayerService } from "./services/players";
 import type { QuestionService } from "./services/questions";
 import type { QuestService } from "./services/quests";
+import type { ClassroomService } from "./services/classrooms";
+import type { ReportService } from "./services/reports";
+import type { TeacherService } from "./services/teachers";
 
 /** บริการที่ห้อง Colyseus ใช้ (ห้องถูกสร้างโดย framework จึงส่งผ่าน constructor ไม่ได้) — 1 process = 1 ชุด */
 export interface Services {
@@ -31,6 +34,9 @@ export interface Services {
   breeding: BreedingService;
   dungeons: DungeonService;
   quests: QuestService;
+  classrooms: ClassroomService;
+  teachers: TeacherService;
+  reports: ReportService;
 }
 
 let current: Services | null = null;

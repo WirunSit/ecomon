@@ -50,6 +50,7 @@ tools/    validate.ts, make-placeholders.ts, make-test-map.ts (อนาคต: 
 | `npm run render-maps` | วาดภาพพื้นของแผนที่ใหม่ (หลังแก้แผนที่ใน Tiled หรือ asset-src/terrain.yaml) |
 | `npm run make-test-map` | สร้างแผนที่ทดสอบ + tileset placeholder (ไม่เขียนทับ ยกเว้น `--force`) |
 | `npm run make-world-map` | สร้างแผนที่เกาะนิเวศา + tileset world_tiles (ไม่เขียนทับ ยกเว้น `--force`) |
+| `npm run import-questions -- <ไฟล์.csv>` | นำเข้าคำถามจาก CSV ลง content/questions (`--dry-run` ตรวจอย่างเดียว, `--update` แทนที่ id เดิม, `--template <ไฟล์>` เขียนแม่แบบ) |
 | `npm test` | vitest |
 | `npm run typecheck` | tsc ทุก workspace |
 | `npm run build` | validate แล้ว build client |
@@ -174,6 +175,19 @@ tools/    validate.ts, make-placeholders.ts, make-test-map.ts (อนาคต: 
 - หนี/หมดแรงก่อนเพื่อน (ห้องโลก) → `onMemberOut` → `finishMember()` สรุปผลให้คนนั้นทันที แล้ว `runner.detach()`
   · หลุดถาวร → `abort()` เพื่อนสู้ต่อ · ชนะ = ทุกคนที่ยังอยู่ได้มอนคนละตัว · เควสทีมนับจาก `partySize`
 
+## หน้าครู (เฟส 13)
+
+- หน้าเว็บแยก `client/teacher.html` → `client/src/teacher/` (ไม่โหลด Phaser/content) · REST `/api/teacher/*` ใน
+  `server/src/http/teacherRoutes.ts` · token ครูแยกจากนักเรียน (ตาราง `teachers`, `teacher_sessions`)
+- สมัครบัญชีครูต้องมีรหัสเชิญ `TEACHER_INVITE_CODE` (ตอนพัฒนา = `DEVTEACHER`, production ไม่ตั้ง = ปิดสมัคร)
+- ห้องเรียน: ครูสร้าง (รหัส 6 ตัว) หรือรับดูแลห้องที่ยังไม่มีครูด้วยรหัส · `ClassroomService` ถือการตั้งค่า (`timerEnabled`,
+  `topics`, `dungeonEntries`) → `QuestionService.pool(playerId)` / `askQuestion` / `DungeonService.entriesPerWindow` อ่านต่อผู้เล่น
+- **คลังคำถาม = `QuestionBank`** (`s.questions.bank`): ไฟล์ content + สถานะที่ครูตั้ง (`question_status`) + ข้อที่ครูนำเข้า
+  (`custom_questions`) — server ห้ามอ่าน `registry.questions` ตรง ๆ ใช้ bank แทน
+- CSV: `parseCsv/questionsFromCsv/questionToCsvRow` ใน `shared/src/content/questionCsv.ts` ใช้ทั้งหน้าครูและ CLI
+  · ข้อที่นำเข้าจากหน้าครูเป็น draft เสมอ · id ของไฟล์ content แก้จากหน้าครูไม่ได้ · `questionProblems()` ใช้ร่วมกับ validate
+- รายงาน `ReportService.classReport()` (นักเรียน × หัวข้อ + ผิดบ่อย 10 ข้อ) · ส่งออก CSV สร้างในเบราว์เซอร์
+
 ## ข้อตกลงของ content
 
 - id เป็น `a-z0-9_` ขึ้นต้นด้วยตัวอักษร ใช้เป็นชื่อไฟล์/โฟลเดอร์ asset ได้
@@ -228,7 +242,8 @@ tools/    validate.ts, make-placeholders.ts, make-test-map.ts (อนาคต: 
 - [x] เฟส 9 — ดันเจี้ยน (ดูหัวข้อ "ดันเจี้ยน" ด้านบน)
 - [x] เฟส 10 — เลเวลผู้เล่น เควส NPC และแผนที่เกาะนิเวศา (ดูหัวข้อ "เลเวลผู้เล่น เควส และ NPC" ด้านบน)
 - [x] เฟส 11 — ต่อสู้ร่วมกัน (ดูหัวข้อ "ต่อสู้ร่วมกัน" ด้านบน)
-- [ ] เฟส 13 เป็นต้นไป — ดู docs/GAME_PLAN.md หัวข้อ 13
+- [x] เฟส 13 — หน้าครูและนำเข้าคำถาม (ดูหัวข้อ "หน้าครู" ด้านบน)
+- [ ] เฟส 14 — ปรับสมดุล ทดสอบโหลด ขึ้นระบบ (docs/GAME_PLAN.md หัวข้อ 13)
 - [x] เฟส 12 — ภาพจริงครบทุก sheet: มอน/ตัวละคร/tileset/NPC/ไอเท็ม/ไข่/ฉาก/เอฟเฟกต์ (จับได้ `capture_sparkle`, เลเวลอัป
       `level_up`) · ไอคอน UI (S14) ผ่าน `ui/uiIcon.ts` (`uiIcon()`, `elementChip()`, `rarityChip()`, `roleChip()`, `statLabel()`)
       · ท่าเดินมอนบนแผนที่ `world/stepHop.ts` · validate เตือนถ้า frame ใน atlas ไม่ครบ · ยังไม่มีภาพพื้น eco_island (ต้องมี Python)

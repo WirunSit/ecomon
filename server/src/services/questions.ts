@@ -11,6 +11,7 @@ import {
   shuffledOrder,
   toClientQuestion,
   type BattleQuestionMessage,
+  type ClassroomSettings,
   type HelperResult,
   type LearnerState,
   type Question,
@@ -21,9 +22,11 @@ import type { ServerConfig } from "../config";
 import type { Db } from "../db/client";
 import { answerLog, topicMastery } from "../db/schema";
 import { registry } from "../content";
+import { DEFAULT_SETTINGS } from "./classrooms";
 import { GameError } from "./errors";
 import type { GameEvents } from "./events";
 import { takeItem } from "./inventory";
+import type { QuestionBank } from "./questionBank";
 
 /** จำนวนคำตอบล่าสุดที่โหลดจากฐานข้อมูลเพื่อสร้างสถานะกันซ้ำ/สมุดทบทวน */
 const HISTORY = 200;
@@ -73,13 +76,23 @@ export class QuestionService {
     private readonly db: Db,
     private readonly config: ServerConfig,
     private readonly events: GameEvents,
+    /** คลังคำถาม: ไฟล์ content + ที่ครูนำเข้า พร้อมสถานะที่ครูอนุมัติ */
+    readonly bank: QuestionBank,
+    /** การตั้งค่าห้องเรียนของผู้เล่น (ตัวจับเวลา หัวข้อที่สอนถึง) */
+    private readonly settingsOf: (playerId: string) => ClassroomSettings = () => DEFAULT_SETTINGS,
     private readonly rng: Rng = defaultRng,
   ) {}
 
-  /** คำถามที่ใช้ในเกมตอนนี้ (อนุมัติแล้ว + draft ถ้าเปิดไว้) จากหัวข้อที่เปิดใช้ */
-  pool(): Question[] {
+  /**
+   * คำถามที่ใช้ในเกมตอนนี้ (อนุมัติแล้ว + draft ถ้าเปิดไว้) จากหัวข้อที่เปิดใช้
+   * @param playerId ระบุ = จำกัดตามหัวข้อที่ครูของห้องเรียนนั้นเลือกไว้ (หัวข้อ 11.6)
+   */
+  pool(playerId?: string): Question[] {
     const statuses: Question["status"][] = this.config.includeDraftQuestions ? ["approved", "draft"] : ["approved"];
-    return registry.questions.all.filter((q) => statuses.includes(q.status) && registry.topics.find(q.topic)?.enabled !== false);
+    const allowed = playerId ? this.settingsOf(playerId).topics : null;
+    return this.bank
+      .all()
+      .filter((q) => statuses.includes(q.status) && registry.topics.find(q.topic)?.enabled !== false && (!allowed || allowed.includes(q.topic)));
   }
 
   /** สถานะผู้เรียน: โหลดจากฐานข้อมูลครั้งแรก แล้วเก็บในหน่วยความจำ */
@@ -131,7 +144,7 @@ export class QuestionService {
 
   /** เลือกคำถามให้ผู้เล่นคนนี้แบบปรับตามผู้เรียน (ยังไม่ถาม) — ใช้เลือกข้อเดียวสำหรับคำถามทีม */
   pick(playerId: string, zoneTopics: readonly string[], minDifficulty = 1, onlyTopic?: string, filter?: (q: Question) => boolean): Question {
-    let pool = this.pool();
+    let pool = this.pool(playerId);
     if (onlyTopic) pool = narrow(pool, (q) => q.topic === onlyTopic);
     if (filter) pool = narrow(pool, filter);
     return pickQuestion(pool, this.learner(playerId), zoneTopics, registry.balance, this.rng, minDifficulty);
@@ -145,7 +158,7 @@ export class QuestionService {
       question,
       order: shuffledOrder(question, this.rng),
       askedAt: now,
-      timeLimitSec: this.config.questionTimer ? registry.balance.questions.timeLimitSec[question.type] : null,
+      timeLimitSec: this.config.questionTimer && this.settingsOf(playerId).timerEnabled ? registry.balance.questions.timeLimitSec[question.type] : null,
       context,
       helpers: new Set(),
       removed: [],
@@ -205,7 +218,7 @@ export class QuestionService {
    * ยังไม่เคยตอบผิด → หัวข้อที่ความชำนาญต่ำสุด · เลือกเฉพาะหัวข้อที่มีคำถามใช้ได้
    */
   weakestTopic(playerId: string): string {
-    const available = new Set(this.pool().map((q) => q.topic));
+    const available = new Set(this.pool(playerId).map((q) => q.topic));
     const wrong = this.db
       .select({ topic: answerLog.topic, n: sql<number>`count(*)` })
       .from(answerLog)
