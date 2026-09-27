@@ -21,7 +21,9 @@
     "assets": "python3 tools/slice_sheets.py && python3 tools/render_maps.py",
     "render-maps": "python3 tools/render_maps.py",
     "preview-map": "tsx tools/preview-map.ts",
-    "import-questions": "tsx tools/import-questions.ts"
+    "import-questions": "tsx tools/import-questions.ts",
+    "simulate": "tsx tools/simulate.ts",
+    "load-test": "tsx --tsconfig tools/tsconfig.json tools/load-test.ts"
   },
   "devDependencies": {
     "@napi-rs/canvas": "^1.0.0",

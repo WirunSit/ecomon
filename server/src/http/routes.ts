@@ -27,10 +27,12 @@ import { GameError } from "../services/errors";
 type AuthedRequest = Request & { auth?: AuthData; token?: string };
 
 /** จำกัดจำนวนครั้งต่อช่วงเวลาแบบง่าย (ต่อ key) กันการเดา PIN */
-function rateLimit(max: number, windowMs: number, keyOf: (req: Request) => string) {
+export function rateLimit(max: number, windowMs: number, keyOf: (req: Request) => string) {
   const hits = new Map<string, { n: number; resetAt: number }>();
   return (req: Request, _res: Response, next: NextFunction) => {
     const now = Date.now();
+    // ล้าง key ที่หมดช่วงแล้วเป็นครั้งคราว ไม่ให้ Map โตไม่สิ้นสุด
+    if (hits.size > 5000) for (const [k, v] of hits) if (v.resetAt <= now) hits.delete(k);
     const key = keyOf(req);
     const h = hits.get(key);
     if (!h || h.resetAt <= now) hits.set(key, { n: 1, resetAt: now + windowMs });
@@ -68,7 +70,10 @@ export function apiRouter(s: Services) {
 
   r.post(
     "/auth/login",
-    rateLimit(30, 5 * 60_000, (req) => `ip:${req.ip}`),
+    // ทั้งห้องเรียนมักออกเน็ตด้วย IP เดียว (NAT ของโรงเรียน) → ต่อ IP ต้องพอสำหรับหลายห้องพร้อมกัน
+    // การเดา PIN ของบัญชีเดียวกันถูกจำกัดต่อบัญชี + ล็อกบัญชีเมื่อใส่ผิดหลายครั้ง (AuthService)
+    rateLimit(s.config.loginPerIpPer5Min, 5 * 60_000, (req) => `ip:${req.ip}`),
+    rateLimit(10, 5 * 60_000, (req) => `acct:${req.ip}:${String(req.body?.classCode ?? "").toUpperCase()}:${String(req.body?.nickname ?? "").toLowerCase()}`),
     (req, res) => {
       const body = LoginRequest.parse(req.body);
       const { token, playerId, created } = s.auth.login(body);

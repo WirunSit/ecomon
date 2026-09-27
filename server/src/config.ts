@@ -1,4 +1,5 @@
 // ค่าตั้งของ server อ่านจาก environment (ไม่ใช่ตัวเลขสมดุลเกม — ตัวเลขเกมอยู่ใน content/balance.json)
+import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { REPO_ROOT } from "@ecomon/shared/node";
 
@@ -28,6 +29,10 @@ export interface ServerConfig {
   dungeonStageBreakMs: number;
   /** แผนที่ของห้องโลก (ไม่ตั้ง = balance.world.startMap) — เทสต์ใช้แผนที่ทดสอบเล็ก */
   startMap?: string;
+  /** โฟลเดอร์ client ที่ build แล้ว (เสิร์ฟหน้าเกม + หน้าครูจาก server เดียวกัน) — null = ไม่เสิร์ฟ (client อยู่ที่อื่น) */
+  clientDist: string | null;
+  /** จำนวนครั้ง login ต่อ IP ใน 5 นาที (โรงเรียนใช้ IP เดียวทั้งอาคาร — ตั้งเผื่อหลายห้องเรียน) */
+  loginPerIpPer5Min: number;
   /** รหัสเชิญสำหรับสมัครบัญชีครู (null = ปิดการสมัคร) — ตอนพัฒนาใช้ DEVTEACHER */
   teacherInviteCode: string | null;
 }
@@ -49,6 +54,12 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env, overrides: Part
     questionTimer: env.QUESTION_TIMER !== "0",
     dungeonStageBreakMs: 4000,
     startMap: env.START_MAP || undefined,
+    // production: ถ้ามี client/dist (npm run build) ให้ server เสิร์ฟเองเลย · ปิดได้ด้วย SERVE_CLIENT=0
+    clientDist:
+      env.SERVE_CLIENT === "0"
+        ? null
+        : (env.CLIENT_DIST ?? (production && existsSync(join(REPO_ROOT, "client", "dist", "index.html")) ? join(REPO_ROOT, "client", "dist") : null)),
+    loginPerIpPer5Min: Number(env.LOGIN_PER_IP_PER_5MIN ?? 400),
     teacherInviteCode: env.TEACHER_INVITE_CODE || (production ? null : "DEVTEACHER"),
     ...overrides,
   };

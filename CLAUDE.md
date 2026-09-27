@@ -243,7 +243,9 @@ tools/    validate.ts, make-placeholders.ts, make-test-map.ts (อนาคต: 
 - [x] เฟส 10 — เลเวลผู้เล่น เควส NPC และแผนที่เกาะนิเวศา (ดูหัวข้อ "เลเวลผู้เล่น เควส และ NPC" ด้านบน)
 - [x] เฟส 11 — ต่อสู้ร่วมกัน (ดูหัวข้อ "ต่อสู้ร่วมกัน" ด้านบน)
 - [x] เฟส 13 — หน้าครูและนำเข้าคำถาม (ดูหัวข้อ "หน้าครู" ด้านบน)
-- [ ] เฟส 14 — ปรับสมดุล ทดสอบโหลด ขึ้นระบบ (docs/GAME_PLAN.md หัวข้อ 13)
+- [~] เฟส 14 — ทำแล้ว: `npm run simulate` (บอท 60/80% → docs/BALANCE_REPORT.md พร้อมข้อเสนอ ยังไม่แก้ balance.json รอผู้ออกแบบตัดสิน)
+      · `npm run load-test` (40 คน 8 ห้อง ผ่าน) · จำกัด login ต่อ IP ใหม่ (NAT โรงเรียน) · server เสิร์ฟ client/dist เอง (`clientDist`)
+      · Dockerfile + .env.example · ที่เหลือ: docs/DEPLOY.md, คู่มือครู 1 หน้า, deploy จริง (ต้องถามผู้ใช้ก่อน)
 - [x] เฟส 12 — ภาพจริงครบทุก sheet: มอน/ตัวละคร/tileset/NPC/ไอเท็ม/ไข่/ฉาก/เอฟเฟกต์ (จับได้ `capture_sparkle`, เลเวลอัป
       `level_up`) · ไอคอน UI (S14) ผ่าน `ui/uiIcon.ts` (`uiIcon()`, `elementChip()`, `rarityChip()`, `roleChip()`, `statLabel()`)
       · ท่าเดินมอนบนแผนที่ `world/stepHop.ts` · validate เตือนถ้า frame ใน atlas ไม่ครบ · ยังไม่มีภาพพื้น eco_island (ต้องมี Python)

@@ -93,3 +93,18 @@ describe("เลือกมอนตั้งต้น (1 ใน 3)", () => {
     expect((await t.api<PlayerProfile>("/me", { token })).body.monsterCount).toBe(1);
   });
 });
+
+describe("จำกัดการ login (กันเดา PIN แต่ไม่บล็อกทั้งห้องเรียน)", () => {
+  it("นักเรียน 40 คนจาก IP เดียวกัน (NAT ของโรงเรียน) login พร้อมกันได้ · บัญชีเดียวลองถี่เกินไปถูกจำกัด", async () => {
+    const own = await startTestServer();
+    const results = await Promise.all(
+      Array.from({ length: 40 }, (_, i) => own.api("/auth/login", { body: { classCode: CLASS, nickname: `class_kid_${i}`, pin: "1234" } })),
+    );
+    expect(results.map((r) => r.status)).toEqual(Array(40).fill(200));
+    const statuses: number[] = [];
+    for (let i = 0; i < 11; i++) statuses.push((await own.api("/auth/login", { body: { classCode: CLASS, nickname: "one_account", pin: "1234" } })).status);
+    expect(statuses.slice(0, 10)).toEqual(Array(10).fill(200));
+    expect(statuses[10]).toBe(429);
+    await own.close();
+  });
+});

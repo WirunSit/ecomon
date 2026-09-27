@@ -3,6 +3,7 @@ import { WebSocketTransport } from "@colyseus/ws-transport";
 import cors from "cors";
 import express from "express";
 import { createServer, type Server as HttpServer } from "node:http";
+import { join } from "node:path";
 import type { AddressInfo } from "node:net";
 import { DUNGEON_ROOM, WORLD_ROOM } from "@ecomon/shared";
 import { loadConfig, type ServerConfig } from "./config";
@@ -90,6 +91,11 @@ export function createGameServer(overrides: Partial<ServerConfig> = {}): GameSer
   app.use(express.json({ limit: "32kb" }));
   app.use("/api/teacher", teacherRouter(s));
   app.use("/api", apiRouter(s));
+  if (config.clientDist) {
+    // ไฟล์ใน assets/ มี hash ในชื่อ → cache ได้นาน · หน้า html ต้องโหลดใหม่เสมอ
+    app.use("/assets", express.static(join(config.clientDist, "assets"), { immutable: true, maxAge: "30d" }));
+    app.use(express.static(config.clientDist, { maxAge: 0 }));
+  }
   app.use(errorHandler);
 
   const http = createServer(app);
