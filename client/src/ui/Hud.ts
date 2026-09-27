@@ -1,4 +1,4 @@
-import { itemsById } from "../content";
+import { registry } from "../content";
 import { profile } from "../state/profile";
 import { h, uiRoot } from "./overlay";
 import { UI } from "./strings";
@@ -13,7 +13,7 @@ export class Hud {
     const name = h("span", { className: "hud-name" });
     const level = h("span", { className: "hud-level" });
     const coins = h("span", { className: "hud-coins-value" });
-    const coinItem = itemsById.get("eco_coin");
+    const coinItem = registry.items.find("eco_coin");
 
     const menuBtn = h("button", { className: "hud-menu-btn interactive" }, [
       h("span", { className: "burger" }, [h("i"), h("i"), h("i")]),

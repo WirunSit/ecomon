@@ -1,4 +1,4 @@
-import { itemsById } from "../content";
+import { registry } from "../content";
 import { profile } from "../state/profile";
 import { h, uiRoot } from "./overlay";
 import { UI } from "./strings";
@@ -23,7 +23,7 @@ export class MenuPanel {
     );
     entries.forEach((b) => (b.disabled = true));
 
-    const keyItems = p.keyItems.map((id) => itemsById.get(id)).filter((i) => !!i);
+    const keyItems = p.keyItems.map((id) => registry.items.find(id)).filter((i) => !!i);
     const close = h("button", { className: "panel-close", text: UI.close });
     close.addEventListener("click", () => this.close());
 

@@ -1,4 +1,4 @@
-import { items } from "../content";
+import { registry } from "../content";
 import { profile } from "../state/profile";
 import { h, uiRoot } from "./overlay";
 import { UI } from "./strings";
@@ -18,7 +18,7 @@ export class DevPanel {
   }
 
   constructor() {
-    const keyItems = items.filter((i) => i.category === "key");
+    const keyItems = registry.items.all.filter((i) => i.category === "key");
     const buttons = keyItems.map((item) => {
       const b = h("button", { className: "interactive" });
       b.addEventListener("click", () => {

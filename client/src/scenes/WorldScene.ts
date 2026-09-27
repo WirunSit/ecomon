@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import { checkStep, findMarker, keyItemFor, movementUnlocks, stepDurationMs, terrainAt, type Direction } from "@ecomon/shared";
-import { balance, items, maps, zones, type LoadedMap } from "../content";
+import { balance, loadedMap, registry, type LoadedMap } from "../content";
 import { InputController } from "../input/InputController";
 import { profile } from "../state/profile";
 import { DevPanel } from "../ui/DevPanel";
@@ -33,15 +33,14 @@ export class WorldScene extends Phaser.Scene {
   private menu!: MenuPanel;
   private toast!: Toast;
   private dev?: DevPanel;
-  private unlocks = movementUnlocks([], items);
+  private unlocks = movementUnlocks([], registry.items.all);
 
   constructor() {
     super("World");
   }
 
   create() {
-    const loaded = maps.get(START_MAP_ID);
-    if (!loaded) throw new Error(`ไม่พบแผนที่ ${START_MAP_ID}`);
+    const loaded = loadedMap(START_MAP_ID);
     this.loaded = loaded;
     const map = loaded.game;
 
@@ -57,11 +56,11 @@ export class WorldScene extends Phaser.Scene {
     this.controls = new InputController(this);
     this.menu = new MenuPanel();
     this.hud = new Hud(() => this.menu.toggle());
-    this.hud.setZone(map.zone ? zones.get(map.zone)?.name : undefined);
+    this.hud.setZone(map.zone ? registry.zones.find(map.zone)?.name : undefined);
     this.toast = new Toast();
     if (DevPanel.enabled()) this.dev = new DevPanel();
 
-    const unsubscribe = profile.subscribe((p) => (this.unlocks = movementUnlocks(p.keyItems, items)));
+    const unsubscribe = profile.subscribe((p) => (this.unlocks = movementUnlocks(p.keyItems, registry.items.all)));
     const onKey = (e: KeyboardEvent) => {
       if (e.code === "Escape" || e.code === "KeyM") this.menu.toggle();
     };
@@ -88,7 +87,7 @@ export class WorldScene extends Phaser.Scene {
     if (!result.ok) {
       this.player.face(dir);
       if (result.reason === "locked") {
-        const item = keyItemFor(result.terrain, items);
+        const item = keyItemFor(result.terrain, registry.items.all);
         this.toast.show(item ? UI.needItem(item.name, item.description) : UI.cannotPass);
       }
       return;

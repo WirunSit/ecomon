@@ -15,15 +15,21 @@
    - ห้าม client import `content/questions/` (เฉลยอยู่ในนั้น) ส่งคำถามด้วย `toClientQuestion()` ที่ตัดเฉลยออก
    - ใช้เวลาของ server เสมอ ไม่เชื่อเวลาจากเครื่องนักเรียน
 3. **ตอบผิดไม่ถูกลงโทษหนัก** และ **ไม่มีทางลัดข้ามการตอบคำถาม** (หัวข้อ 1)
-4. **ฟังก์ชันที่มีการสุ่มรับ RNG เป็นพารามิเตอร์** เพื่อเขียนเทสต์ได้
+4. **ฟังก์ชันที่มีการสุ่มรับ RNG เป็นพารามิเตอร์** (`Rng` ใน shared/src/formulas/rng.ts) เพื่อเขียนเทสต์ได้
+   เทสต์ใช้ `mulberry32(seed)` / `sequenceRng([...])` · server ใช้ `defaultRng`
+5. **เข้าถึง content ผ่าน registry เท่านั้น** — server: `registry` จาก `server/src/content.ts` (`loadRegistry()`)
+   client: `registry` จาก `client/src/content.ts` (สร้างจากไฟล์ที่ไม่มีคำถาม) · `registry.monsters.get(id)` โยน
+   `UnknownIdError` ถ้าไม่มี, `.find(id)` คืน undefined
+6. **สูตรคำนวณอยู่ใน shared/src/formulas ที่เดียว** ห้ามเขียนสูตรซ้ำใน client/server
 
 ## โครงสร้าง
 
 ```
 client/   Phaser 3 + Vite + HTML overlay (ฟอนต์ Kanit/Sarabun) — ความละเอียดฐาน 960x540
 server/   Node + Colyseus 0.16 (WorldRoom สูงสุด balance.world.maxClients คน) + express (/api/*)
-shared/   zod schema (shared/src/schema), parser/validator ของ content, กติกาโลก (shared/src/world:
-          ภูมิประเทศ + checkStep การเดิน), (เฟส 2) registry + สูตรคำนวณ
+shared/   zod schema (shared/src/schema), parser/validator ของ content, registry (shared/src/registry.ts),
+          สูตรคำนวณ (shared/src/formulas: stats, battle, exp, breeding, dungeon, rng),
+          กติกาโลก (shared/src/world: ภูมิประเทศ + checkStep การเดิน)
           "@ecomon/shared" ใช้ได้ทุกที่ · "@ecomon/shared/node" ใช้ fs ได้เฉพาะ server/tools/test
 content/  ข้อมูลเกมทั้งหมด (JSON) — ดูหัวข้อ 12
 assets/   ภาพที่ใช้ในเกม · assets/monsters/<id>/f{1-3}_{idle|attack}.png (ชื่อตายตัว)
@@ -76,5 +82,5 @@ tools/    validate.ts, make-placeholders.ts, make-test-map.ts (อนาคต: 
 
 - [x] เฟส 0 — ตั้งโปรเจคและกติกา
 - [x] เฟส 1 — โลกและการเดิน
-- [ ] เฟส 2 — สูตรคำนวณและ registry
+- [x] เฟส 2 — สูตรคำนวณและ registry
 - [ ] เฟส 3 เป็นต้นไป — ดู docs/GAME_PLAN.md หัวข้อ 13

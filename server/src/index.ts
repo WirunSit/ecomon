@@ -2,7 +2,7 @@ import { Server } from "@colyseus/core";
 import { WebSocketTransport } from "@colyseus/ws-transport";
 import express from "express";
 import { createServer } from "node:http";
-import { content } from "./content";
+import { registry } from "./content";
 import { WorldRoom } from "./rooms/WorldRoom";
 
 const PORT = Number(process.env.PORT ?? 2567);
@@ -15,12 +15,13 @@ app.get("/api/health", (_req, res) => {
   res.json({
     ok: true,
     content: {
-      monsters: content.monsters.length,
-      moves: content.moves.length,
-      items: content.items.length,
-      questions: content.questions.length,
+      monsters: registry.monsters.size,
+      moves: registry.moves.size,
+      items: registry.items.size,
+      questions: registry.questions.size,
+      maps: registry.maps.size,
     },
-    maxClients: content.balance.world.maxClients,
+    maxClients: registry.balance.world.maxClients,
   });
 });
 
@@ -29,4 +30,4 @@ const gameServer = new Server({ transport: new WebSocketTransport({ server: http
 gameServer.define("world", WorldRoom);
 
 await gameServer.listen(PORT);
-console.log(`[server] EcoMon Quest พร้อมที่ http://localhost:${PORT} (ws) · content: มอนสเตอร์ ${content.monsters.length} สายพันธุ์`);
+console.log(`[server] EcoMon Quest พร้อมที่ http://localhost:${PORT} (ws) · content: มอนสเตอร์ ${registry.monsters.size} สายพันธุ์`);

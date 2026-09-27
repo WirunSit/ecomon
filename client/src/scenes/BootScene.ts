@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import { FALLBACK_TEXTURE, fallbackUrl, monsterImageUrl, monsterTextureKey, tileImageUrl, tilesetTextureKey } from "../assets";
-import { maps, monsters } from "../content";
+import { loadedMap, registry } from "../content";
 import { createPlaceholderTextures } from "../textures/placeholders";
 
 /** โหลดภาพทั้งหมดที่ต้องใช้ แล้วไปฉากถัดไป (?scene=preview เพื่อเปิดหน้าตรวจ content ของเฟส 0) */
@@ -16,7 +16,7 @@ export class BootScene extends Phaser.Scene {
     this.load.on("progress", (p: number) => (bar.width = 400 * p));
 
     this.load.image(FALLBACK_TEXTURE, fallbackUrl);
-    for (const m of monsters) {
+    for (const m of registry.enabledMonsters()) {
       for (const f of m.forms) {
         for (const pose of ["idle", "attack"] as const) {
           const url = monsterImageUrl(m.id, f.form, pose);
@@ -25,7 +25,7 @@ export class BootScene extends Phaser.Scene {
       }
     }
 
-    const tilesetFiles = new Set([...maps.values()].flatMap((m) => m.tilesetImages.map((t) => t.file)));
+    const tilesetFiles = new Set(registry.maps.all.flatMap((m) => loadedMap(m.id).tilesetImages.map((t) => t.file)));
     for (const file of tilesetFiles) {
       const url = tileImageUrl(file);
       if (url) this.load.image(tilesetTextureKey(file), url);

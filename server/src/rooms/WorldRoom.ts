@@ -1,5 +1,5 @@
 import { Room, type Client } from "@colyseus/core";
-import { content } from "../content";
+import { registry } from "../content";
 import { PlayerState, WorldState } from "./WorldState";
 
 /**
@@ -8,11 +8,11 @@ import { PlayerState, WorldState } from "./WorldState";
  * TODO(เฟส 3): login, รหัสห้อง 6 หลัก, sync ตำแหน่ง + ตรวจความเร็ว, reconnect, quick chat
  */
 export class WorldRoom extends Room<WorldState> {
-  override maxClients = content.balance.world.maxClients;
+  override maxClients = registry.balance.world.maxClients;
   override state = new WorldState();
 
   override onCreate() {
-    this.setPatchRate(1000 / content.balance.world.tickRate);
+    this.setPatchRate(1000 / registry.balance.world.tickRate);
   }
 
   override onJoin(client: Client, options: { nickname?: unknown } = {}) {

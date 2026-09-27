@@ -1,7 +1,9 @@
 import Phaser from "phaser";
 import type { MonsterSpecies } from "@ecomon/shared";
 import { FALLBACK_TEXTURE, monsterTextureKey, type Pose } from "../assets";
-import { elements, monsters, roles } from "../content";
+import { registry } from "../content";
+
+const monsters = registry.enabledMonsters();
 import { h, uiRoot } from "../ui/overlay";
 
 const RARITY_LABEL: Record<MonsterSpecies["rarity"], string> = { normal: "Normal", rare: "Rare", legend: "Legend" };
@@ -100,9 +102,9 @@ export class PreviewScene extends Phaser.Scene {
 
   private showCard(m: MonsterSpecies) {
     this.card?.remove();
-    const role = roles.get(m.role);
+    const role = registry.roles.find(m.role);
     const chips = m.elements.map((id) => {
-      const el = elements.get(id);
+      const el = registry.elements.find(id);
       return h("span", { className: "chip", text: el ? `${el.name} ${el.nameEn}` : id, style: { background: el?.color ?? "#999" } });
     });
     const statRows = (Object.keys(STAT_LABEL) as (keyof typeof STAT_LABEL)[]).map((k) =>

@@ -4,6 +4,7 @@ import { dirname, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseContent, attachLines } from "./content/parse";
 import { validateContent } from "./content/validate";
+import { createRegistry, type Registry } from "./registry";
 import type { ContentFiles, ContentIssue, ContentOrigins, GameContent } from "./content/types";
 
 /** รากของ repo (ecomon/) */
@@ -67,6 +68,11 @@ export function loadContentOrThrow(opts: LoadOptions = {}): GameContent {
     throw new Error(`content ไม่ผ่านการตรวจ:\n${formatIssues(result.issues.filter((i) => i.severity === "error"))}`);
   }
   return result.content;
+}
+
+/** โหลด content ทั้งหมด (รวมคำถามพร้อมเฉลย) เป็น registry — ใช้ฝั่ง server */
+export function loadRegistry(opts: LoadOptions = {}): Registry {
+  return createRegistry(loadContentOrThrow(opts));
 }
 
 export function formatIssue(i: ContentIssue): string {
