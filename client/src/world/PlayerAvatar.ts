@@ -2,11 +2,14 @@ import Phaser from "phaser";
 import type { Direction, TileTerrain } from "@ecomon/shared";
 import { characterTextureKey, type CharFrame } from "../assets";
 import { TEX } from "../textures/placeholders";
+import { PartnerFollower } from "./PartnerFollower";
 
 /** ความสูงตัวละครบนแผนที่ (px) */
 const BODY_HEIGHT = 46;
 const RING_WIDTH = 46;
 const BOAT_WIDTH = 60;
+/** ขอบล่างของบรรทัดเหนือป้ายชื่อ (ฉายา / ไอคอนต่อสู้) */
+const TITLE_Y = 12 - BODY_HEIGHT - 16;
 
 /**
  * ตัวละครบนแผนที่ (ผู้เล่นเองและผู้เล่นอื่น) ใช้ภาพนักเรียนจาก sheet S06
@@ -28,6 +31,10 @@ export class PlayerAvatar {
   private moveTween?: Phaser.Tweens.Tween;
   private stepTimer?: Phaser.Time.TimerEvent;
   private terrain: TileTerrain = "land";
+  private titleText?: Phaser.GameObjects.Text;
+  /** คู่หูที่เดินตาม (ไม่มี = ยังไม่มีคู่หู) */
+  follower?: PartnerFollower;
+  private partnerKey = "";
   tileX: number;
   tileY: number;
   facing: Direction = "down";
@@ -99,8 +106,40 @@ export class PlayerAvatar {
     this.applyCrop();
   }
 
-  /** เดินไปช่องข้าง ๆ ใช้เวลา durationMs */
+  /** ตั้งคู่หูที่เดินตาม ("" = ไม่มี) */
+  setPartner(speciesId: string, form: number) {
+    const key = speciesId ? `${speciesId}/${form}` : "";
+    if (key === this.partnerKey) return;
+    this.partnerKey = key;
+    if (!speciesId) {
+      this.follower?.destroy();
+      this.follower = undefined;
+    } else if (this.follower) this.follower.setSpecies(speciesId, form);
+    else this.follower = new PartnerFollower(this.scene, this.tileSize, this.tileX, this.tileY, speciesId, form);
+  }
+
+  /** ฉายาเหนือชื่อ (จากรางวัลสมุดภาพ) */
+  setTitle(text: string) {
+    if (text === (this.titleText?.text ?? "")) return;
+    if (!text) {
+      this.titleText?.destroy();
+      this.titleText = undefined;
+      return;
+    }
+    if (!this.titleText) {
+      this.titleText = this.scene.add
+        .text(0, TITLE_Y, "", { fontFamily: "Kanit, sans-serif", fontSize: "10px", color: "#ffe28a", stroke: "#1b2130", strokeThickness: 3 })
+        .setOrigin(0.5, 1)
+        .setResolution(2);
+      this.container.add(this.titleText);
+    }
+    this.titleText.setText(text);
+    this.battleIcon?.setY(TITLE_Y - 13);
+  }
+
+  /** เดินไปช่องข้าง ๆ ใช้เวลา durationMs (คู่หูเดินตามไปช่องที่เพิ่งออกมา) */
   walkTo(x: number, y: number, dir: Direction, terrain: TileTerrain, durationMs: number, onDone?: () => void) {
+    this.follower?.walkTo(this.tileX, this.tileY, dir, durationMs);
     this.facing = dir;
     this.moving = true;
     this.tileX = x;
@@ -143,6 +182,7 @@ export class PlayerAvatar {
     this.stepTimer?.remove();
     this.moving = false;
     this.placeAt(x, y);
+    this.follower?.snapTo(x, y);
     this.setTerrain(terrain);
     this.setFrame("idle");
     this.body.setScale(this.bodyScale);
@@ -169,7 +209,7 @@ export class PlayerAvatar {
       return;
     }
     this.battleIcon = this.scene.add
-      .text(0, -BODY_HEIGHT - 4, "⚔", { fontFamily: "Kanit, sans-serif", fontSize: "16px", color: "#ffe28a", stroke: "#1b2130", strokeThickness: 4 })
+      .text(0, this.titleText ? TITLE_Y - 13 : TITLE_Y, "⚔", { fontFamily: "Kanit, sans-serif", fontSize: "16px", color: "#ffe28a", stroke: "#1b2130", strokeThickness: 4 })
       .setOrigin(0.5, 1)
       .setResolution(2);
     this.container.add(this.battleIcon);
@@ -179,6 +219,7 @@ export class PlayerAvatar {
   /** ผู้เล่นที่หลุดการเชื่อมต่อแสดงจางลง */
   setConnected(connected: boolean) {
     this.container.setAlpha(connected ? 1 : 0.4);
+    this.follower?.setAlpha(connected ? 1 : 0.4);
   }
 
   /** ลูกโป่งคำพูด (แชทสำเร็จรูป/อีโมต) แสดงชั่วคราว */
@@ -207,6 +248,7 @@ export class PlayerAvatar {
     this.bubbleTimer?.remove();
     this.stepTimer?.remove();
     this.moveTween?.stop();
+    this.follower?.destroy();
     this.container.destroy();
   }
 }

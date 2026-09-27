@@ -3,6 +3,7 @@ import type { z } from "zod";
 import {
   BalanceSchema,
   BreedingFileSchema,
+  CollectionRewardsFileSchema,
   DungeonsFileSchema,
   ElementsFileSchema,
   ItemsFileSchema,
@@ -35,6 +36,7 @@ export const SINGLE_FILES = {
   dungeons: "dungeons.json",
   spawnTables: "spawn-tables.json",
   quickChat: "quick-chat.json",
+  collection: "collection-rewards.json",
 } as const;
 
 /** โฟลเดอร์ที่ 1 ไฟล์ = 1 record */
@@ -138,6 +140,7 @@ export function parseContent(files: ContentFiles): ParseResult {
   const dungeons = single(SINGLE_FILES.dungeons, DungeonsFileSchema);
   const spawnTables = single(SINGLE_FILES.spawnTables, SpawnTablesFileSchema);
   const quickChat = single(SINGLE_FILES.quickChat, QuickChatFileSchema);
+  const collection = single(SINGLE_FILES.collection, CollectionRewardsFileSchema);
 
   const inDir = (dir: string, ext = ".json") =>
     Object.keys(files)
@@ -207,7 +210,8 @@ export function parseContent(files: ContentFiles): ParseResult {
     !breeding ||
     !dungeons ||
     !spawnTables ||
-    !quickChat
+    !quickChat ||
+    !collection
   ) {
     return { origins, issues: attachLines(issues, files) };
   }
@@ -229,6 +233,7 @@ export function parseContent(files: ContentFiles): ParseResult {
     quests,
     questions,
     quickChat,
+    collectionRewards: collection.rewards,
     maps,
   };
   // เรียงมอนสเตอร์ตาม dex (ลำดับใน catalog) พร้อมเรียงที่มาของไฟล์ตาม

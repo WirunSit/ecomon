@@ -52,6 +52,10 @@ export function showEndPanel(end: BattleEndMessage): Promise<void> {
     lines.push(h("li", { className: "up", text: b.levelUp(nameOf(end, lv.uid, lv.speciesId), lv.from, lv.to) }));
     for (const id of lv.newMoves) lines.push(h("li", { className: "up", text: b.newMove(registry.moves.find(id)?.name ?? id) }));
   }
+  for (const u of end.catalogUnlocks ?? []) {
+    const gifts = [registry.title(u.titleId)?.name, registry.frame(u.frameId)?.name, ...u.items.map((it) => `${registry.items.find(it.id)?.name ?? it.id}${it.tier ? ` (${UI.catalog.tier[it.tier] ?? it.tier})` : ""} ×${it.qty}`), u.coins ? UI.catalog.coins(u.coins) : ""];
+    lines.push(h("li", { className: "up", text: `📖 ${UI.catalog.unlocked(Math.round(u.percent * 100))}: ${gifts.filter(Boolean).join(" · ")}` }));
+  }
   if (end.playerLevelUp) lines.push(h("li", { className: "up", text: b.playerLevelUp(end.playerLevelUp.from, end.playerLevelUp.to) }));
 
   const done = h("button", { className: "btn primary big", text: b.backToMap });

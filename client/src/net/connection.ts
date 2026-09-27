@@ -14,6 +14,8 @@ export interface PlayerView {
   inBattle: boolean;
   partnerSpecies: string;
   partnerForm: number;
+  /** id ฉายา ("" = ไม่มี) */
+  title: string;
 }
 
 export interface WorldView {

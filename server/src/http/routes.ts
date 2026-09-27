@@ -3,6 +3,8 @@ import express, { type NextFunction, type Request, type Response } from "express
 import { ZodError } from "zod";
 import {
   LoginRequest,
+  MonsterAction,
+  ProfileStyleRequest,
   ROOM_CODE_PATTERN,
   StarterRequest,
   WORLD_ROOM,
@@ -12,6 +14,7 @@ import {
 } from "@ecomon/shared";
 import { registry } from "../content";
 import type { Services } from "../context";
+import { playerInBattle, profileChanged } from "../rooms/hooks";
 import type { AuthData } from "../services/auth";
 import { GameError } from "../services/errors";
 
@@ -79,6 +82,31 @@ export function apiRouter(s: Services) {
   r.post("/me/starter", requireAuth, (req: AuthedRequest, res) => {
     const { speciesId, avatar } = StarterRequest.parse(req.body);
     res.json(s.players.chooseStarter(req.auth!.playerId, speciesId, avatar));
+  });
+
+  // ---------- คลังของฉัน / สมุดภาพ (หัวข้อ 6) ----------
+
+  r.get("/monsters", requireAuth, (req: AuthedRequest, res) => {
+    res.json(s.collection.list(req.auth!.playerId));
+  });
+
+  r.post("/monsters/:uid/action", requireAuth, (req: AuthedRequest, res) => {
+    const playerId = req.auth!.playerId;
+    const action = MonsterAction.parse(req.body);
+    const result = s.collection.action(playerId, String(req.params.uid), action, playerInBattle(playerId));
+    profileChanged(playerId, result.profile);
+    res.json(result);
+  });
+
+  r.get("/catalog", requireAuth, (req: AuthedRequest, res) => {
+    res.json(s.catalog.view(req.auth!.playerId));
+  });
+
+  r.post("/me/style", requireAuth, (req: AuthedRequest, res) => {
+    const playerId = req.auth!.playerId;
+    const profile = s.players.setStyle(playerId, ProfileStyleRequest.parse(req.body));
+    profileChanged(playerId, profile);
+    res.json(profile);
   });
 
   r.get("/rooms/:code", requireAuth, (req: AuthedRequest, res, next) => {

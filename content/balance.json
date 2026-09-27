@@ -162,7 +162,13 @@
       0.5,
       0.75,
       1.0
-    ]
+    ],
+    "releasePoints": {
+      "normal": 1,
+      "rare": 3,
+      "legend": 10
+    },
+    "nicknameMaxLength": 12
   },
   "breeding": {
     "maxEggs": 3,

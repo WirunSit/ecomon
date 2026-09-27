@@ -1,0 +1,32 @@
+{
+  "rewards": [
+    {
+      "percent": 0.25,
+      "title": { "id": "title_explorer", "name": "นักสำรวจมือใหม่" },
+      "frame": { "id": "frame_leaf", "name": "กรอบใบไม้", "color": "#5DBB4A" },
+      "items": [{ "id": "honey_potion", "qty": 3 }],
+      "coins": 100
+    },
+    {
+      "percent": 0.5,
+      "title": { "id": "title_naturalist", "name": "นักธรรมชาติวิทยา" },
+      "frame": { "id": "frame_river", "name": "กรอบสายน้ำ", "color": "#3B9BE8" },
+      "items": [{ "id": "knowledge_charm", "qty": 1, "tier": "common" }],
+      "coins": 200
+    },
+    {
+      "percent": 0.75,
+      "title": { "id": "title_ecologist", "name": "นักนิเวศวิทยา" },
+      "frame": { "id": "frame_sunset", "name": "กรอบอาทิตย์อัสดง", "color": "#EF6A3A" },
+      "items": [{ "id": "golden_honey", "qty": 2 }, { "id": "power_candy", "qty": 2 }],
+      "coins": 300
+    },
+    {
+      "percent": 1,
+      "title": { "id": "title_guardian", "name": "ผู้พิทักษ์เกาะนิเวศา" },
+      "frame": { "id": "frame_gold", "name": "กรอบทองคำ", "color": "#F2C94C" },
+      "items": [{ "id": "knowledge_charm", "qty": 1, "tier": "rare" }],
+      "coins": 500
+    }
+  ]
+}

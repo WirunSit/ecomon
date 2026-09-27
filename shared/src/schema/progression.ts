@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Id, LevelRange, Text } from "./common";
+import { HexColor, Id, LevelRange, Text } from "./common";
 
 /** content/breeding-recipes.json (หัวข้อ 7.2–7.3) */
 export const BreedingFileSchema = z.strictObject({
@@ -122,3 +122,27 @@ export const QuestDef = z.strictObject({
   enabled: z.boolean().default(true),
 });
 export type QuestDef = z.infer<typeof QuestDef>;
+
+/** ของรางวัล 1 ชิ้น · ไอเท็มสวมใส่ต้องระบุขั้น (tier ตาม balance.equipment.tierMultiplier) */
+export const RewardItem = z.strictObject({
+  id: Id,
+  qty: z.number().int().positive(),
+  tier: z.enum(["common", "good", "rare"]).optional(),
+});
+
+/** content/collection-rewards.json — รางวัลเมื่อสมุดภาพครบ 25/50/75/100% (หัวข้อ 6.2) */
+export const CollectionRewardsFileSchema = z.strictObject({
+  rewards: z
+    .array(
+      z.strictObject({
+        /** สัดส่วนที่ต้องครบ ต้องตรงกับ balance.collection.rewardThresholds ลำดับเดียวกัน */
+        percent: z.number().gt(0).max(1),
+        title: z.strictObject({ id: Id, name: Text }),
+        frame: z.strictObject({ id: Id, name: Text, color: HexColor }),
+        items: z.array(RewardItem).default([]),
+        coins: z.number().int().nonnegative().default(0),
+      }),
+    )
+    .min(1),
+});
+export type CollectionReward = z.infer<typeof CollectionRewardsFileSchema>["rewards"][number];

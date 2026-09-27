@@ -22,7 +22,11 @@ import { InputController } from "../input/InputController";
 import { connection, type PlayerView, type WorldRoom } from "../net/connection";
 import { session } from "../net/session";
 import { profile } from "../state/profile";
+import { CatalogPanel } from "../ui/collection/CatalogPanel";
+import { CollectionPanel } from "../ui/collection/CollectionPanel";
+import { TeamQuick } from "../ui/collection/TeamQuick";
 import { DevPanel } from "../ui/DevPanel";
+import { FullPanel } from "../ui/FullPanel";
 import { Hud } from "../ui/Hud";
 import { MenuPanel } from "../ui/MenuPanel";
 import { h, uiRoot } from "../ui/overlay";
@@ -63,6 +67,9 @@ export class WorldScene extends Phaser.Scene {
   private menu!: MenuPanel;
   private chat!: QuickChatPanel;
   private toast!: Toast;
+  private collection!: CollectionPanel;
+  private catalog!: CatalogPanel;
+  private teamQuick!: TeamQuick;
   private dev?: DevPanel;
   private blocker?: HTMLElement;
   private unlocks = movementUnlocks([], registry.items.all);
@@ -112,14 +119,21 @@ export class WorldScene extends Phaser.Scene {
     cam.setRoundPixels(true);
 
     this.controls = new InputController(this);
-    this.menu = new MenuPanel([
-      { label: UI.room.leave, run: () => void this.leaveTo("Lobby") },
-      { label: UI.room.logout, run: () => void this.leaveTo("Login") },
-    ]);
-    this.chat = new QuickChatPanel((msg) => room.send(MSG.chat, msg));
-    this.hud = new Hud({ onMenu: () => this.menu.toggle(), onChat: () => this.chat.toggle() });
-    this.hud.setZone(map.zone ? registry.zones.find(map.zone)?.name : undefined);
     this.toast = new Toast();
+    const say = (text: string) => this.toast.show(text, 3000);
+    this.collection = new CollectionPanel(say);
+    this.catalog = new CatalogPanel(say);
+    this.teamQuick = new TeamQuick(() => void this.collection.open(), say);
+    this.menu = new MenuPanel(
+      [
+        { label: UI.room.leave, run: () => void this.leaveTo("Lobby") },
+        { label: UI.room.logout, run: () => void this.leaveTo("Login") },
+      ],
+      { collection: () => void this.collection.open(), catalog: () => void this.catalog.open() },
+    );
+    this.chat = new QuickChatPanel((msg) => room.send(MSG.chat, msg));
+    this.hud = new Hud({ onMenu: () => this.menu.toggle(), onChat: () => this.chat.toggle(), onPartner: () => this.teamQuick.toggle() });
+    this.hud.setZone(map.zone ? registry.zones.find(map.zone)?.name : undefined);
     if (DevPanel.enabled()) {
       this.dev = new DevPanel(
         (itemId) => room.send(MSG.devToggleKeyItem, { itemId }),
@@ -179,6 +193,7 @@ export class WorldScene extends Phaser.Scene {
 
     const unsubscribe = profile.subscribe((p) => (this.unlocks = movementUnlocks(p.keyItems, registry.items.all)));
     const onKey = (e: KeyboardEvent) => {
+      if (FullPanel.isOpen || this.battle || e.target instanceof HTMLInputElement) return;
       if (e.code === "Escape" || e.code === "KeyM") this.menu.toggle();
     };
     window.addEventListener("keydown", onKey);
@@ -191,6 +206,8 @@ export class WorldScene extends Phaser.Scene {
       this.menu.close();
       this.chat.close();
       this.toast.destroy();
+      FullPanel.closeAll();
+      this.teamQuick.close();
       this.dev?.destroy();
       this.blocker?.remove();
       if (this.scene.isActive("Battle") || this.scene.isPaused("Battle")) this.scene.stop("Battle");
@@ -205,11 +222,13 @@ export class WorldScene extends Phaser.Scene {
 
   override update(time: number) {
     if (!this.player) return;
+    const self = this.room.state.players?.get(this.room.sessionId);
+    if (self) this.applyLooks(this.player, self);
     this.updateRemotes();
     this.sortByDepth();
     if (this.blocker || this.battle || time < this.encounterUntil) return;
 
-    const dir = this.menu.isOpen ? null : this.controls.direction();
+    const dir = this.menu.isOpen || FullPanel.isOpen ? null : this.controls.direction();
     if (dir) this.lastInputAt = time;
     if (this.player.isMoving) return;
     if (!dir) return this.reconcile(time);
@@ -278,6 +297,8 @@ export class WorldScene extends Phaser.Scene {
     if (on) {
       this.menu.close();
       this.chat.close();
+      this.teamQuick.close();
+      FullPanel.closeAll();
     }
   }
 
@@ -301,8 +322,18 @@ export class WorldScene extends Phaser.Scene {
   private sortByDepth() {
     const set = (c: Phaser.GameObjects.Container, bias: number) => c.setDepth(depthForY(c.y, bias));
     set(this.player.container, 0.00002);
-    for (const r of this.remotes.values()) set(r.avatar.container, 0.00001);
+    if (this.player.follower) set(this.player.follower.container, 0.000015);
+    for (const r of this.remotes.values()) {
+      set(r.avatar.container, 0.00001);
+      if (r.avatar.follower) set(r.avatar.follower.container, 0.000005);
+    }
     for (const w of this.wild.values()) set(w.container, 0);
+  }
+
+  /** คู่หูที่เดินตาม + ฉายา ตาม state จาก server */
+  private applyLooks(avatar: PlayerAvatar, view: PlayerView) {
+    avatar.setPartner(view.partnerSpecies, view.partnerForm);
+    avatar.setTitle(view.title ? (registry.title(view.title)?.name ?? "") : "");
   }
 
   private addRemote(sessionId: string, view: PlayerView) {
@@ -318,6 +349,7 @@ export class WorldScene extends Phaser.Scene {
   private updateRemotes() {
     const map = this.loaded.game;
     for (const { avatar, view } of this.remotes.values()) {
+      this.applyLooks(avatar, view);
       avatar.setConnected(view.connected);
       avatar.setBattling(view.inBattle);
       if (avatar.isMoving) continue;

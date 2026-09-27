@@ -1,6 +1,7 @@
 import type {
   Balance,
   BreedingRecipes,
+  CollectionReward,
   DungeonDef,
   ElementDef,
   ItemDef,
@@ -36,6 +37,8 @@ export interface GameContent {
   quests: QuestDef[];
   questions: Question[];
   quickChat: QuickChat;
+  /** รางวัลสมุดภาพ เรียงตาม balance.collection.rewardThresholds */
+  collectionRewards: CollectionReward[];
   /** แผนที่จาก content/maps/<id>.tmj */
   maps: GameMap[];
 }

@@ -82,6 +82,19 @@ tools/    validate.ts, make-placeholders.ts, make-test-map.ts (อนาคต: 
   · แผง HTML อยู่ใน `client/src/ui/battle/` (การ์ด HP, แผงท่า, แผงคำถาม, สรุปผล)
 - โหมดทดสอบ: ปุ่ม "เรียกมอนป่ามาข้างหน้า" (`dev:summon-wild`, ต้องเปิด DEV_TOOLS)
 
+## คลังและสมุดภาพ (เฟส 6)
+
+- REST: `GET /api/monsters` (คลัง + ค่าพลังสดที่ server คำนวณ) · `POST /api/monsters/:uid/action` (`MonsterAction`:
+  partner / team_add / team_remove / lock / release / unbox / nickname) · `GET /api/catalog` · `POST /api/me/style` (ฉายา/กรอบ)
+- `server/src/services/collection.ts` ตัดสินกติกาทีม (ทีม 3 ตัว ต้องเหลือ 1 · ระหว่างต่อสู้เปลี่ยนไม่ได้ · กล่องพักใส่ทีมไม่ได้)
+  ลำดับทีมใช้ `rearrangeTeam()` ใน shared · ปล่อยคืนธรรมชาติได้แต้มอนุรักษ์ `balance.collection.releasePoints`
+- `server/src/services/catalog.ts` — ตาราง `catalog` 1 แถวต่อ (สายพันธุ์, ร่าง): เคยพบ = เริ่มต่อสู้ด้วย · เคยมี = ได้มา
+  (ปล่อยไปแล้วยังนับ) · ครบขั้นใน `balance.collection.rewardThresholds` → ให้รางวัลจาก `content/collection-rewards.json` ทันที
+  ได้มอนร่างใหม่ในเฟสถัดไป (พัฒนาร่าง ฟักไข่) ต้องเรียก `catalog.owned()` ด้วย
+- REST ที่เปลี่ยนสิ่งที่เพื่อนเห็น (คู่หู ฉายา) แจ้งห้องผ่าน `server/src/rooms/hooks.ts` → `WorldRoom.refreshPlayer()`
+- client: `ui/collection/` (CollectionPanel, CatalogPanel, TeamQuick) บน `FullPanel` · ภาพมอนใน HTML ตัดจาก atlas ด้วย
+  `monsterThumb()` · เงาดำ = CSS class `silhouette` · คู่หูเดินตาม = `world/PartnerFollower.ts` (ผูกกับ PlayerAvatar)
+
 ## ข้อตกลงของ content
 
 - id เป็น `a-z0-9_` ขึ้นต้นด้วยตัวอักษร ใช้เป็นชื่อไฟล์/โฟลเดอร์ asset ได้
@@ -130,6 +143,7 @@ tools/    validate.ts, make-placeholders.ts, make-test-map.ts (อนาคต: 
 - [x] เฟส 3 — Server, ห้อง 5 คน, login, บันทึกข้อมูล
 - [x] เฟส 4 — จุดเกิดมอนสเตอร์ (server/src/world/SpawnManager.ts)
 - [x] เฟส 5 — คำถาม การต่อสู้ และการจับมอน (ดูหัวข้อ "การต่อสู้และคำถาม" ด้านบน)
-- [ ] เฟส 6 เป็นต้นไป — ดู docs/GAME_PLAN.md หัวข้อ 13
+- [x] เฟส 6 — คลังของฉัน สมุดภาพ คู่หู (ดูหัวข้อ "คลังและสมุดภาพ" ด้านบน)
+- [ ] เฟส 7 เป็นต้นไป — ดู docs/GAME_PLAN.md หัวข้อ 13
 - [~] เฟส 12 — ทำ pipeline ตัดภาพ (หัวข้อ 15) และใช้ภาพจริงกับมอนสเตอร์ ตัวละคร tileset หน้า login แล้ว
       ฉากต่อสู้ (S11–S12) และเอฟเฟกต์ธาตุ (S15) ใช้แล้วในเฟส 5 · ที่เหลือ: ภาพ NPC/ไอเท็ม/ไข่ จะผูกเข้าเกมตามเฟสที่ใช้

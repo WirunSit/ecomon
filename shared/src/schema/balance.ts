@@ -120,6 +120,10 @@ export const BalanceSchema = z.strictObject({
     storagePerStep: z.number().int().nonnegative(),
     storageStepLevels: PosInt,
     rewardThresholds: z.array(Probability).min(1),
+    /** แต้มอนุรักษ์ที่ได้เมื่อปล่อยมอนคืนธรรมชาติ ตามความหายาก (หัวข้อ 5.2) */
+    releasePoints: z.strictObject({ normal: z.number().int().nonnegative(), rare: z.number().int().nonnegative(), legend: z.number().int().nonnegative() }),
+    /** ความยาวชื่อเล่นมอนสูงสุด (ตัวอักษร) */
+    nicknameMaxLength: PosInt,
   }),
   breeding: z.strictObject({
     maxEggs: PosInt,

@@ -12,6 +12,8 @@ import { apiRouter, errorHandler } from "./http/routes";
 import { WorldRoom } from "./rooms/WorldRoom";
 import { AuthService, ensureClassroom } from "./services/auth";
 import { BattleService } from "./services/battles";
+import { CatalogService } from "./services/catalog";
+import { CollectionService } from "./services/collection";
 import { PlayerService } from "./services/players";
 import { QuestionService } from "./services/questions";
 
@@ -28,13 +30,17 @@ export interface GameServer {
 export function createGameServer(overrides: Partial<ServerConfig> = {}): GameServer {
   const config = loadConfig(process.env, overrides);
   const db = openDatabase(config.databasePath);
+  const catalog = new CatalogService(db);
+  const players = new PlayerService(db, catalog);
   const s: Services = {
     config,
     db,
     auth: new AuthService(db, config),
-    players: new PlayerService(db),
+    players,
     questions: new QuestionService(db, config),
-    battles: new BattleService(db),
+    battles: new BattleService(db, catalog),
+    catalog,
+    collection: new CollectionService(db, players),
   };
   setServices(s);
 

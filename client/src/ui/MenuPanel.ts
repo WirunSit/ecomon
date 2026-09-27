@@ -12,7 +12,14 @@ export interface MenuAction {
 export class MenuPanel {
   private el?: HTMLElement;
 
-  constructor(private readonly actions: MenuAction[] = []) {}
+  /**
+   * @param actions ปุ่มด้านล่าง (ออกจากห้อง ออกจากระบบ)
+   * @param features หน้าต่างที่เปิดใช้แล้ว ตาม id ใน UI.menuItems (ที่ไม่มีแสดงว่า "เร็ว ๆ นี้")
+   */
+  constructor(
+    private readonly actions: MenuAction[] = [],
+    private readonly features: Partial<Record<string, () => void>> = {},
+  ) {}
 
   get isOpen() {
     return !!this.el;
@@ -25,10 +32,16 @@ export class MenuPanel {
 
   open() {
     const p = profile.get();
-    const entries = UI.menuItems.map((m) =>
-      h("button", { className: "menu-entry", text: m.label }, [h("small", { text: `${UI.comingSoon} (เฟส ${m.phase})` })]),
-    );
-    entries.forEach((b) => (b.disabled = true));
+    const entries = UI.menuItems.map((m) => {
+      const run = this.features[m.id];
+      const b = h("button", { className: "menu-entry", text: m.label }, run ? [] : [h("small", { text: UI.soon(m.phase) })]);
+      b.disabled = !run;
+      b.addEventListener("click", () => {
+        this.close();
+        run?.();
+      });
+      return b;
+    });
 
     const keyItems = p.keyItems.map((id) => registry.items.find(id)).filter((i) => !!i);
     const close = h("button", { className: "panel-close", text: UI.close });

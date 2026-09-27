@@ -6,6 +6,7 @@ import { LoginScene } from "./scenes/LoginScene";
 import { PreviewScene } from "./scenes/PreviewScene";
 import { StarterScene } from "./scenes/StarterScene";
 import { WorldScene } from "./scenes/WorldScene";
+import { setThumbnailSource } from "./ui/monsterThumb";
 
 /** ความละเอียดฐาน 960x540 ขยายแบบคงสัดส่วน */
 export const GAME_WIDTH = 960;
@@ -18,7 +19,7 @@ async function start() {
     new Promise((resolve) => setTimeout(resolve, 2500)),
   ]);
 
-  new Phaser.Game({
+  const game = new Phaser.Game({
     type: Phaser.AUTO,
     parent: "game",
     backgroundColor: "#1b2130",
@@ -32,6 +33,7 @@ async function start() {
     },
     scene: [BootScene, LoginScene, StarterScene, LobbyScene, WorldScene, BattleScene, PreviewScene],
   });
+  setThumbnailSource(game);
 }
 
 void start();

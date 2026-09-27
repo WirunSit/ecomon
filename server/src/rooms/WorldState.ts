@@ -10,11 +10,13 @@ export class PlayerState extends Schema {
   @type("string") facing = "down";
   /** false = หลุดการเชื่อมต่อ รอกลับเข้าห้อง (reconnect) */
   @type("boolean") connected = true;
-  /** คู่หู (ใช้แสดงคู่หูเดินตามในเฟส 6) */
   /** กำลังต่อสู้อยู่ (เพื่อนเห็นสัญลักษณ์ต่อสู้เหนือหัว) */
   @type("boolean") inBattle = false;
+  /** คู่หูที่เดินตามบนแผนที่ (หัวข้อ 6.1) "" = ไม่มี */
   @type("string") partnerSpecies = "";
   @type("number") partnerForm = 1;
+  /** ฉายาที่เลือกใช้ (id ใน collection-rewards.json) "" = ไม่มี */
+  @type("string") title = "";
 }
 
 /** มอนป่า 1 ตัวบนแผนที่ (หัวข้อ 10.3) — มอนป่าเป็นร่าง 1 เสมอ (หัวข้อ 5.2) */

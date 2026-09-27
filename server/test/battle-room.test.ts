@@ -106,6 +106,8 @@ describe("ชนมอนป่า → สู้ด้วยการตอบ�
     expect(end.profile.monsterCount).toBe(2);
     expect(end.profile.team.map((m) => m.speciesId)).toEqual(["puibai", "fungfiw"]);
     expect(end.profile.coins).toBe(100 + end.coins);
+    expect(end.catalogUnlocks).toEqual([]);
+    expect(t.server.services.catalog.view(player.profile.id).entries).toContainEqual({ speciesId: "fungfiw", form: 1, status: "owned" });
 
     const db = t.server.services.db;
     expect(db.select().from(answerLog).where(eq(answerLog.playerId, player.profile.id)).all().length).toBe(end.answered);
@@ -136,12 +138,14 @@ describe("หมดเวลา หนี แพ้ และจุดฟื้�
   });
 
   it("หนีได้เสมอ มอนป่ากลับมาเดินได้", async () => {
-    const { room, box, server } = await setup("runner");
+    const { player: runner, room, box, server } = await setup("runner");
     const wild = placeWildAbove(server, room, "fungfiw", 3);
     await startBattle(room, box);
     room.send(MSG.battleAction, { type: "flee" });
     await until(() => box[MSG.battleEnd]!.length > 0, 3000, "fled");
     expect(box[MSG.battleEnd]![0]).toMatchObject({ result: "fled", coins: 0 });
+    // หนีแล้วยังนับว่า "เคยพบ" ในสมุดภาพ
+    expect(t.server.services.catalog.view(runner.profile.id).entries).toContainEqual({ speciesId: "fungfiw", form: 1, status: "seen" });
     expect(server.spawner.monsters.get(wild.id)?.locked).toBe(false);
     await room.leave();
   });

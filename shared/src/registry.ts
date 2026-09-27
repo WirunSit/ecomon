@@ -53,6 +53,7 @@ export class Registry {
   readonly balance: GameContent["balance"];
   readonly breeding: GameContent["breeding"];
   readonly quickChat: GameContent["quickChat"];
+  readonly collectionRewards: GameContent["collectionRewards"];
   readonly monsters: IdTable<MonsterSpecies>;
   readonly moves: IdTable<GameContent["moves"][number]>;
   readonly items: IdTable<GameContent["items"][number]>;
@@ -76,6 +77,7 @@ export class Registry {
     this.balance = content.balance;
     this.breeding = content.breeding;
     this.quickChat = content.quickChat;
+    this.collectionRewards = content.collectionRewards;
     this.monsters = new IdTable("มอนสเตอร์", [...content.monsters].sort((a, b) => a.dex - b.dex));
     this.moves = new IdTable("ท่า", content.moves);
     this.items = new IdTable("ไอเท็ม", content.items);
@@ -97,6 +99,21 @@ export class Registry {
   /** มอนสเตอร์ที่เปิดใช้ เรียงตาม dex (ลำดับใน catalog) */
   enabledMonsters(rarity?: Rarity): MonsterSpecies[] {
     return this.monsters.all.filter((m) => m.enabled && (!rarity || m.rarity === rarity));
+  }
+
+  /** ช่องในสมุดภาพ: ทุกร่างของมอนที่เปิดใช้ เรียงตาม dex แล้วตามร่าง (หัวข้อ 6.2 นับแยกทุกร่าง) */
+  catalogSlots(): { speciesId: string; form: number }[] {
+    return this.enabledMonsters().flatMap((m) => m.forms.map((f) => ({ speciesId: m.id, form: f.form })));
+  }
+
+  /** ฉายาจากรางวัลสมุดภาพ */
+  title(id: string) {
+    return this.collectionRewards.find((r) => r.title.id === id)?.title;
+  }
+
+  /** กรอบโปรไฟล์จากรางวัลสมุดภาพ */
+  frame(id: string) {
+    return this.collectionRewards.find((r) => r.frame.id === id)?.frame;
   }
 
   /** คำถามของหัวข้อ (ค่าเริ่มต้น: เฉพาะที่ครูอนุมัติแล้ว) */

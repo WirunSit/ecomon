@@ -28,6 +28,11 @@ export const players = sqliteTable(
     partnerUid: text("partner_uid"),
     /** รูปลักษณ์ตัวละคร (index ของนักเรียนใน sheet S06) */
     avatar: integer("avatar").notNull().default(0),
+    /** ฉายา/กรอบโปรไฟล์ที่เลือกใช้ (id จาก content/collection-rewards.json) */
+    titleId: text("title_id"),
+    frameId: text("frame_id"),
+    /** ได้รางวัลสมุดภาพไปแล้วกี่ขั้น */
+    catalogRewards: integer("catalog_rewards").notNull().default(0),
     mapId: text("map_id"),
     x: integer("x"),
     y: integer("y"),
@@ -85,6 +90,21 @@ export const monsters = sqliteTable(
     obtainedAt: integer("obtained_at").notNull(),
   },
   (t) => [index("monsters_player").on(t.playerId)],
+);
+
+/** สมุดภาพ (หัวข้อ 6.2): 1 แถว = 1 ร่างของ 1 สายพันธุ์ที่เคยพบ · ownedAt = เคยมีแล้ว (ปล่อยไปก็ยังนับ) */
+export const catalog = sqliteTable(
+  "catalog",
+  {
+    playerId: text("player_id")
+      .notNull()
+      .references(() => players.id, { onDelete: "cascade" }),
+    speciesId: text("species_id").notNull(),
+    form: integer("form").notNull(),
+    seenAt: integer("seen_at").notNull(),
+    ownedAt: integer("owned_at"),
+  },
+  (t) => [primaryKey({ columns: [t.playerId, t.speciesId, t.form] })],
 );
 
 /** กระเป๋า: ไอเท็มสวมใส่แยกตามขั้น (tier) · ไอเท็มอื่น tier = "" */

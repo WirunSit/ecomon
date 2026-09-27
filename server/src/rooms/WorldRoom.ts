@@ -16,6 +16,7 @@ import {
   type Direction,
   type GameMap,
   type NoticeMessage,
+  type PlayerProfile,
   type Unlock,
   type WorldJoinOptions,
 } from "@ecomon/shared";
@@ -135,9 +136,9 @@ export class WorldRoom extends Room<WorldState, { code: string; classroomId: str
     p.x = start.x;
     p.y = start.y;
     p.facing = start.facing;
-    p.partnerSpecies = profile.partner?.speciesId ?? "";
-    p.partnerForm = profile.partner?.form ?? 1;
+    this.applyProfile(p, profile);
     this.state.players.set(client.sessionId, p);
+    services().catalog.syncOwned(auth.playerId); // ข้อมูลเก่าก่อนมีสมุดภาพ
 
     const now = Date.now();
     client.userData = {
@@ -310,6 +311,26 @@ export class WorldRoom extends Room<WorldState, { code: string; classroomId: str
     if (now - ud.lastChatAt < registry.balance.world.chatCooldownSec * 1000) return;
     ud.lastChatAt = now;
     this.broadcast(MSG.chat, { sessionId: client.sessionId, kind, id } satisfies ChatBroadcast);
+  }
+
+  // ---------- ข้อมูลผู้เล่นที่เพื่อนเห็น ----------
+
+  private applyProfile(p: PlayerState, profile: PlayerProfile) {
+    p.partnerSpecies = profile.partner?.speciesId ?? "";
+    p.partnerForm = profile.partner?.form ?? 1;
+    p.title = profile.titleId ?? "";
+  }
+
+  /** ข้อมูลผู้เล่นเปลี่ยนจากนอกห้อง (REST: ตั้งคู่หู ฉายา) → อัปเดตสิ่งที่เพื่อนเห็น + ส่ง profile ให้เจ้าตัว */
+  refreshPlayer(sessionId: string, profile: PlayerProfile) {
+    const p = this.state.players.get(sessionId);
+    if (!p) return;
+    this.applyProfile(p, profile);
+    this.clients.getById(sessionId)?.send(MSG.profile, profile);
+  }
+
+  isInBattle(sessionId: string): boolean {
+    return this.battles.inBattle(sessionId);
   }
 
   // ---------- โหมดทดสอบ ----------

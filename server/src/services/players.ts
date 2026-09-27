@@ -1,9 +1,10 @@
 import { randomUUID } from "node:crypto";
 import { and, asc, count, eq, isNotNull } from "drizzle-orm";
-import { maxFormForLevel, type Direction, type MonsterSummary, type PlayerProfile } from "@ecomon/shared";
+import { maxFormForLevel, type Direction, type MonsterSummary, type PlayerProfile, type ProfileStyleRequest } from "@ecomon/shared";
 import type { Db } from "../db/client";
 import { classrooms, monsters, playerItems, players } from "../db/schema";
 import { registry } from "../content";
+import type { CatalogService } from "./catalog";
 import { GameError } from "./errors";
 
 export interface SavedPosition {
@@ -26,7 +27,10 @@ const summary = (m: MonsterRow): MonsterSummary => ({
 
 /** ข้อมูลผู้เล่นทั้งหมดอยู่ในฐานข้อมูล server เป็นเจ้าของ client ขอดูได้อย่างเดียว */
 export class PlayerService {
-  constructor(private readonly db: Db) {}
+  constructor(
+    private readonly db: Db,
+    private readonly catalog: CatalogService,
+  ) {}
 
   private row(playerId: string) {
     const p = this.db
@@ -66,6 +70,8 @@ export class PlayerService {
       team: team.map(summary),
       monsterCount,
       needsStarter: monsterCount === 0,
+      titleId: player.titleId,
+      frameId: player.frameId,
     };
   }
 
@@ -105,6 +111,19 @@ export class PlayerService {
         .run();
       tx.update(players).set({ partnerUid: uid, avatar }).where(eq(players.id, playerId)).run();
     });
+    this.catalog.owned(playerId, [{ speciesId, form: maxFormForLevel(starterLevel, registry.balance) }], now);
+    return this.profile(playerId);
+  }
+
+  /** เลือกฉายา/กรอบโปรไฟล์ที่ปลดล็อกแล้ว (null = ไม่ใช้) */
+  setStyle(playerId: string, req: ProfileStyleRequest): PlayerProfile {
+    const { titles, frames } = this.catalog.unlocked(playerId);
+    if (req.titleId && !titles.has(req.titleId)) throw new GameError("locked_title", "ยังไม่ได้ปลดล็อกฉายานี้");
+    if (req.frameId && !frames.has(req.frameId)) throw new GameError("locked_frame", "ยังไม่ได้ปลดล็อกกรอบนี้");
+    const values: { titleId?: string | null; frameId?: string | null } = {};
+    if (req.titleId !== undefined) values.titleId = req.titleId;
+    if (req.frameId !== undefined) values.frameId = req.frameId;
+    if (Object.keys(values).length) this.db.update(players).set(values).where(eq(players.id, playerId)).run();
     return this.profile(playerId);
   }
 

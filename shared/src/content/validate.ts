@@ -55,6 +55,32 @@ export function validateContent(c: GameContent, origins: ContentOrigins, opts: V
   const questionIds = uniqueIds(c.questions, (i) => [origins.questions[i]!.file, ["questions", origins.questions[i]!.index]]);
   void questionIds;
 
+  // ---------- รางวัลสมุดภาพ (หัวข้อ 6.2) ----------
+  const thresholds = b.collection.rewardThresholds;
+  if (c.collectionRewards.length !== thresholds.length)
+    err(F.collection, ["rewards"], `ต้องมี ${thresholds.length} รางวัล เท่ากับ balance.collection.rewardThresholds`);
+  thresholds.forEach((t, i) => {
+    if (i > 0 && t <= thresholds[i - 1]!) err(F.balance, ["collection", "rewardThresholds", i], "สัดส่วนต้องเพิ่มขึ้นเรื่อย ๆ");
+  });
+  const rewardIds = new Set<string>();
+  c.collectionRewards.forEach((r, i) => {
+    const at = (...path: (string | number)[]) => ["rewards", i, ...path];
+    if (thresholds[i] !== undefined && Math.abs(r.percent - thresholds[i]!) > 1e-9)
+      err(F.collection, at("percent"), `ต้องเท่ากับ balance.collection.rewardThresholds[${i}] (${thresholds[i]})`);
+    for (const [key, id] of [["title", r.title.id], ["frame", r.frame.id]] as const) {
+      if (rewardIds.has(id)) err(F.collection, at(key, "id"), `id "${id}" ซ้ำ`);
+      rewardIds.add(id);
+    }
+    r.items.forEach((it, j) => {
+      const item = items.get(it.id);
+      if (!item) err(F.collection, at("items", j, "id"), `ไม่มีไอเท็ม "${it.id}" ใน items.json`);
+      else if (item.category === "key" || item.category === "currency")
+        err(F.collection, at("items", j, "id"), "ของสำคัญ/สกุลเงินให้เป็นรางวัลสมุดภาพไม่ได้ (เหรียญใช้ช่อง coins)");
+      else if ((item.category === "equipment") !== (it.tier !== undefined))
+        err(F.collection, at("items", j, "tier"), item.category === "equipment" ? "ไอเท็มสวมใส่ต้องระบุ tier" : "ระบุ tier ได้เฉพาะไอเท็มสวมใส่");
+    });
+  });
+
   // ---------- balance ----------
   const formCount = b.evolution.formLevels.length;
   if (b.stats.formMultiplier.length !== formCount)

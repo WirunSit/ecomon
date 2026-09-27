@@ -2,6 +2,8 @@ import type { ServerConfig } from "./config";
 import type { Db } from "./db/client";
 import type { AuthService } from "./services/auth";
 import type { BattleService } from "./services/battles";
+import type { CatalogService } from "./services/catalog";
+import type { CollectionService } from "./services/collection";
 import type { PlayerService } from "./services/players";
 import type { QuestionService } from "./services/questions";
 
@@ -13,6 +15,8 @@ export interface Services {
   players: PlayerService;
   questions: QuestionService;
   battles: BattleService;
+  catalog: CatalogService;
+  collection: CollectionService;
 }
 
 let current: Services | null = null;

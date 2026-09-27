@@ -70,6 +70,7 @@ export class BattleController {
     }
     const wild = this.host.lockWild(wildId);
     if (!wild) return false;
+    services().catalog.seen(playerId, wild.species, 1);
 
     const zone = this.zone();
     const session = new BattleSession(

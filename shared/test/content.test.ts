@@ -125,3 +125,23 @@ describe("ตัวตรวจจับข้อผิดพลาด", () => {
     expect(msgs.some((m) => m.includes("ชื่อไฟล์"))).toBe(true);
   });
 });
+
+describe("รางวัลสมุดภาพ (content/collection-rewards.json)", () => {
+  it("สัดส่วนต้องตรงกับ balance · ไอเท็มต้องมีจริง · ไอเท็มสวมใส่ต้องระบุขั้น", () => {
+    const issues = errors(
+      run(
+        patch("collection-rewards.json", (j) => {
+          j.rewards[0].percent = 0.3;
+          j.rewards[1].items = [{ id: "no_such_item", qty: 1 }];
+          j.rewards[2].items = [{ id: "knowledge_charm", qty: 1 }];
+          j.rewards[3].title.id = j.rewards[0].title.id;
+        }),
+      ),
+    );
+    const at = (path: string) => issues.find((i) => i.file === "collection-rewards.json" && i.path.join(".").startsWith(path));
+    expect(at("rewards.0.percent")?.message).toContain("rewardThresholds");
+    expect(at("rewards.1.items.0.id")?.message).toContain("no_such_item");
+    expect(at("rewards.2.items.0.tier")?.message).toContain("tier");
+    expect(at("rewards.3.title.id")?.message).toContain("ซ้ำ");
+  });
+});

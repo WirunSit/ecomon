@@ -1,6 +1,6 @@
 // สัญญาระหว่าง client ↔ server (REST + ข้อความในห้อง Colyseus) — ใช้ชุดเดียวกันทั้งสองฝั่ง
 import { z } from "zod";
-import { Id } from "./schema/common";
+import { Id, type Stats } from "./schema/common";
 import type { ClientQuestion } from "./schema/question";
 import { DIRECTIONS, type Direction } from "./world/movement";
 
@@ -60,7 +60,81 @@ export interface PlayerProfile {
   monsterCount: number;
   /** ยังไม่ได้เลือกมอนตั้งต้น */
   needsStarter: boolean;
+  /** ฉายาและกรอบโปรไฟล์ที่เลือกใช้ (ปลดล็อกจากรางวัลสมุดภาพ) */
+  titleId: string | null;
+  frameId: string | null;
 }
+
+// ---------- คลังของฉัน และสมุดภาพ (หัวข้อ 6) ----------
+
+/** มอนสเตอร์รายตัวพร้อมค่าพลังที่ server คำนวณสด (หัวข้อ 6.4) */
+export interface MonsterDetail extends MonsterSummary {
+  moves: (string | null)[];
+  equipment: { head: string | null; body: string | null; charm: string | null };
+  originType: string;
+  originZone: string | null;
+  parents: [string, string] | null;
+  locked: boolean;
+  /** 0 = คู่หู, 1–2 = ทีม, null = อยู่ในคลัง */
+  teamSlot: number | null;
+  /** อยู่ในกล่องพัก (คลังเต็ม) */
+  boxed: boolean;
+  hp: number;
+  stats: Stats;
+  statTotal: number;
+  expToNext: number;
+  obtainedAt: number;
+}
+
+export interface CollectionResponse {
+  monsters: MonsterDetail[];
+  /** ช่องคลังทั้งหมด (ตามเลเวลผู้เล่น) และที่ใช้ไป (ไม่นับกล่องพัก) */
+  capacity: number;
+  stored: number;
+}
+
+export type CatalogStatus = "seen" | "owned";
+
+export interface CatalogResponse {
+  entries: { speciesId: string; form: number; status: CatalogStatus }[];
+  total: number;
+  owned: number;
+  /** ได้รางวัลไปแล้วกี่ขั้น (index 0.. ใน collectionRewards) */
+  rewardsClaimed: number;
+}
+
+/** รางวัลสมุดภาพที่เพิ่งได้ */
+export interface CatalogUnlock {
+  index: number;
+  percent: number;
+  titleId: string;
+  frameId: string;
+  items: { id: string; qty: number; tier?: string }[];
+  coins: number;
+}
+
+/** คำสั่งจัดการมอนสเตอร์ 1 ตัวในคลัง (POST /api/monsters/:uid/action) */
+export const MonsterAction = z.discriminatedUnion("type", [
+  z.object({ type: z.literal("partner") }),
+  z.object({ type: z.literal("team_add") }),
+  z.object({ type: z.literal("team_remove") }),
+  z.object({ type: z.literal("lock"), locked: z.boolean() }),
+  z.object({ type: z.literal("release") }),
+  z.object({ type: z.literal("unbox") }),
+  z.object({ type: z.literal("nickname"), nickname: z.string().max(64).nullable() }),
+]);
+export type MonsterAction = z.infer<typeof MonsterAction>;
+
+export interface MonsterActionResponse {
+  profile: PlayerProfile;
+  collection: CollectionResponse;
+  /** ปล่อยคืนธรรมชาติแล้วได้แต้มอนุรักษ์ */
+  releasedPoints?: number;
+}
+
+/** เลือกฉายา/กรอบโปรไฟล์ (null = ไม่ใช้) — ต้องปลดล็อกแล้ว */
+export const ProfileStyleRequest = z.object({ titleId: Id.nullable().optional(), frameId: Id.nullable().optional() });
+export type ProfileStyleRequest = z.infer<typeof ProfileStyleRequest>;
 
 export interface LoginResponse {
   token: string;
@@ -273,5 +347,7 @@ export interface BattleEndMessage {
   answered: number;
   /** แพ้ → ย้ายไปจุดฟื้นฟู */
   respawn?: { x: number; y: number };
+  /** รางวัลสมุดภาพที่เพิ่งได้จากการจับครั้งนี้ */
+  catalogUnlocks: CatalogUnlock[];
   profile: PlayerProfile;
 }
