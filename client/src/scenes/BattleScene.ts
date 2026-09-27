@@ -232,6 +232,10 @@ export class BattleScene extends Phaser.Scene {
 
   /** วาดทุกอย่างให้ตรงกับ state จาก server */
   private renderState(state: BattleStateView) {
+    // เพื่อนเข้าร่วมกลางทาง (หัวข้อ 5.3)
+    const known = new Set((this.state?.allies ?? []).map((a) => a.playerId));
+    if (this.state?.battleId === state.battleId)
+      for (const a of state.allies ?? []) if (!known.has(a.playerId)) this.toast.show(UI.coop.joined(a.nickname));
     this.state = state;
     const me = state.team[state.active]!;
     this.setMonster("wild", state.wild);
@@ -292,6 +296,7 @@ export class BattleScene extends Phaser.Scene {
       });
     } else if (state.phase === "awaiting_answer" && state.question) {
       const q = state.question;
+      if (this.question.isShowing(q.instanceId)) return; // เพื่อนเข้าร่วม/ตอบแล้ว → อัปเดตการ์ดอย่างเดียว
       this.question.show(q, (a) => this.room.send(MSG.battleAnswer, { instanceId: q.instanceId, ...a }));
     }
   }

@@ -53,6 +53,11 @@ export class QuestionPanel {
   ) {}
 
   /** @param call ข้อความหัวแผง (ไม่ส่ง = "ตอบให้ถูกเพื่อโจมตี!") เช่นคำถามทีมของบอส */
+  /** กำลังแสดงคำถามข้อนี้อยู่และยังไม่ได้ตอบ (สถานะใหม่จาก server ไม่ต้องวาดซ้ำ) */
+  isShowing(instanceId: string): boolean {
+    return this.asked?.msg.instanceId === instanceId && !this.asked.answered;
+  }
+
   show(msg: BattleQuestionMessage, submit: (a: SubmittedAnswer) => void, call?: string) {
     this.stopTimer();
     const q = msg.question;

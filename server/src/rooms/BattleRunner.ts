@@ -29,13 +29,16 @@ export interface RunnerMember {
 export interface RunnerHost {
   send(sessionId: string, type: string, payload: unknown): void;
   clock: { setTimeout(cb: () => void, ms: number): Delayed };
-  /** ถามคำถามก่อนโจมตี 1 ข้อ (ห้องเลือกหัวข้อ/ความยาก) */
-  ask(playerId: string, runner: BattleRunner): QuestionInstance;
+  /**
+   * ถามคำถามก่อนโจมตี 1 ข้อ (ห้องเลือกหัวข้อ/ความยาก)
+   * @param avoid id คำถามที่เพื่อนร่วมต่อสู้กำลังตอบอยู่ — ต้องได้คนละข้อ กันลอกคำตอบ (หัวข้อ 5.3)
+   */
+  ask(playerId: string, runner: BattleRunner, avoid: ReadonlySet<string>): QuestionInstance;
   /** คำถามทีมของบอส: เลือกข้อเดียวให้ทุกคน */
   askTeam?(playerIds: string[], runner: BattleRunner): QuestionInstance[];
   /** การต่อสู้จบแล้ว (session.ended) — ห้องบันทึกผลและส่ง battle:end */
   onEnded(runner: BattleRunner): void;
-  /** ผู้เล่นคนหนึ่งหมดแรงทั้งทีมระหว่างที่เพื่อนยังสู้ต่อ */
+  /** ผู้เล่นคนหนึ่งหมดแรงทั้งทีม/หนี ระหว่างที่เพื่อนยังสู้ต่อ (ห้องโลกจบการต่อสู้ให้คนนั้นทันทีด้วย detach) */
   onMemberOut?(runner: BattleRunner, member: RunnerMember): void;
 }
 
@@ -81,6 +84,12 @@ export class BattleRunner {
   /** ส่งสถานะเริ่มต้นให้ทุกคน */
   start() {
     for (const m of this.members.values()) this.host.send(m.sessionId, MSG.battleState, this.stateFor(m));
+  }
+
+  /** เพื่อนเข้าร่วมกลางทาง (ต้อง session.addParticipant แล้ว) → ส่งสถานะให้คนใหม่ + อัปเดตเพื่อน/HP มอนป่าให้ทุกคน */
+  join(member: { sessionId: string; playerId: string }) {
+    this.members.set(member.sessionId, { ...member });
+    this.broadcastState();
   }
 
   // ---------- ข้อความจาก client ----------
@@ -163,6 +172,14 @@ export class BattleRunner {
     else this.broadcastState();
   }
 
+  /** เอาคนที่ออกจากการต่อสู้แล้ว (phase out) ออกจากรายชื่อที่ได้รับข้อความ — ยังอยู่ใน session ให้เพื่อนเห็นว่าออกแล้ว */
+  detach(sessionId: string) {
+    const m = this.members.get(sessionId);
+    if (!m) return;
+    m.timer?.clear();
+    this.members.delete(sessionId);
+  }
+
   /** ยกเลิกทั้งหมด (ปิดห้อง) โดยไม่ให้รางวัล */
   dispose() {
     this.done = true;
@@ -193,12 +210,24 @@ export class BattleRunner {
   /** ถามคำถาม 1 ข้อก่อนโจมตี + ตั้งเวลาหมดเวลา (server ตัดสิน หัวข้อ 5.4) */
   private ask(m: RunnerMember) {
     const { questions } = services();
-    const q = this.host.ask(m.playerId, this);
+    const q = this.host.ask(m.playerId, this, this.pendingQuestions(m));
     this.session.attachQuestion(m.playerId, q.id);
     this.host.send(m.sessionId, MSG.battleQuestion, questions.toMessage(q));
     const deadline = questions.deadline(q);
     // หมดเวลา → ถือว่าตอบผิด (ทำงานแม้ผู้เล่นกำลังหลุดอยู่)
     if (deadline !== null) m.timer = this.host.clock.setTimeout(() => this.resolveAnswer(m, null), deadline - Date.now());
+  }
+
+  /** คำถามที่เพื่อนคนอื่นในการต่อสู้นี้ถืออยู่ตอนนี้ */
+  private pendingQuestions(except: RunnerMember): Set<string> {
+    const { questions } = services();
+    const out = new Set<string>();
+    for (const m of this.members.values()) {
+      const id = m === except ? undefined : this.participant(m).questionId;
+      const q = id ? questions.get(id) : undefined;
+      if (q) out.add(q.question.id);
+    }
+    return out;
   }
 
   private resultMessage(outcome: AnswerOutcome): BattleResultMessage {
@@ -260,6 +289,7 @@ export class BattleRunner {
       this.host.onEnded(this);
       return;
     }
+    this.host.onMemberOut?.(this, m);
     const outcome = this.session.resolvePending();
     if (outcome) this.afterTurn(outcome);
     else this.broadcastState();

@@ -163,6 +163,17 @@ tools/    validate.ts, make-placeholders.ts, make-test-map.ts (อนาคต: 
 - แผนที่เกาะ `ui/world/MapPanel.ts` (ปุ่มแผนที่ / กด N) สีโซนจาก `zones.mapColor` · ไอเท็ม effect `reveal_spawns` ตั้ง
   `players.reveal_spawns_until` (เวลาของ server, ใช้ซ้อนต่อเวลา) → profile ส่ง `revealSpawnsUntil` + `serverNow` ให้แผนที่นับถอยหลัง
 
+## ต่อสู้ร่วมกัน (เฟส 11)
+
+- เริ่มต่อสู้กับมอนป่า → `BattleController.openOffer()` ประกาศ `MSG.coopOffer` ให้ทั้งห้อง (จุดที่สู้ + เวลาที่เหลือ) · client
+  (`ui/world/CoopPrompt.ts`) แสดงปุ่มเมื่อยืนในรัศมี `balance.coop.joinRadiusTiles` (`withinTiles()` ใน shared)
+- `MSG.coopJoin` → server ตรวจ: ยังเปิดรับ (`joinWindowSec` เวลาของ server) · ไม่เกิน `maxParticipants` · ยืนในรัศมี · ไม่ได้สู้อยู่
+  ไม่ผ่าน = notice `coop_closed|coop_full|coop_far` · ผ่าน = `BattleSession.addParticipant()` (HP มอนป่า × `coopHpMultiplier`
+  เพิ่มเฉพาะส่วนต่าง) + `BattleRunner.join()` · เต็ม/หมดเวลา/จบ → `MSG.coopClosed`
+- คำถามคนละข้อ: `RunnerHost.ask(..., avoid)` ได้ id คำถามที่เพื่อนถืออยู่ ต้องเลือกข้ออื่น (ทั้งห้องโลกและดันเจี้ยน)
+- หนี/หมดแรงก่อนเพื่อน (ห้องโลก) → `onMemberOut` → `finishMember()` สรุปผลให้คนนั้นทันที แล้ว `runner.detach()`
+  · หลุดถาวร → `abort()` เพื่อนสู้ต่อ · ชนะ = ทุกคนที่ยังอยู่ได้มอนคนละตัว · เควสทีมนับจาก `partySize`
+
 ## ข้อตกลงของ content
 
 - id เป็น `a-z0-9_` ขึ้นต้นด้วยตัวอักษร ใช้เป็นชื่อไฟล์/โฟลเดอร์ asset ได้
@@ -216,6 +227,7 @@ tools/    validate.ts, make-placeholders.ts, make-test-map.ts (อนาคต: 
 - [x] เฟส 8 — ผสมพันธุ์และไข่ (ดูหัวข้อ "ผสมพันธุ์และไข่" ด้านบน)
 - [x] เฟส 9 — ดันเจี้ยน (ดูหัวข้อ "ดันเจี้ยน" ด้านบน)
 - [x] เฟส 10 — เลเวลผู้เล่น เควส NPC และแผนที่เกาะนิเวศา (ดูหัวข้อ "เลเวลผู้เล่น เควส และ NPC" ด้านบน)
-- [ ] เฟส 11 เป็นต้นไป — ดู docs/GAME_PLAN.md หัวข้อ 13
+- [x] เฟส 11 — ต่อสู้ร่วมกัน (ดูหัวข้อ "ต่อสู้ร่วมกัน" ด้านบน)
+- [ ] เฟส 13 เป็นต้นไป — ดู docs/GAME_PLAN.md หัวข้อ 13
 - [~] เฟส 12 — ทำ pipeline ตัดภาพ (หัวข้อ 15) และใช้ภาพจริงกับมอนสเตอร์ ตัวละคร tileset หน้า login แล้ว
       ฉากต่อสู้ (S11–S12) และเอฟเฟกต์ธาตุ (S15) ใช้แล้วในเฟส 5 · ที่เหลือ: ภาพ NPC/ไอเท็ม/ไข่ จะผูกเข้าเกมตามเฟสที่ใช้

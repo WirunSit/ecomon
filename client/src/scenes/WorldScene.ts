@@ -12,6 +12,8 @@ import {
   type BattleEndMessage,
   type BattleStateView,
   type ChatBroadcast,
+  type CoopClosedMessage,
+  type CoopOfferMessage,
   type CorrectionMessage,
   type DungeonDeniedMessage,
   type DungeonEnterMessage,
@@ -35,6 +37,7 @@ import { DungeonPanel } from "../ui/dungeon/DungeonPanel";
 import { DialoguePanel } from "../ui/quests/DialoguePanel";
 import { QuestLogPanel } from "../ui/quests/QuestLogPanel";
 import { QuestTracker } from "../ui/quests/QuestTracker";
+import { CoopPrompt } from "../ui/world/CoopPrompt";
 import { MapPanel } from "../ui/world/MapPanel";
 import { objectiveText } from "../ui/quests/questText";
 import { questStore } from "../state/quests";
@@ -106,6 +109,7 @@ export class WorldScene extends Phaser.Scene {
   /** ประตูดันเจี้ยน (ภาพ + ป้ายจำนวนคนในปาร์ตี้ที่รออยู่) */
   private entrances: { id: string; x: number; y: number; container: Phaser.GameObjects.Container; party: Phaser.GameObjects.Text }[] = [];
   private npcPrompt?: HTMLButtonElement;
+  private coop!: CoopPrompt;
   private nearNpc?: string;
   private nearEntrance?: string;
   private dungeonPanel!: DungeonPanel;
@@ -188,6 +192,7 @@ export class WorldScene extends Phaser.Scene {
     this.npcPrompt.style.display = "none";
     this.npcPrompt.addEventListener("click", () => this.talk());
     uiRoot().append(this.npcPrompt);
+    this.coop = new CoopPrompt((battleId) => room.send(MSG.coopJoin, { battleId }));
     this.teamQuick = new TeamQuick(() => void this.collection.open(), say);
     this.menu = new MenuPanel(
       [
@@ -257,6 +262,8 @@ export class WorldScene extends Phaser.Scene {
     });
     room.onMessage(MSG.profile, (p: PlayerProfile) => profile.set(p));
     room.onMessage(MSG.notice, (n: NoticeMessage) => this.onNotice(n));
+    room.onMessage(MSG.coopOffer, (m: CoopOfferMessage) => this.coop.offer(m));
+    room.onMessage(MSG.coopClosed, (m: CoopClosedMessage) => this.coop.close(m.battleId));
     room.onMessage(MSG.questUpdate, (m: QuestUpdateMessage) => this.onQuestUpdate(m));
 
     // ---- ดันเจี้ยน: server ปฏิเสธ (บอกชื่อคนที่ยังไม่พร้อม) / ได้ที่นั่งในห้องดันเจี้ยน ----
@@ -292,6 +299,7 @@ export class WorldScene extends Phaser.Scene {
       window.removeEventListener("keydown", onKey);
       room.removeAllListeners();
       this.hud.destroy();
+      this.coop.destroy();
       this.tracker.destroy();
       this.dialogue.close();
       this.menu.close();
@@ -403,6 +411,8 @@ export class WorldScene extends Phaser.Scene {
     this.sortByDepth();
     this.updateNpcPrompt();
     this.updateEntrances();
+    const busy = !!this.battle || this.inDungeon || this.menu.isOpen || FullPanel.isOpen || !!this.evolution?.isOpen || this.dialogue.isOpen;
+    this.coop.update(busy ? undefined : { x: this.player.tileX, y: this.player.tileY, sessionId: this.room.sessionId });
     if (this.blocker || this.battle || this.inDungeon || time < this.encounterUntil) return;
 
     const dir = this.menu.isOpen || FullPanel.isOpen || this.evolution?.isOpen || this.dialogue.isOpen ? null : this.controls.direction();

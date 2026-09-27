@@ -119,11 +119,19 @@ export class WorldRoom extends Room<WorldState, { code: string; classroomId: str
       respawn: (sid) => this.respawnAtRecovery(sid),
       nickname: (sid) => this.state.players.get(sid)?.nickname ?? "",
       zoneOf: (sid) => this.zoneOf(sid),
+      spot: (sid) => {
+        const p = this.state.players.get(sid);
+        return p && p.connected && !p.inDungeon ? { x: p.x, y: p.y } : undefined;
+      },
+      broadcast: (type, payload) => this.broadcast(type, payload),
     });
     this.onMessage(MSG.battleAction, (client, raw) => this.battles.action(client, raw));
     this.onMessage(MSG.battleAnswer, (client, raw) => this.battles.answer(client, raw));
     this.onMessage(MSG.battleResync, (client) => this.battles.resync(client));
     this.onMessage(MSG.battleHelper, (client, raw) => this.battles.helper(client, raw));
+    this.onMessage(MSG.coopJoin, (client: Client<ClientData, AuthData>, raw) => {
+      if (client.userData) this.battles.join(client, client.userData.playerId, raw);
+    });
 
     // ปาร์ตี้หน้าทางเข้าดันเจี้ยน (หัวข้อ 8.2)
     this.onMessage(MSG.dungeonOpen, (client, raw) => this.dungeonOpen(client, raw));

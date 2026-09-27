@@ -53,3 +53,8 @@ export function stepDurationMs(terrain: Terrain, balance: Balance): number {
   const base = 1000 / balance.world.walkTilesPerSec;
   return terrain === "land" ? base : base / balance.world.waterSpeedFactor;
 }
+
+/** ยืนห่างกันไม่เกิน r ช่อง (นับแบบช่องทแยงเท่ากับ 1 ช่อง) — ใช้กับรัศมีเข้าร่วมต่อสู้/คุย NPC/ทางเข้า */
+export function withinTiles(a: { x: number; y: number }, b: { x: number; y: number }, r: number): boolean {
+  return Math.abs(a.x - b.x) <= r && Math.abs(a.y - b.y) <= r;
+}

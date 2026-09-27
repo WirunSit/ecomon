@@ -157,7 +157,7 @@ export class BattleError extends Error {}
  * การต่อสู้แบบผลัดตา (หัวข้อ 5) — ตรรกะล้วน ไม่ผูกกับ Colyseus หรือฐานข้อมูล
  * - ทุกการโจมตีต้องผ่านคำถาม (ห้องเป็นคนถามผ่าน QuestionService แล้วส่งผลมาที่ answered())
  * - ตอบผิด = โจมตีพลาด (ไม่เสียคูลดาวน์) แต่มอนป่ายังโจมตีกลับเสมอ ลำดับใครตีก่อนตัดสินด้วย SPD
- * - รองรับผู้เล่นหลายคน (participants) — เทิร์นเดินเมื่อทุกคนพร้อม (หัวข้อ 5.3 ทำ UI ในเฟส 11)
+ * - รองรับผู้เล่นหลายคน (participants) — เทิร์นเดินเมื่อทุกคนพร้อม · เพื่อนเข้าร่วมกลางทางได้ (addParticipant หัวข้อ 5.3)
  */
 export class BattleSession {
   turn = 1;
@@ -181,6 +181,20 @@ export class BattleSession {
   /** HP มอนป่าเพิ่มตามจำนวนผู้เล่น (หัวข้อ 5.3) */
   static wildHpMultiplier(reg: Registry, participants: number): number {
     return coopHpMultiplier(reg.balance, participants);
+  }
+
+  /**
+   * เพื่อนเข้าร่วมกลางการต่อสู้ (หัวข้อ 5.3) — HP สูงสุดของมอนป่าเพิ่มตามจำนวนคน (HP ที่ลดไปแล้วยังลดอยู่)
+   * คนใหม่เริ่มที่เลือกท่า เทิร์นปัจจุบันเดินเมื่อทุกคนพร้อม
+   */
+  addParticipant(p: Participant) {
+    if (this.ended) throw new BattleError("การต่อสู้จบแล้ว");
+    if (this.participants.some((x) => x.playerId === p.playerId)) throw new BattleError("อยู่ในการต่อสู้นี้แล้ว");
+    this.participants.push(p);
+    if (this.options.boss) return; // บอสคำนวณ HP ตามปาร์ตี้ตั้งแต่เริ่ม
+    const maxHp = Math.floor(this.wild.stats.hp * BattleSession.wildHpMultiplier(this.reg, this.participants.length));
+    this.wild.hp += Math.max(0, maxHp - this.wild.maxHp);
+    this.wild.maxHp = Math.max(this.wild.maxHp, maxHp);
   }
 
   participant(playerId: string): Participant {

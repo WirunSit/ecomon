@@ -442,6 +442,14 @@ export const MSG = {
   /** client → server: ใช้ไอเท็มตัวช่วยตอบ · server → client: ผล (HelperResult) */
   battleHelper: "battle:helper",
 
+  // ---- ต่อสู้ร่วมกัน (หัวข้อ 5.3) ----
+  /** server → ทุกคนในห้อง: เพื่อนเริ่มต่อสู้ เข้าร่วมได้ (CoopOfferMessage) client แสดงปุ่มเมื่อยืนอยู่ในรัศมี */
+  coopOffer: "coop:offer",
+  /** server → ทุกคนในห้อง: ปิดรับคนเพิ่มแล้ว (เต็ม/หมดเวลา/จบ) { battleId } */
+  coopClosed: "coop:closed",
+  /** client → server: ขอเข้าร่วมการต่อสู้ { battleId } */
+  coopJoin: "coop:join",
+
   // ---- ปาร์ตี้หน้าทางเข้าดันเจี้ยน (ในห้องโลก หัวข้อ 8.2) ----
   /** client → server: เปิดปาร์ตี้หน้าทางเข้า { dungeonId } (คนเปิดเป็นหัวหน้า) */
   dungeonOpen: "dungeon:open",
@@ -472,6 +480,26 @@ export const MSG = {
 } as const;
 
 export const DUNGEON_ROOM = "dungeon";
+
+/** เพื่อนเริ่มต่อสู้กับมอนป่า — เข้าร่วมได้ภายใน expiresInMs ถ้ายืนห่างจาก (x, y) ไม่เกิน balance.coop.joinRadiusTiles */
+export interface CoopOfferMessage {
+  battleId: string;
+  hostSessionId: string;
+  hostName: string;
+  speciesId: string;
+  level: number;
+  x: number;
+  y: number;
+  /** จำนวนคนตอนนี้ */
+  players: number;
+  expiresInMs: number;
+}
+
+export interface CoopClosedMessage {
+  battleId: string;
+}
+
+export const CoopJoinMessage = z.object({ battleId: z.string().min(1).max(64) });
 
 export const DungeonOpenMessage = z.object({ dungeonId: Id });
 export const DungeonBossMessage = z.object({ species: Id });

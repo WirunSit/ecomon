@@ -264,7 +264,16 @@ export const UI = {
     party_full: "ปาร์ตี้เต็มแล้ว (ไม่เกิน 5 คน)",
     choose_boss: "หัวหน้าต้องเลือกบอสก่อนเข้า",
     dungeon_error: "เปิดดันเจี้ยนไม่สำเร็จ ลองใหม่อีกครั้ง",
+    coop_closed: "การต่อสู้นี้ปิดรับเพื่อนแล้ว",
+    coop_full: "การต่อสู้นี้มีคนครบแล้ว",
+    coop_far: "ต้องยืนใกล้เพื่อนกว่านี้จึงเข้าร่วมได้",
   } as Record<string, string>,
+  /** ต่อสู้ร่วมกัน (หัวข้อ 5.3) */
+  coop: {
+    join: (host: string, monster: string, level: number) => `⚔ ช่วย ${host} สู้กับ ${monster} Lv.${level}`,
+    meta: (players: number, max: number, sec: number) => `${players}/${max} คน · อีก ${sec} วินาที`,
+    joined: (name: string) => `🤝 ${name} เข้ามาช่วยสู้!`,
+  },
   dungeon: {
     enter: (name: string) => `🏰 ${name}`,
     unlock: (lv: number) => `ปลดล็อกที่เลเวล ${lv}`,
@@ -326,7 +335,7 @@ export const UI = {
     ally: {
       attack: (name: string, dmg: number) => `${name} โจมตี -${dmg}`,
       miss: (name: string) => `${name} ตอบพลาด`,
-      hit: (name: string, dmg: number) => `บอสโจมตี ${name} -${dmg}`,
+      hit: (name: string, dmg: number) => `${name} โดนโจมตี -${dmg}`,
       faint: (name: string) => `มอนของ ${name} หมดแรง`,
       switch: (name: string) => `${name} สลับตัว`,
       item: (name: string) => `${name} ใช้ไอเท็ม`,

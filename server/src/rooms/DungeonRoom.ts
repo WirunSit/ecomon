@@ -231,7 +231,11 @@ export class DungeonRoom extends Room<DungeonRoomState, unknown, { playerId: str
     return {
       send: (sid, type, payload) => this.clients.getById(sid)?.send(type, payload),
       clock: this.clock,
-      ask: (playerId) => services().questions.ask(playerId, d.topics, "dungeon", Date.now(), this.minDifficulty(), undefined, this.calcFilter()),
+      ask: (playerId, _runner, avoid) => {
+        const calc = this.calcFilter();
+        const filter = calc || avoid.size ? (q: Question) => (!calc || calc(q)) && !avoid.has(q.id) : undefined;
+        return services().questions.ask(playerId, d.topics, "dungeon", Date.now(), this.minDifficulty(), undefined, filter);
+      },
       askTeam: (playerIds) => {
         const { questions } = services();
         const q = questions.pick(playerIds[0]!, d.topics, this.minDifficulty(), undefined, this.calcFilter());
