@@ -38,3 +38,10 @@ export function loadedMap(id: string): LoadedMap {
     tilesetImages: tiled.tilesets.map((t) => ({ name: t.name, file: t.image.split("/").pop()! })),
   };
 }
+
+/** ชื่อมอนสเตอร์ตามร่าง (ร่างที่ไม่มี → ชื่อร่างแรก) */
+export function speciesName(speciesId: string, form = 1): string {
+  const m = registry.monsters.find(speciesId);
+  if (!m) return speciesId;
+  return (m.forms.find((f) => f.form === form) ?? m.forms[0]!).name;
+}

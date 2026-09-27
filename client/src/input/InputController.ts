@@ -19,6 +19,7 @@ const KEY_DIRS: Record<string, Direction> = {
  */
 export class InputController {
   private readonly held: Direction[] = [];
+  private enabled = true;
   private readonly joystick = new Joystick();
   private readonly onDown = (e: KeyboardEvent) => {
     const d = KEY_DIRS[e.code];
@@ -43,7 +44,15 @@ export class InputController {
 
   /** ทิศที่ผู้เล่นกดอยู่ตอนนี้ หรือ null */
   direction(): Direction | null {
+    if (!this.enabled) return null;
     return this.joystick.direction ?? this.held[this.held.length - 1] ?? null;
+  }
+
+  /** ปิดการเดินชั่วคราว (เช่น ระหว่างต่อสู้) — ซ่อนจอยด้วย */
+  setEnabled(on: boolean) {
+    this.enabled = on;
+    this.held.length = 0;
+    this.joystick.setHidden(!on);
   }
 
   destroy() {

@@ -15,6 +15,13 @@
       "when": 1790500232069,
       "tag": "0001_player_avatar",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1790502177681,
+      "tag": "0002_monster_hp",
+      "breakpoints": true
     }
   ]
 }

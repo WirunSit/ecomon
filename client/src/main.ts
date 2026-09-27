@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { BattleScene } from "./scenes/BattleScene";
 import { BootScene } from "./scenes/BootScene";
 import { LobbyScene } from "./scenes/LobbyScene";
 import { LoginScene } from "./scenes/LoginScene";
@@ -29,7 +30,7 @@ async function start() {
       width: GAME_WIDTH,
       height: GAME_HEIGHT,
     },
-    scene: [BootScene, LoginScene, StarterScene, LobbyScene, WorldScene, PreviewScene],
+    scene: [BootScene, LoginScene, StarterScene, LobbyScene, WorldScene, BattleScene, PreviewScene],
   });
 }
 

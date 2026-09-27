@@ -1,6 +1,7 @@
 // สัญญาระหว่าง client ↔ server (REST + ข้อความในห้อง Colyseus) — ใช้ชุดเดียวกันทั้งสองฝั่ง
 import { z } from "zod";
 import { Id } from "./schema/common";
+import type { ClientQuestion } from "./schema/question";
 import { DIRECTIONS, type Direction } from "./world/movement";
 
 // ---------- login (หัวข้อ 2: รหัสห้องเรียน + ชื่อเล่น + PIN 4 หลัก) ----------
@@ -109,6 +110,27 @@ export const MSG = {
   profile: "profile",
   /** client → server (โหมดทดสอบเท่านั้น): ให้/เอาออก key item */
   devToggleKeyItem: "dev:key-item",
+  devSummonWild: "dev:summon-wild",
+  /** server → client: ข้อความแจ้งเตือนสั้น ๆ (เช่น ฟื้นฟูมอนสเตอร์แล้ว) */
+  notice: "notice",
+
+  // ---- การต่อสู้ (หัวข้อ 5) ----
+  /** server → client: เริ่มต่อสู้ / ภาพรวมสถานะ (ส่งซ้ำเมื่อ resync) */
+  battleState: "battle:state",
+  /** client → server: เลือกท่า / สลับตัว / หนี */
+  battleAction: "battle:action",
+  /** server → client: คำถามที่ต้องตอบก่อนโจมตี (ไม่มีเฉลย) */
+  battleQuestion: "battle:question",
+  /** client → server: คำตอบ */
+  battleAnswer: "battle:answer",
+  /** server → client: เฉลย + คำอธิบาย (ทุกครั้ง แม้ตอบถูก) */
+  battleResult: "battle:result",
+  /** server → client: เหตุการณ์ในเทิร์น (โจมตี ดาเมจ หมดแรง สลับตัว) */
+  battleTurn: "battle:turn",
+  /** server → client: จบการต่อสู้ + รางวัล */
+  battleEnd: "battle:end",
+  /** client → server: ขอสถานะการต่อสู้ใหม่ (หลังกลับเข้าห้อง) */
+  battleResync: "battle:resync",
 } as const;
 
 export const MoveMessage = z.object({ dir: z.enum(DIRECTIONS) });
@@ -128,3 +150,128 @@ export interface ChatBroadcast extends ChatMessage {
 }
 
 export const DevToggleKeyItemMessage = z.object({ itemId: Id });
+
+// ---------- การต่อสู้ (หัวข้อ 5) ----------
+
+/** ข้อความแจ้งเตือนจาก server: code = ข้อความสำเร็จรูปที่ client แปลเอง, text = ข้อความพร้อมแสดง */
+export interface NoticeMessage {
+  code?: string;
+  text?: string;
+}
+
+export type BattleSide = "player" | "wild";
+
+export interface BattleMoveView {
+  id: string;
+  /** เหลือกี่เทิร์นจึงใช้ได้อีก (0 = ใช้ได้) */
+  cooldown: number;
+}
+
+export interface CombatantView {
+  /** uid ของมอนผู้เล่น หรือ id ของมอนป่า */
+  id: string;
+  speciesId: string;
+  level: number;
+  form: number;
+  hp: number;
+  maxHp: number;
+  moves: BattleMoveView[];
+  /** ผลเสริมที่ติดอยู่ เช่น { def: -10 } (%) */
+  mods: Partial<Record<"hp" | "atk" | "def" | "spd", number>>;
+  /** ชั้นสถานะ "ย่อยสลาย" */
+  decay: number;
+}
+
+export interface BattleStateView {
+  battleId: string;
+  wild: CombatantView;
+  team: CombatantView[];
+  active: number;
+  /** awaiting_action = เลือกท่าได้ · awaiting_answer = กำลังตอบคำถาม · ended */
+  phase: "awaiting_action" | "awaiting_answer" | "ended";
+  turn: number;
+  canFlee: boolean;
+  background: string;
+  /** คำถามที่ค้างอยู่ (ถ้ากำลังตอบ) */
+  question?: BattleQuestionMessage;
+}
+
+export const BattleActionMessage = z.discriminatedUnion("type", [
+  z.object({ type: z.literal("move"), moveId: Id }),
+  z.object({ type: z.literal("switch"), uid: z.string().min(1).max(64) }),
+  z.object({ type: z.literal("flee") }),
+]);
+export type BattleActionMessage = z.infer<typeof BattleActionMessage>;
+
+export interface BattleQuestionMessage {
+  instanceId: string;
+  question: ClientQuestion;
+  /** เวลาตอบ (วินาที) null = ปิดตัวจับเวลา (โหมดฝึก) */
+  timeLimitSec: number | null;
+}
+
+export const BattleAnswerMessage = z.object({
+  instanceId: z.string().min(1).max(64),
+  choice: z.number().int().min(0).max(3).optional(),
+  value: z.union([z.number().finite(), z.boolean()]).optional(),
+});
+export type BattleAnswerMessage = z.infer<typeof BattleAnswerMessage>;
+
+export interface BattleResultMessage {
+  instanceId: string;
+  correct: boolean;
+  /** ตอบถูกภายในช่วงตอบไว (ดาเมจ ×1.2) */
+  quick: boolean;
+  /** หมดเวลา */
+  timedOut: boolean;
+  answer: { choice?: number; value?: number | boolean; unit?: string };
+  explanation: string;
+}
+
+export type BattleEvent =
+  | {
+      kind: "attack";
+      side: BattleSide;
+      attacker: string;
+      target: string;
+      moveId: string;
+      /** ตอบผิดแล้วโจมตีพลาด */
+      missed: boolean;
+      damage: number;
+      effectiveness: "super" | "normal" | "weak";
+      targetHp: number;
+    }
+  | { kind: "heal"; side: BattleSide; target: string; amount: number; hp: number; source: "move" | "passive" }
+  | { kind: "stat"; side: BattleSide; target: string; stat: "hp" | "atk" | "def" | "spd"; percent: number }
+  | { kind: "decay"; target: string; stacks: number }
+  | { kind: "faint"; side: BattleSide; target: string }
+  | { kind: "switch"; side: "player"; from: string; to: string; forced: boolean };
+
+export interface BattleTurnMessage {
+  turn: number;
+  events: BattleEvent[];
+  state: BattleStateView;
+}
+
+export interface LevelUpView {
+  uid: string;
+  speciesId: string;
+  from: number;
+  to: number;
+  newMoves: string[];
+}
+
+export interface BattleEndMessage {
+  result: "win" | "lose" | "fled";
+  caught?: MonsterSummary & { newSpecies: boolean; boxed: boolean };
+  monsterExp: { uid: string; exp: number }[];
+  levelUps: LevelUpView[];
+  playerExp: number;
+  playerLevelUp?: { from: number; to: number };
+  coins: number;
+  correct: number;
+  answered: number;
+  /** แพ้ → ย้ายไปจุดฟื้นฟู */
+  respawn?: { x: number; y: number };
+  profile: PlayerProfile;
+}

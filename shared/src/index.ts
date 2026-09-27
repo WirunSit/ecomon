@@ -13,3 +13,4 @@ export * from "./formulas/breeding";
 export * from "./formulas/dungeon";
 export * from "./protocol";
 export * from "./world/spawn";
+export * from "./formulas/questions";

@@ -371,7 +371,10 @@ def slice_sheet(name: str, spec: dict, args: argparse.Namespace) -> tuple[SheetR
                 img = place(Image.fromarray(cell).crop(box), cat, sheet_scale.get(cat))
             dest = ROOT / out_rel
             dest.parent.mkdir(parents=True, exist_ok=True)
-            img.save(dest, optimize=True)
+            if dest.suffix == ".webp":  # ฉาก/ภาพใหญ่ไม่ต้องโปร่งใส → webp เล็กกว่า PNG มาก
+                img.convert("RGB").save(dest, quality=85, method=6)
+            else:
+                img.save(dest, optimize=True)
             report.written.append(out_rel)
             pieces.append((label, img))
     return report, pieces
@@ -518,7 +521,7 @@ def completeness() -> list[str]:
     bgs = {z["battleBackground"] for z in json.loads((content / "zones.json").read_text())["zones"]}
     bgs |= {d["battleBackground"] for d in json.loads((content / "dungeons.json").read_text())["dungeons"]}
     for bg in sorted(bgs):
-        p = ASSETS / "backgrounds" / f"{bg}.png"
+        p = ASSETS / "backgrounds" / f"{bg}.webp"
         if not p.exists():
             missing.append(str(p.relative_to(ROOT)))
     return missing

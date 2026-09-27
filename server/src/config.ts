@@ -20,6 +20,10 @@ export interface ServerConfig {
   pinLockMinutes: number;
   /** บันทึกตำแหน่งผู้เล่นลงฐานข้อมูลทุกกี่วินาที */
   saveIntervalSec: number;
+  /** ใช้คำถามสถานะ draft ด้วย (ตอนพัฒนา) — production ใช้เฉพาะที่ครูอนุมัติ (หัวข้อ 11) */
+  includeDraftQuestions: boolean;
+  /** เปิดตัวจับเวลาตอบคำถาม (ครูปิดได้ในโหมดฝึก หัวข้อ 5.1) */
+  questionTimer: boolean;
 }
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env, overrides: Partial<ServerConfig> = {}): ServerConfig {
@@ -35,6 +39,8 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env, overrides: Part
     pinMaxFailures: 5,
     pinLockMinutes: 5,
     saveIntervalSec: 30,
+    includeDraftQuestions: env.INCLUDE_DRAFT_QUESTIONS ? env.INCLUDE_DRAFT_QUESTIONS === "1" : !production,
+    questionTimer: env.QUESTION_TIMER !== "0",
     ...overrides,
   };
 }

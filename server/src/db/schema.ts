@@ -78,6 +78,10 @@ export const monsters = sqliteTable(
     breedReadyAt: integer("breed_ready_at"),
     /** ตำแหน่งในทีม 0–2 (0 = คู่หู) หรือ null ถ้าอยู่ในคลัง */
     teamSlot: integer("team_slot"),
+    /** HP ปัจจุบัน (null = เต็ม) — ลดจากการต่อสู้ ฟื้นที่จุดฟื้นฟูหรือเมื่อแพ้ */
+    hp: integer("hp"),
+    /** คลังเต็ม → อยู่ใน "กล่องพัก" (หัวข้อ 5.2) ไม่หาย */
+    boxed: integer("boxed", { mode: "boolean" }).notNull().default(false),
     obtainedAt: integer("obtained_at").notNull(),
   },
   (t) => [index("monsters_player").on(t.playerId)],

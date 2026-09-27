@@ -114,7 +114,7 @@ S11.png:
   category: background
   bg: none
   cellIds: [meadow, mushroom_forest, lotus_pond, rocky_canyon]
-  out: assets/backgrounds/{id}.png
+  out: assets/backgrounds/{id}.webp
 
 S12.png:
   rows: 2
@@ -122,7 +122,7 @@ S12.png:
   category: background
   bg: none
   cellIds: [volcano, beach, deep_sea, temple]
-  out: assets/backgrounds/{id}.png
+  out: assets/backgrounds/{id}.webp
 
 S13.png:
   rows: 5
@@ -180,7 +180,7 @@ S17.png:
   bg: none
   split: grid
   cellIds: [title]
-  out: assets/ui/{id}.png
+  out: assets/ui/{id}.webp
 
 # tileset ของแผนที่ ประกอบจากภาพที่ตัดแล้ว — ลำดับ = gid 1..n ตรงกับ TILE ใน tools/make-test-map.ts
 _tilesets:
@@ -201,3 +201,4 @@ _tilesets:
       - props/mossy_rock
       - props/round_bush
       - props/village_house
+      - props/healing_fountain

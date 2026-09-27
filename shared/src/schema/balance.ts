@@ -83,6 +83,11 @@ export const BalanceSchema = z.strictObject({
     canFleeBoss: z.boolean(),
     targetWildQuestions: z.tuple([PosInt, PosInt]),
     targetBossQuestions: z.tuple([PosInt, PosInt]),
+    /** เหรียญเมื่อชนะมอนป่า = coinsWinBase + coinsWinPerLevel × เลเวลมอนป่า */
+    coinsWinBase: z.number().int().nonnegative(),
+    coinsWinPerLevel: z.number().nonnegative(),
+    /** ค่าพลังจากผลเสริมท่า (ลด/เพิ่ม) ไม่ต่ำกว่าสัดส่วนนี้ของค่าเดิม */
+    statFloor: Probability,
   }),
   questions: z.strictObject({
     timeLimitSec: z.record(QuestionType, Positive),
@@ -170,6 +175,8 @@ export const BalanceSchema = z.strictObject({
     walkTilesPerSec: Positive,
     /** แผนที่ที่ผู้เล่นใหม่เริ่ม (id ใน content/maps) */
     startMap: z.string().min(1),
+    /** ยืนห่างจุดฟื้นฟู (marker "recovery") ไม่เกินกี่ช่องจึงฟื้น HP มอนในทีม */
+    recoveryRadius: z.number().int().nonnegative(),
     /** เว้นระยะส่งแชทสำเร็จรูป (วินาที) กันสแปม */
     chatCooldownSec: NonNeg,
     /** ความเร็วเมื่ออยู่ในน้ำ (ห่วงยาง/เรือ) เป็นสัดส่วนของความเร็วเดิน */

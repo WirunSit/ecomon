@@ -118,6 +118,25 @@ export class SpawnManager {
     }
   }
 
+  /**
+   * โหมดทดสอบ: ย้ายมอนป่าที่ใกล้ที่สุด (ที่อยู่ภูมิประเทศแบบนี้ได้) มายืนนิ่งที่ช่อง (x, y) ชั่วคราว
+   * คืนมอนที่ย้ายมา หรือ undefined ถ้าไม่มีตัวที่เหมาะ
+   */
+  summon(x: number, y: number, terrain: SpawnArea["terrain"][number], now: number, holdMs = 15000): WildMonster | undefined {
+    if (this.at(x, y)) return undefined;
+    let best: WildMonster | undefined;
+    let bestDist = Infinity;
+    for (const m of this.monsters.values()) {
+      if (m.locked || !this.areas[m.area]!.area.terrain.includes(terrain)) continue;
+      const d = Math.abs(m.x - x) + Math.abs(m.y - y);
+      if (d < bestDist) [best, bestDist] = [m, d];
+    }
+    if (!best) return undefined;
+    Object.assign(best, { x, y, nextMoveAt: now + holdMs });
+    this.events.moved(best);
+    return best;
+  }
+
   /** ล็อกตัวที่กำลังถูกต่อสู้ คืน false ถ้าไม่มีหรือถูกล็อกอยู่แล้ว */
   lock(id: string): boolean {
     const m = this.monsters.get(id);

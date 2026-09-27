@@ -120,11 +120,18 @@ export class Registry {
     return result;
   }
 
-  /** ท่าที่มอนสเตอร์รู้ ณ เลเวลนี้ (ท่าล่าสุดไม่เกินจำนวนช่องท่า) */
-  movesAtLevel(speciesId: string, level: number): string[] {
+  /**
+   * ท่าที่มอนสเตอร์รู้ ณ เลเวลนี้ (ท่าล่าสุดไม่เกินจำนวนช่องท่า)
+   * ถ้าระบุร่าง: ท่าที่ได้ตอนพัฒนาร่าง (ขั้นสูง/ประจำตัว) ต้องพัฒนาร่างถึงก่อน (หัวข้อ 4.4)
+   */
+  movesAtLevel(speciesId: string, level: number, form?: number): string[] {
+    const tiers = this.balance.moves.tiers;
+    const formLevels = this.balance.evolution.formLevels;
+    const formOf = (lv: number) => formLevels.filter((min) => lv >= min).length;
     const learned = this.monsters
       .get(speciesId)
       .learnset.filter((l) => l.level <= level)
+      .filter((l) => form === undefined || formOf(tiers[this.moves.get(l.move).tier].learnLevel) <= form)
       .sort((a, b) => a.level - b.level)
       .map((l) => l.move);
     return learned.slice(-this.balance.moves.slots);

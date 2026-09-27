@@ -41,6 +41,14 @@ export class Joystick {
     return this.dir;
   }
 
+  /** ซ่อนชั่วคราว (ระหว่างต่อสู้) โดยไม่เปลี่ยนว่าเป็นจอสัมผัสหรือไม่ */
+  setHidden(hidden: boolean) {
+    this.base.classList.toggle("off", hidden);
+    this.pointerId = null;
+    this.dir = null;
+    this.knob.style.transform = "";
+  }
+
   private setVisible(v: boolean) {
     this.base.style.display = v ? "" : "none";
   }

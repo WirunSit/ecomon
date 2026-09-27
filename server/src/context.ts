@@ -1,7 +1,9 @@
 import type { ServerConfig } from "./config";
 import type { Db } from "./db/client";
 import type { AuthService } from "./services/auth";
+import type { BattleService } from "./services/battles";
 import type { PlayerService } from "./services/players";
+import type { QuestionService } from "./services/questions";
 
 /** บริการที่ห้อง Colyseus ใช้ (ห้องถูกสร้างโดย framework จึงส่งผ่าน constructor ไม่ได้) — 1 process = 1 ชุด */
 export interface Services {
@@ -9,6 +11,8 @@ export interface Services {
   db: Db;
   auth: AuthService;
   players: PlayerService;
+  questions: QuestionService;
+  battles: BattleService;
 }
 
 let current: Services | null = null;

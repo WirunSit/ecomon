@@ -9,10 +9,14 @@ import {
   MSG,
   stepDurationMs,
   terrainAt,
+  type BattleEndMessage,
+  type BattleStateView,
   type ChatBroadcast,
   type CorrectionMessage,
+  type NoticeMessage,
   type PlayerProfile,
 } from "@ecomon/shared";
+import { BattleLink } from "../battle/BattleLink";
 import { balance, loadedMap, registry, type LoadedMap } from "../content";
 import { InputController } from "../input/InputController";
 import { connection, type PlayerView, type WorldRoom } from "../net/connection";
@@ -28,6 +32,7 @@ import { UI } from "../ui/strings";
 import { depthForY, MapView } from "../world/MapView";
 import { PlayerAvatar } from "../world/PlayerAvatar";
 import { WildMonsterSprite, type WildView } from "../world/WildMonsterSprite";
+import type { BattleSceneData } from "./BattleScene";
 import { logoutTo } from "./LobbyScene";
 
 /** ผู้เล่นอื่นในห้อง: ตำแหน่งเป้าหมายจาก server + ตัวละครที่เดินตามไปทีละช่อง */
@@ -38,6 +43,8 @@ interface Remote {
 
 /** หยุดกดนานเท่านี้แล้วตำแหน่งยังไม่ตรง server → ยึดตาม server */
 const RECONCILE_IDLE_MS = 400;
+/** เดินชนมอนป่าแล้วรอ server เริ่มการต่อสู้ — ไม่รับการเดินช่วงนี้ */
+const ENCOUNTER_WAIT_MS = 1000;
 
 /**
  * ฉากโลก (overworld) แบบหลายคน
@@ -61,6 +68,9 @@ export class WorldScene extends Phaser.Scene {
   private unlocks = movementUnlocks([], registry.items.all);
   private leaving = false;
   private lastInputAt = 0;
+  /** การต่อสู้ที่กำลังเล่นอยู่ (ฉาก Battle ซ้อนบนฉากนี้) */
+  private battle?: BattleLink;
+  private encounterUntil = 0;
 
   constructor() {
     super("World");
@@ -69,6 +79,8 @@ export class WorldScene extends Phaser.Scene {
   create(data: { room: WorldRoom }) {
     this.room = data.room;
     this.leaving = false;
+    this.battle = undefined;
+    this.encounterUntil = 0;
     this.remotes = new Map();
     this.wild = new Map();
     const ready = () => !!this.room.state.players?.get(this.room.sessionId);
@@ -108,7 +120,12 @@ export class WorldScene extends Phaser.Scene {
     this.hud = new Hud({ onMenu: () => this.menu.toggle(), onChat: () => this.chat.toggle() });
     this.hud.setZone(map.zone ? registry.zones.find(map.zone)?.name : undefined);
     this.toast = new Toast();
-    if (DevPanel.enabled()) this.dev = new DevPanel((itemId) => room.send(MSG.devToggleKeyItem, { itemId }));
+    if (DevPanel.enabled()) {
+      this.dev = new DevPanel(
+        (itemId) => room.send(MSG.devToggleKeyItem, { itemId }),
+        () => room.send(MSG.devSummonWild),
+      );
+    }
 
     // ---- ผู้เล่นอื่น ----
     const $ = getStateCallbacks(room);
@@ -147,6 +164,17 @@ export class WorldScene extends Phaser.Scene {
       if (avatar && text) avatar.say(text);
     });
     room.onMessage(MSG.profile, (p: PlayerProfile) => profile.set(p));
+    room.onMessage(MSG.notice, (n: NoticeMessage) => this.onNotice(n));
+
+    // ---- การต่อสู้ (ส่งต่อให้ฉาก Battle ผ่าน BattleLink) ----
+    room.onMessage(MSG.battleState, (s: BattleStateView) => this.onBattleState(s));
+    room.onMessage(MSG.battleQuestion, (msg) => this.battle?.push({ type: "question", msg }));
+    room.onMessage(MSG.battleResult, (msg) => this.battle?.push({ type: "result", msg }));
+    room.onMessage(MSG.battleTurn, (msg) => this.battle?.push({ type: "turn", msg }));
+    room.onMessage(MSG.battleEnd, (msg: BattleEndMessage) => {
+      if (this.battle) this.battle.push({ type: "end", msg });
+      else this.onBattleClosed(msg); // ไม่ควรเกิด แต่ต้องไม่พลาดข้อมูลผู้เล่น
+    });
     room.onLeave((code) => this.onDisconnected(code));
 
     const unsubscribe = profile.subscribe((p) => (this.unlocks = movementUnlocks(p.keyItems, registry.items.all)));
@@ -165,18 +193,21 @@ export class WorldScene extends Phaser.Scene {
       this.toast.destroy();
       this.dev?.destroy();
       this.blocker?.remove();
+      if (this.scene.isActive("Battle") || this.scene.isPaused("Battle")) this.scene.stop("Battle");
       this.remotes.forEach((r) => r.avatar.destroy());
       this.wild.forEach((w) => w.destroy());
     });
     this.updateRoomChip();
     this.updateDevInfo();
+    // กลับเข้าห้องระหว่างต่อสู้ (reload/หลุด) → ขอสถานะการต่อสู้ที่ค้างอยู่
+    room.send(MSG.battleResync);
   }
 
   override update(time: number) {
     if (!this.player) return;
     this.updateRemotes();
     this.sortByDepth();
-    if (this.blocker) return;
+    if (this.blocker || this.battle || time < this.encounterUntil) return;
 
     const dir = this.menu.isOpen ? null : this.controls.direction();
     if (dir) this.lastInputAt = time;
@@ -184,6 +215,17 @@ export class WorldScene extends Phaser.Scene {
     if (!dir) return this.reconcile(time);
 
     const map = this.loaded.game;
+    // ช่องข้างหน้ามีมอนป่า → ชนเพื่อเริ่มต่อสู้ (ไม่ทำนายการเดิน server เป็นผู้ตัดสิน)
+    const wild = this.wildAt(this.player.tileX + DIR_VECTORS[dir].dx, this.player.tileY + DIR_VECTORS[dir].dy);
+    if (wild) {
+      this.player.face(dir);
+      if (wild.locked) this.toast.show(UI.battle.busy);
+      else {
+        this.room.send(MSG.move, { dir });
+        this.encounterUntil = time + ENCOUNTER_WAIT_MS;
+      }
+      return;
+    }
     const result = checkStep(map, this.player.tileX, this.player.tileY, dir, this.unlocks);
     if (!result.ok) {
       if (this.player.facing !== dir) this.player.face(dir);
@@ -195,6 +237,55 @@ export class WorldScene extends Phaser.Scene {
     }
     this.room.send(MSG.move, { dir });
     this.player.walkTo(result.x, result.y, dir, result.terrain, stepDurationMs(result.terrain, balance), () => this.updateDevInfo());
+  }
+
+  private wildAt(x: number, y: number): WildView | undefined {
+    for (const w of this.room.state.wild?.values() ?? []) if (w.x === x && w.y === y) return w as WildView;
+    return undefined;
+  }
+
+  // ---------- การต่อสู้ ----------
+
+  private onBattleState(state: BattleStateView) {
+    if (this.battle) {
+      this.battle.push({ type: "state", msg: state });
+      return;
+    }
+    this.battle = new BattleLink();
+    this.setBattleMode(true);
+    const data: BattleSceneData = { room: this.room, state, link: this.battle, onClose: (end) => this.onBattleClosed(end) };
+    this.scene.launch("Battle", data);
+  }
+
+  private onBattleClosed(end: BattleEndMessage | null) {
+    this.battle = undefined;
+    this.setBattleMode(false);
+    this.encounterUntil = 0;
+    if (!end) return;
+    profile.set(end.profile);
+    if (end.respawn) {
+      this.player.snapTo(end.respawn.x, end.respawn.y, terrainAt(this.loaded.game, end.respawn.x, end.respawn.y));
+      this.player.face("down");
+      this.updateDevInfo();
+    }
+  }
+
+  /** ระหว่างต่อสู้: ซ่อน HUD/จอย/แผงทดสอบ ปิดเมนู ไม่รับการเดิน */
+  private setBattleMode(on: boolean) {
+    this.controls.setEnabled(!on);
+    this.hud.el.style.display = on ? "none" : "";
+    if (this.dev) this.dev.el.style.display = on ? "none" : "";
+    if (on) {
+      this.menu.close();
+      this.chat.close();
+    }
+  }
+
+  private onNotice(n: NoticeMessage) {
+    const text = n.text ?? (n.code ? UI.notice[n.code] : undefined);
+    if (!text) return;
+    if (this.battle && n.text) this.battle.push({ type: "notice", text });
+    else this.toast.show(text, 3000);
   }
 
   /** หยุดเดินแล้วตำแหน่งยังไม่ตรงกับ server (เช่น ข้อความเดินหาย) → ยึดตาม server */
@@ -228,6 +319,7 @@ export class WorldScene extends Phaser.Scene {
     const map = this.loaded.game;
     for (const { avatar, view } of this.remotes.values()) {
       avatar.setConnected(view.connected);
+      avatar.setBattling(view.inBattle);
       if (avatar.isMoving) continue;
       const dx = view.x - avatar.tileX;
       const dy = view.y - avatar.tileY;

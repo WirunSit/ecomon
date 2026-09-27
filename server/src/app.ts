@@ -11,7 +11,9 @@ import { openDatabase } from "./db/client";
 import { apiRouter, errorHandler } from "./http/routes";
 import { WorldRoom } from "./rooms/WorldRoom";
 import { AuthService, ensureClassroom } from "./services/auth";
+import { BattleService } from "./services/battles";
 import { PlayerService } from "./services/players";
+import { QuestionService } from "./services/questions";
 
 export interface GameServer {
   config: ServerConfig;
@@ -26,7 +28,14 @@ export interface GameServer {
 export function createGameServer(overrides: Partial<ServerConfig> = {}): GameServer {
   const config = loadConfig(process.env, overrides);
   const db = openDatabase(config.databasePath);
-  const s: Services = { config, db, auth: new AuthService(db, config), players: new PlayerService(db) };
+  const s: Services = {
+    config,
+    db,
+    auth: new AuthService(db, config),
+    players: new PlayerService(db),
+    questions: new QuestionService(db, config),
+    battles: new BattleService(db),
+  };
   setServices(s);
 
   if (config.seedClassCode) ensureClassroom(db, config.seedClassCode, "ห้องเรียนทดลอง");

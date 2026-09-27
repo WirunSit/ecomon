@@ -49,6 +49,6 @@ describe("registry", () => {
 
   it("คำถามตามหัวข้อ ค่าเริ่มต้นเฉพาะที่อนุมัติแล้ว", () => {
     expect(reg.questionsForTopic("pop_growth")).toEqual([]);
-    expect(reg.questionsForTopic("pop_growth", ["draft", "approved"]).length).toBe(2);
+    expect(reg.questionsForTopic("pop_growth", ["draft", "approved"]).length).toBeGreaterThanOrEqual(10);
   });
 });

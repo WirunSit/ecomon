@@ -22,6 +22,7 @@ export class PlayerAvatar {
   private readonly bodyScale: number;
   private moving = false;
   private label?: Phaser.GameObjects.Text;
+  private battleIcon?: Phaser.GameObjects.Text;
   private bubble?: Phaser.GameObjects.Container;
   private bubbleTimer?: Phaser.Time.TimerEvent;
   private moveTween?: Phaser.Tweens.Tween;
@@ -157,6 +158,22 @@ export class PlayerAvatar {
       this.container.add(this.label);
     }
     this.label.setText(text).setColor(color);
+  }
+
+  /** ไอคอน ⚔ เหนือหัวระหว่างกำลังต่อสู้ (ผู้เล่นอื่นเห็น) */
+  setBattling(on: boolean) {
+    if (on === !!this.battleIcon) return;
+    if (!on) {
+      this.battleIcon?.destroy();
+      this.battleIcon = undefined;
+      return;
+    }
+    this.battleIcon = this.scene.add
+      .text(0, -BODY_HEIGHT - 4, "⚔", { fontFamily: "Kanit, sans-serif", fontSize: "16px", color: "#ffe28a", stroke: "#1b2130", strokeThickness: 4 })
+      .setOrigin(0.5, 1)
+      .setResolution(2);
+    this.container.add(this.battleIcon);
+    this.scene.tweens.add({ targets: this.battleIcon, y: this.battleIcon.y - 4, duration: 500, yoyo: true, repeat: -1 });
   }
 
   /** ผู้เล่นที่หลุดการเชื่อมต่อแสดงจางลง */

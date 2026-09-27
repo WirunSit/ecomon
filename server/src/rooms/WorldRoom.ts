@@ -4,6 +4,7 @@ import {
   checkStep,
   CLOSE_CODES,
   DevToggleKeyItemMessage,
+  DIR_VECTORS,
   findMarker,
   MoveMessage,
   movementUnlocks,
@@ -14,6 +15,7 @@ import {
   type CorrectionMessage,
   type Direction,
   type GameMap,
+  type NoticeMessage,
   type Unlock,
   type WorldJoinOptions,
 } from "@ecomon/shared";
@@ -22,6 +24,7 @@ import { services } from "../context";
 import type { AuthData } from "../services/auth";
 import { activePlayers, allocateRoomCode, releaseRoomCode } from "./presence";
 import { SpawnManager, type WildMonster } from "../world/SpawnManager";
+import { BattleController } from "./BattleController";
 import { PlayerState, WildMonsterState, WorldState } from "./WorldState";
 
 interface ClientData {
@@ -53,8 +56,9 @@ export class WorldRoom extends Room<WorldState, { code: string; classroomId: str
   override state = new WorldState();
   private classroomId = "";
   private map!: GameMap;
-  /** มอนป่าในห้องนี้ (อ่านได้จากเทสต์และระบบต่อสู้เฟส 5) */
+  /** มอนป่าในห้องนี้ (อ่านได้จากเทสต์และระบบต่อสู้) */
   spawner!: SpawnManager;
+  battles!: BattleController;
 
   static override async onAuth(token: string): Promise<AuthData> {
     const auth = services().auth.resolveToken(token);
@@ -75,6 +79,7 @@ export class WorldRoom extends Room<WorldState, { code: string; classroomId: str
     this.onMessage(MSG.move, (client, raw) => this.handleMove(client, raw));
     this.onMessage(MSG.chat, (client, raw) => this.handleChat(client, raw));
     this.onMessage(MSG.devToggleKeyItem, (client, raw) => this.handleDevToggle(client, raw));
+    this.onMessage(MSG.devSummonWild, (client) => this.handleDevSummon(client));
 
     this.clock.setInterval(() => this.saveAll(), services().config.saveIntervalSec * 1000);
 
@@ -89,6 +94,22 @@ export class WorldRoom extends Room<WorldState, { code: string; classroomId: str
     this.refillWild();
     this.clock.setInterval(() => this.refillWild(), world.spawnCheckSec * 1000);
     this.clock.setInterval(() => this.spawner.wander(Date.now()), WANDER_TICK_MS);
+
+    this.battles = new BattleController({
+      map: this.map,
+      clock: this.clock,
+      client: (sid) => this.clients.getById(sid),
+      lockWild: (id) => (this.spawner.lock(id) ? this.spawner.monsters.get(id) : undefined),
+      releaseWild: (id, caught) => (caught ? this.spawner.remove(id, Date.now()) : this.spawner.unlock(id, Date.now())),
+      setInBattle: (sid, inBattle) => {
+        const p = this.state.players.get(sid);
+        if (p) p.inBattle = inBattle;
+      },
+      respawn: (sid) => this.respawnAtRecovery(sid),
+    });
+    this.onMessage(MSG.battleAction, (client, raw) => this.battles.action(client, raw));
+    this.onMessage(MSG.battleAnswer, (client, raw) => this.battles.answer(client, raw));
+    this.onMessage(MSG.battleResync, (client) => this.battles.resync(client));
   }
 
   override onJoin(client: Client<ClientData, AuthData>, _options: unknown, auth: AuthData) {
@@ -136,6 +157,7 @@ export class WorldRoom extends Room<WorldState, { code: string; classroomId: str
     this.save(ud.playerId, p);
 
     if (consented || ud.replaced) {
+      this.battles.abort(client.sessionId);
       this.removePlayer(client.sessionId, ud.playerId);
       return;
     }
@@ -146,11 +168,13 @@ export class WorldRoom extends Room<WorldState, { code: string; classroomId: str
       ud.moveCredit = this.moveCreditCap();
       ud.lastMoveAt = Date.now();
     } catch {
+      this.battles.abort(client.sessionId);
       this.removePlayer(client.sessionId, ud.playerId);
     }
   }
 
   override onDispose() {
+    for (const sid of this.state.players.keys()) this.battles?.abort(sid);
     this.saveAll();
     releaseRoomCode(this.state.code);
   }
@@ -166,6 +190,7 @@ export class WorldRoom extends Room<WorldState, { code: string; classroomId: str
       client.leave(CLOSE_CODES.replaced, "บัญชีนี้เข้าเล่นจากที่อื่น");
     } else {
       // กำลังรอ reconnect อยู่ → ลบทิ้งเลย
+      this.battles.abort(sessionId);
       if (p) this.state.players.delete(sessionId);
     }
   }
@@ -204,15 +229,57 @@ export class WorldRoom extends Room<WorldState, { code: string; classroomId: str
     ud.moveCredit = Math.min(this.moveCreditCap(), ud.moveCredit + (now - ud.lastMoveAt));
     ud.lastMoveAt = now;
 
-    const step = checkStep(this.map, p.x, p.y, dir, ud.unlocks);
     p.facing = dir;
+    if (this.battles.inBattle(client.sessionId)) return this.correct(client, p);
+    const step = checkStep(this.map, p.x, p.y, dir, ud.unlocks);
     if (!step.ok) return this.correct(client, p);
+
+    // เดินชนมอนป่า → เริ่มต่อสู้ ไม่ขยับ (มอนที่มีคนสู้อยู่แล้วถือว่าเดินผ่านไม่ได้)
+    const wild = this.spawner.at(step.x, step.y);
+    if (wild) {
+      if (!wild.locked) this.battles.start(client, ud.playerId, wild.id);
+      return this.correct(client, p);
+    }
 
     const cost = stepDurationMs(step.terrain, registry.balance) * MOVE_COST_FACTOR;
     if (ud.moveCredit < cost) return this.correct(client, p); // เร็วเกินจริง = ปฏิเสธ
     ud.moveCredit -= cost;
     p.x = step.x;
     p.y = step.y;
+    this.checkRecovery(client, ud.playerId, p);
+  }
+
+  // ---------- จุดฟื้นฟู ----------
+
+  private recoveryPoints() {
+    return this.map.markers.filter((m) => m.type === "recovery");
+  }
+
+  /** ยืนใกล้จุดฟื้นฟู → มอนในทีมหายเหนื่อย */
+  private checkRecovery(client: Client, playerId: string, p: PlayerState) {
+    const r = registry.balance.world.recoveryRadius;
+    const near = this.recoveryPoints().some((m) => Math.abs(m.x - p.x) <= r && Math.abs(m.y - p.y) <= r);
+    const { battles, players } = services();
+    if (!near || !battles.teamHurt(playerId)) return;
+    battles.healTeam(playerId);
+    client.send(MSG.notice, { code: "team_healed" });
+    client.send(MSG.profile, players.profile(playerId));
+  }
+
+  /** แพ้ → ย้ายไปจุดฟื้นฟูที่ใกล้ที่สุด (ไม่มี → จุดเริ่ม) HP เต็ม (หัวข้อ 5.1) */
+  private respawnAtRecovery(sessionId: string): { x: number; y: number } {
+    const p = this.state.players.get(sessionId);
+    const points = this.recoveryPoints();
+    const start = findMarker(this.map, "player_start");
+    const from = p ?? { x: 0, y: 0 };
+    const best = [...points].sort((a, b) => Math.hypot(a.x - from.x, a.y - from.y) - Math.hypot(b.x - from.x, b.y - from.y))[0] ?? start;
+    if (!p || !best) return { x: from.x, y: from.y };
+    p.x = best.x;
+    p.y = best.y;
+    p.facing = "down";
+    const client = this.clients.getById(sessionId);
+    if (client?.userData) this.save(client.userData.playerId, p);
+    return { x: p.x, y: p.y };
   }
 
   private correct(client: Client, p: PlayerState) {
@@ -255,6 +322,20 @@ export class WorldRoom extends Room<WorldState, { code: string; classroomId: str
     const keyItems = players.toggleKeyItem(ud.playerId, parsed.data.itemId);
     ud.unlocks = movementUnlocks(keyItems, registry.items.all);
     client.send(MSG.profile, players.profile(ud.playerId));
+  }
+
+  /** เรียกมอนป่ามายืนตรงหน้า (ทดสอบการต่อสู้โดยไม่ต้องเดินหา) */
+  private handleDevSummon(client: Client<ClientData, AuthData>) {
+    const p = this.state.players.get(client.sessionId);
+    if (!services().config.devTools || !p || this.battles.inBattle(client.sessionId)) return;
+    const { dx, dy } = DIR_VECTORS[p.facing as Direction];
+    const x = p.x + dx;
+    const y = p.y + dy;
+    const terrain = terrainAt(this.map, x, y);
+    const taken = [...this.state.players.values()].some((o) => o.x === x && o.y === y);
+    if (terrain === "blocked" || taken || !this.spawner.summon(x, y, terrain, Date.now())) {
+      client.send(MSG.notice, { text: "ไม่มีมอนป่าที่มาได้ หรือช่องข้างหน้าไม่ว่าง" } satisfies NoticeMessage);
+    }
   }
 
   // ---------- บันทึก ----------

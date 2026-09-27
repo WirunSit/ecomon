@@ -13,7 +13,10 @@ const propImages = import.meta.glob<string>("../../assets/props/*.png", { eager:
 // ภาพพื้นที่วาดด้วย tools/render_maps.py
 const groundMeta = import.meta.glob<GroundMeta>("../../assets/maps/*/ground.json", { eager: true, import: "default" });
 const groundImages = import.meta.glob<string>("../../assets/maps/*/*.webp", { eager: true, query: "?url", import: "default" });
-const uiImages = import.meta.glob<string>(["../../assets/ui/title.png"], { eager: true, query: "?url", import: "default" });
+const uiImages = import.meta.glob<string>(["../../assets/ui/title.webp"], { eager: true, query: "?url", import: "default" });
+// ฉากต่อสู้ (S11–S12) และเอฟเฟกต์ (S15) — โหลดตอนเริ่มต่อสู้ครั้งแรกเท่านั้น
+const backgroundImages = import.meta.glob<string>("../../assets/backgrounds/*.webp", { eager: true, query: "?url", import: "default" });
+const vfxImages = import.meta.glob<string>("../../assets/vfx/*.png", { eager: true, query: "?url", import: "default" });
 
 export type Pose = "idle" | "attack";
 
@@ -102,7 +105,26 @@ export function mapGround(mapId: string): { meta: GroundMeta; chunks: { key: str
 }
 
 export function uiImageUrl(id: string): string | undefined {
-  return uiImages[`../../assets/ui/${id}.png`];
+  return uiImages[`../../assets/ui/${id}.webp`];
+}
+
+// ---------- การต่อสู้ ----------
+
+export function backgroundTextureKey(id: string): string {
+  return `bg_${id}`;
+}
+
+export function backgroundImageUrl(id: string): string | undefined {
+  return backgroundImages[`../../assets/backgrounds/${id}.webp`];
+}
+
+/** เอฟเฟกต์: <element>_1..4 (ท่าตามธาตุ), hit_spark, capture_sparkle, level_up, evolution */
+export function vfxTextureKey(id: string): string {
+  return `vfx_${id}`;
+}
+
+export function vfxImageUrl(id: string): string | undefined {
+  return vfxImages[`../../assets/vfx/${id}.png`];
 }
 
 export { fallbackUrl };

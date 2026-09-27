@@ -11,6 +11,7 @@ export interface PlayerView {
   y: number;
   facing: Direction;
   connected: boolean;
+  inBattle: boolean;
   partnerSpecies: string;
   partnerForm: number;
 }

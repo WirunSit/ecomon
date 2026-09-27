@@ -43,19 +43,22 @@ export const QuestionsFileSchema = z.strictObject({
  * คำถามแบบที่ส่งให้ client: ตัดเฉลย คำอธิบาย และข้อมูลภายในออก (หัวข้อ 5.4)
  * เฉลย/คำอธิบายส่งแยกหลัง server ตรวจคำตอบแล้วเท่านั้น
  */
-export type ClientQuestion =
-  | { type: "mcq" | "image_mcq"; stem: string; choices: string[]; image: string | null }
-  | { type: "truefalse"; stem: string; image: string | null }
-  | { type: "numeric"; stem: string; unit?: string; image: string | null };
+export type ClientQuestion = { topic: string; stem: string; image: string | null } & (
+  | { type: "mcq" | "image_mcq"; choices: string[] }
+  | { type: "truefalse" }
+  | { type: "numeric"; unit?: string }
+);
 
-export function toClientQuestion(q: Question): ClientQuestion {
+/** @param order ลำดับตัวเลือกที่สลับแล้ว (order[ตำแหน่งที่แสดง] = index เดิม) */
+export function toClientQuestion(q: Question, order?: readonly number[]): ClientQuestion {
+  const base = { topic: q.topic, stem: q.stem, image: q.image };
   switch (q.type) {
     case "mcq":
     case "image_mcq":
-      return { type: q.type, stem: q.stem, choices: [...q.choices], image: q.image };
+      return { ...base, type: q.type, choices: (order?.length ? order : q.choices.map((_, i) => i)).map((i) => q.choices[i]!) };
     case "truefalse":
-      return { type: q.type, stem: q.stem, image: q.image };
+      return { ...base, type: q.type };
     case "numeric":
-      return { type: q.type, stem: q.stem, unit: q.unit, image: q.image };
+      return { ...base, type: q.type, unit: q.unit };
   }
 }

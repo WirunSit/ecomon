@@ -116,7 +116,10 @@
     "targetBossQuestions": [
       12,
       20
-    ]
+    ],
+    "coinsWinBase": 10,
+    "coinsWinPerLevel": 2,
+    "statFloor": 0.3
   },
   "questions": {
     "timeLimitSec": {
@@ -246,6 +249,7 @@
     "walkTilesPerSec": 5,
     "waterSpeedFactor": 0.8,
     "startMap": "test_island",
+    "recoveryRadius": 1,
     "chatCooldownSec": 2
   },
   "daily": {

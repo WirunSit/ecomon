@@ -65,6 +65,23 @@ tools/    validate.ts, make-placeholders.ts, make-test-map.ts (อนาคต: 
 - เทสต์ server เปิด server จริงบนพอร์ตสุ่ม + SQLite ในหน่วยความจำ (`server/test/helpers.ts`) · vitest ใช้ pool แบบ threads
   เพราะ Colyseus เรียก `process.send`
 
+## การต่อสู้และคำถาม (เฟส 5)
+
+- **server ตัดสินทุกอย่าง**: เลือกคำถาม ตรวจคำตอบ จับเวลา สุ่มดาเมจ · client แค่แสดงผลตามข้อความที่ได้
+- `shared/src/formulas/questions.ts` — เลือกคำถามแบบปรับตามความชำนาญ (หัวข้อ 11.3) สมุดทบทวน สลับตัวเลือก ตรวจคำตอบ
+  (ฟังก์ชันล้วน รับ `Rng` เทสต์ได้) · คำถามที่ส่งให้ client ผ่าน `toClientQuestion()` เท่านั้น (ไม่มีเฉลย/คำอธิบาย/คำใบ้)
+- `server/src/services/questions.ts` — ถาม/ตรวจ/บันทึก `answer_log` + `topic_mastery` · หมดเวลา = ผิด (มีเวลาผ่อนผัน `lateAnswerGraceSec`)
+  คำถาม `draft` ใช้ได้เฉพาะตอนพัฒนา (`INCLUDE_DRAFT_QUESTIONS`) · ปิดตัวจับเวลาได้ด้วย `QUESTION_TIMER=0`
+- `server/src/battle/BattleSession.ts` — กติกาการต่อสู้ล้วน ๆ (ไม่ผูก Colyseus) ผู้เข้าร่วมเป็น array รองรับหลายคนในอนาคต
+- `server/src/services/battles.ts` — โหลดทีม บันทึก HP (null = เต็ม) แจก EXP/เหรียญ บันทึกมอนที่จับได้
+- `server/src/rooms/BattleController.ts` — ผูกการต่อสู้เข้ากับห้อง: เดินชนมอนป่า → `battle:state` → เลือกท่า → `battle:question`
+  → ตอบ → `battle:result` (เฉลย+คำอธิบาย) + `battle:turn` (event ทีละอย่าง) → จบด้วย `battle:end` (รางวัล + profile ใหม่)
+  reconnect แล้ว client ส่ง `battle:resync` เพื่อรับสถานะที่ค้างอยู่
+- client: `WorldScene` เป็นเจ้าของ listener ของห้อง ส่งต่อข้อความให้ `BattleScene` ผ่าน `BattleLink`
+  · `BattleScene` เล่นข้อความเป็นคิวทีละอย่าง (เฉลย → รอกด "ต่อไป" → อนิเมชันเทิร์น → เลือกท่า/สรุปผล)
+  · แผง HTML อยู่ใน `client/src/ui/battle/` (การ์ด HP, แผงท่า, แผงคำถาม, สรุปผล)
+- โหมดทดสอบ: ปุ่ม "เรียกมอนป่ามาข้างหน้า" (`dev:summon-wild`, ต้องเปิด DEV_TOOLS)
+
 ## ข้อตกลงของ content
 
 - id เป็น `a-z0-9_` ขึ้นต้นด้วยตัวอักษร ใช้เป็นชื่อไฟล์/โฟลเดอร์ asset ได้
@@ -83,7 +100,8 @@ tools/    validate.ts, make-placeholders.ts, make-test-map.ts (อนาคต: 
 - เลเยอร์ที่ engine อ่าน: `ground`, `water_shallow`, `water_deep`, `collision` (tile) · `spawns`, `markers` (object)
   - ภูมิประเทศตัดสินตามลำดับ collision > water_deep > water_shallow > land
   - `spawns`: สี่เหลี่ยม มี property `table`, `terrain`, `maxActive`, `respawnSec`, `wander` (หัวข้อ 10.3)
-  - `markers`: จุด type `player_start` (อนาคต: NPC, ทางเข้าดันเจี้ยน, จุดฟื้นฟู)
+  - `markers`: จุด type `player_start`, `recovery` (จุดฟื้นฟู: เข้าใกล้ในรัศมี `recoveryRadius` แล้วทีมหายเหนื่อย แพ้แล้วกลับมาที่นี่)
+    (อนาคต: NPC, ทางเข้าดันเจี้ยน)
 - map property `zone` = id โซนใน zones.json
 - property ของ tile ใน tileset: `material` (ชนิดพื้นที่วาด เช่น grass, sand — ดู asset-src/terrain.yaml)
   และสำหรับช่องชน `prop` (ภาพ assets/props, ใส่หลายแบบคั่น , ได้) `propWidth` `propSize` `propJitter`
@@ -111,6 +129,7 @@ tools/    validate.ts, make-placeholders.ts, make-test-map.ts (อนาคต: 
 - [x] เฟส 2 — สูตรคำนวณและ registry
 - [x] เฟส 3 — Server, ห้อง 5 คน, login, บันทึกข้อมูล
 - [x] เฟส 4 — จุดเกิดมอนสเตอร์ (server/src/world/SpawnManager.ts)
-- [ ] เฟส 5 เป็นต้นไป — ดู docs/GAME_PLAN.md หัวข้อ 13
+- [x] เฟส 5 — คำถาม การต่อสู้ และการจับมอน (ดูหัวข้อ "การต่อสู้และคำถาม" ด้านบน)
+- [ ] เฟส 6 เป็นต้นไป — ดู docs/GAME_PLAN.md หัวข้อ 13
 - [~] เฟส 12 — ทำ pipeline ตัดภาพ (หัวข้อ 15) และใช้ภาพจริงกับมอนสเตอร์ ตัวละคร tileset หน้า login แล้ว
-      ที่เหลือ: แอนิเมชันโจมตี/โดนตี, ภาพ NPC/ไอเท็ม/ฉากต่อสู้/ไข่ จะผูกเข้าเกมตามเฟสที่ใช้
+      ฉากต่อสู้ (S11–S12) และเอฟเฟกต์ธาตุ (S15) ใช้แล้วในเฟส 5 · ที่เหลือ: ภาพ NPC/ไอเท็ม/ไข่ จะผูกเข้าเกมตามเฟสที่ใช้

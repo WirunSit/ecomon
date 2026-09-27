@@ -11,6 +11,8 @@ export class PlayerState extends Schema {
   /** false = หลุดการเชื่อมต่อ รอกลับเข้าห้อง (reconnect) */
   @type("boolean") connected = true;
   /** คู่หู (ใช้แสดงคู่หูเดินตามในเฟส 6) */
+  /** กำลังต่อสู้อยู่ (เพื่อนเห็นสัญลักษณ์ต่อสู้เหนือหัว) */
+  @type("boolean") inBattle = false;
   @type("string") partnerSpecies = "";
   @type("number") partnerForm = 1;
 }

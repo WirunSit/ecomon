@@ -31,6 +31,7 @@ const TILE = {
   rock: 10,
   bush: 11,
   house: 12,
+  fountain: 13,
 } as const;
 const COLS = 4;
 
@@ -51,6 +52,7 @@ const TILE_PROPS: [number, Record<string, string | number>][] = [
   [TILE.rock, { prop: "mossy_rock,boulder", propSize: 42, propJitter: 3 }],
   [TILE.bush, { prop: "round_bush,round_bush,flowering_bush", propSize: 40, propJitter: 4 }],
   [TILE.house, { prop: "village_house", propWidth: 2, propSize: 92 }],
+  [TILE.fountain, { prop: "healing_fountain", propSize: 58 }],
 ];
 const TILE_COUNT = Object.keys(TILE).length;
 
@@ -236,6 +238,8 @@ function makeMap() {
     [16, 19], [17, 19], [23, 19], [24, 19], [16, 25], [17, 25], [23, 25], [24, 25],
   ];
   for (const [x, y] of houses) collision[idx(x, y)] = TILE.house;
+  // น้ำพุฟื้นฟูกลางหมู่บ้าน (จุด recovery อยู่ข้าง ๆ)
+  collision[idx(21, 20)] = TILE.fountain;
 
   // ขอบเกาะเป็นต้นไม้
   for (let x = 0; x < W; x++) {
@@ -292,11 +296,14 @@ function makeMap() {
       },
       {
         draworder: "topdown", id: 6, name: "markers", opacity: 1, type: "objectgroup", visible: false, x: 0, y: 0,
-        objects: [{ height: 0, id: 4, name: "start", point: true, rotation: 0, type: "player_start", visible: true, width: 0, x: 20 * T + 16, y: 23 * T + 16 }],
+        objects: [
+          { height: 0, id: 4, name: "start", point: true, rotation: 0, type: "player_start", visible: true, width: 0, x: 20 * T + 16, y: 23 * T + 16 },
+          { height: 0, id: 5, name: "fountain", point: true, rotation: 0, type: "recovery", visible: true, width: 0, x: 21 * T + 16, y: 21 * T + 16 },
+        ],
       },
     ],
     nextlayerid: 7,
-    nextobjectid: 5,
+    nextobjectid: 6,
     orientation: "orthogonal",
     properties: [prop("zone", "meadow")],
     renderorder: "right-down",
