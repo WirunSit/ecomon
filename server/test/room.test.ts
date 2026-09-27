@@ -13,7 +13,8 @@ beforeAll(async () => {
 });
 afterAll(() => t.close());
 
-const map = registry.maps.get(registry.balance.world.startMap);
+// ห้องในเทสต์ใช้แผนที่ทดสอบ (helpers.ts ตั้ง startMap)
+const map = registry.maps.get("test_island");
 const DIRS: Record<Direction, [number, number]> = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 
 /** หาช่องบกที่มีเพื่อนบ้านตามภูมิประเทศที่ต้องการ */

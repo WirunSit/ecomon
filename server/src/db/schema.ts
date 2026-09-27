@@ -177,6 +177,11 @@ export const dungeonEntries = sqliteTable(
   (t) => [index("dungeon_entries_player").on(t.playerId, t.enteredAt)],
 );
 
+/**
+ * ความคืบหน้าเควส (หัวข้อ 9.4) — status: active (กำลังทำ) / done (ครบแล้ว รอรับรางวัล) / claimed (รับรางวัลแล้ว)
+ * progress[i] = ความคืบหน้าของเป้าหมายข้อ i · seen[i] = สายพันธุ์ที่นับแล้ว (เป้าหมายแบบ distinctSpecies)
+ * เควสประจำวันเก็บวันที่ (เวลาไทย) ใน day แล้วลบทิ้งเมื่อข้ามวัน
+ */
 export const questProgress = sqliteTable(
   "quest_progress",
   {
@@ -186,6 +191,10 @@ export const questProgress = sqliteTable(
     questId: text("quest_id").notNull(),
     status: text("status").notNull(),
     progress: text("progress", { mode: "json" }).$type<number[]>().notNull(),
+    seen: text("seen", { mode: "json" }).$type<Record<string, string[]>>(),
+    day: text("day"),
+    acceptedAt: integer("accepted_at"),
+    claimedAt: integer("claimed_at"),
     updatedAt: integer("updated_at").notNull(),
   },
   (t) => [primaryKey({ columns: [t.playerId, t.questId] })],

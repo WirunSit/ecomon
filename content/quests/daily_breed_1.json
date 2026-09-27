@@ -1,0 +1,23 @@
+{
+  "id": "daily_breed_1",
+  "type": "daily",
+  "title": "นักวิจัยประจำวัน",
+  "description": "ผสมมอนสเตอร์ 1 ครั้ง",
+  "giver": "npc_prof_ton",
+  "requires": {
+    "playerLevel": 5,
+    "quests": []
+  },
+  "objectives": [
+    {
+      "kind": "breed",
+      "filter": {},
+      "count": 1
+    }
+  ],
+  "rewards": {
+    "exp": 150,
+    "coins": 80,
+    "items": []
+  }
+}

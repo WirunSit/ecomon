@@ -1,0 +1,28 @@
+{
+  "id": "daily_dungeon_1",
+  "type": "daily",
+  "title": "ขจัดมลพิษ",
+  "description": "พิชิตดันเจี้ยน 1 ครั้ง",
+  "giver": "npc_prof_ton",
+  "requires": {
+    "playerLevel": 10,
+    "quests": []
+  },
+  "objectives": [
+    {
+      "kind": "dungeon",
+      "filter": {},
+      "count": 1
+    }
+  ],
+  "rewards": {
+    "exp": 250,
+    "coins": 120,
+    "items": [
+      {
+        "id": "treasure_chest",
+        "qty": 1
+      }
+    ]
+  }
+}

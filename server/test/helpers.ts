@@ -18,7 +18,8 @@ export interface TestServer {
 export const CLASS = "TEST01";
 
 export async function startTestServer(overrides: Partial<ServerConfig> = {}): Promise<TestServer> {
-  const server = createGameServer({ databasePath: ":memory:", seedClassCode: CLASS, devTools: true, ...overrides });
+  // เทสต์ห้องโลกเขียนตามพิกัดของแผนที่ทดสอบ 40x30 (test_island)
+  const server = createGameServer({ databasePath: ":memory:", seedClassCode: CLASS, devTools: true, startMap: "test_island", ...overrides });
   const port = await server.listen(0);
   const base = `http://127.0.0.1:${port}`;
   const api: TestServer["api"] = async (path, opts = {}) => {

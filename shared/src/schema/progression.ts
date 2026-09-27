@@ -114,6 +114,9 @@ export const QuestDef = z.strictObject({
     .default({ playerLevel: 1, quests: [] }),
   /** เควสทีม: ต้องมีเพื่อนร่วมกี่คน */
   minPartySize: z.number().int().min(1).default(1),
+  /** บทพูดของผู้ให้เควสตอนเสนอเควส (ทีละบรรทัด) และตอนส่งเควส */
+  intro: z.array(Text).default([]),
+  outro: z.array(Text).default([]),
   objectives: z.array(QuestObjective).min(1),
   rewards: z.strictObject({
     exp: z.number().int().nonnegative().default(0),

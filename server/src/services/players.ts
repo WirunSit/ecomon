@@ -6,6 +6,7 @@ import { classrooms, monsters, playerItems, players } from "../db/schema";
 import { registry } from "../content";
 import type { CatalogService } from "./catalog";
 import { GameError } from "./errors";
+import type { GameEvents } from "./events";
 
 export interface SavedPosition {
   mapId: string;
@@ -30,6 +31,7 @@ export class PlayerService {
   constructor(
     private readonly db: Db,
     private readonly catalog: CatalogService,
+    private readonly events: GameEvents,
   ) {}
 
   private row(playerId: string) {
@@ -73,6 +75,12 @@ export class PlayerService {
       titleId: player.titleId,
       frameId: player.frameId,
     };
+  }
+
+  /** เลเวล + ของสำคัญ (ใช้ตัดสินการเข้าโซน หัวข้อ 9.3) */
+  access(playerId: string): { level: number; keyItems: string[] } {
+    const level = this.db.select({ level: players.level }).from(players).where(eq(players.id, playerId)).get()?.level ?? 1;
+    return { level, keyItems: this.keyItems(playerId) };
   }
 
   /** id ของ key item ที่มี (ใช้ตัดสินว่าลงน้ำได้ไหม) */
@@ -139,7 +147,9 @@ export class PlayerService {
       .set({ level: up.level, exp: up.exp, coins: p.coins + (gain.coins ?? 0), conservationPoints: p.conservationPoints + (gain.points ?? 0) })
       .where(eq(players.id, playerId))
       .run();
-    return up.levelsGained > 0 ? { from: p.level, to: up.level } : undefined;
+    if (up.levelsGained <= 0) return undefined;
+    this.events.emit("level", { playerId, from: p.level, to: up.level });
+    return { from: p.level, to: up.level };
   }
 
   savedPosition(playerId: string): SavedPosition | null {

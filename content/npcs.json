@@ -6,7 +6,11 @@
       "title": "นักนิเวศวิทยาประจำหมู่บ้าน",
       "zone": "village",
       "sprite": "npc_prof_ton",
-      "portrait": "npc_prof_ton_portrait"
+      "portrait": "npc_prof_ton_portrait",
+      "greeting": [
+        "สวัสดี นักนิเวศฝึกหัด! วันนี้เรียนรู้อะไรใหม่บ้างหรือยัง",
+        "ทุกคำตอบที่ถูกต้องช่วยให้เกาะนิเวศากลับมาสมดุลนะ"
+      ]
     },
     {
       "id": "npc_shop_auntie",
@@ -15,7 +19,10 @@
       "zone": "village",
       "sprite": "npc_shop_auntie",
       "portrait": "npc_shop_auntie_portrait",
-      "shop": true
+      "shop": true,
+      "greeting": [
+        "มาแล้วเหรอจ๊ะ! ของในร้านป้าช่วยให้ผจญภัยง่ายขึ้นนะ"
+      ]
     },
     {
       "id": "npc_lab_researcher",
@@ -24,7 +31,11 @@
       "zone": "village",
       "sprite": "npc_lab_researcher",
       "portrait": "npc_lab_researcher_portrait",
-      "lab": true
+      "lab": true,
+      "greeting": [
+        "ห้องแล็บพร้อมเสมอ! ผสมมอนสเตอร์แล้วตอบคำถามให้ไข่ฟักนะ",
+        "อย่าลืมว่าในธรรมชาติจริง สิ่งมีชีวิตต่างสปีชีส์ผสมพันธุ์กันไม่ได้"
+      ]
     },
     {
       "id": "npc_fisherman",
@@ -32,7 +43,10 @@
       "title": "ชาวประมงชายฝั่ง",
       "zone": "coast",
       "sprite": "npc_fisherman",
-      "portrait": "npc_fisherman_portrait"
+      "portrait": "npc_fisherman_portrait",
+      "greeting": [
+        "ลมทะเลวันนี้ดีนะหลาน ทะเลเป็นบ้านของสิ่งมีชีวิตมากมาย"
+      ]
     },
     {
       "id": "npc_ranger",
@@ -40,7 +54,11 @@
       "title": "เจ้าหน้าที่พิทักษ์ป่า",
       "zone": "meadow",
       "sprite": "npc_ranger",
-      "portrait": "npc_ranger_portrait"
+      "portrait": "npc_ranger_portrait",
+      "greeting": [
+        "ป่าและทุ่งหญ้าจะอยู่ได้ ถ้าเราดูแลห่วงโซ่อาหารให้สมบูรณ์",
+        "เห็นมอนสเตอร์แปลก ๆ ที่ไหน บอกพี่ด้วยนะ"
+      ]
     },
     {
       "id": "npc_temple_elder",
@@ -48,7 +66,11 @@
       "title": "ผู้เฝ้าวิหารสมดุล",
       "zone": "valley",
       "sprite": "npc_temple_elder",
-      "portrait": "npc_temple_elder_portrait"
+      "portrait": "npc_temple_elder_portrait",
+      "greeting": [
+        "ความสมดุลเกิดจากความเข้าใจ นักนิเวศเอ๋ย",
+        "ผู้พิทักษ์ทั้งสามรอให้เจ้าพร้อม"
+      ]
     }
   ]
 }

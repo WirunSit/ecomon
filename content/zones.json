@@ -97,6 +97,7 @@
       "topics": [
         "energy_flow"
       ],
+      "requiresItem": "mushroom_flashlight",
       "battleBackground": "rocky_canyon"
     },
     {

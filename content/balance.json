@@ -258,7 +258,7 @@
     "wildStepMs": 400,
     "walkTilesPerSec": 5,
     "waterSpeedFactor": 0.8,
-    "startMap": "test_island",
+    "startMap": "eco_island",
     "interactRadius": 1,
     "recoveryRadius": 1,
     "chatCooldownSec": 2

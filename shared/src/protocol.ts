@@ -301,6 +301,65 @@ export interface HatchResponse {
   profile: PlayerProfile;
 }
 
+// ---------- เควส (หัวข้อ 9.4) ----------
+
+/** active = กำลังทำ · done = ครบแล้วรอรับรางวัล · claimed = รับรางวัลแล้ว */
+export type QuestStatus = "active" | "done" | "claimed";
+
+/** ความคืบหน้าเควส 1 เควส (ข้อความ/เป้าหมายอยู่ใน content/quests ที่ client มีอยู่แล้ว) */
+export interface QuestProgressView {
+  id: string;
+  status: QuestStatus;
+  /** progress[i] / targets[i] ของเป้าหมายข้อ i */
+  progress: number[];
+  targets: number[];
+}
+
+export interface QuestLogResponse {
+  /** เควสที่รับแล้ว (กำลังทำ + รอรับรางวัล) รวมเควสประจำวันของวันนี้ */
+  quests: QuestProgressView[];
+  /** เควสที่รับรางวัลแล้ว (ไม่รวมเควสประจำวัน) */
+  claimed: string[];
+  /** เควสที่รับได้ตอนนี้ (ไปคุยกับผู้ให้เควส) */
+  available: string[];
+  /** วันของเควสประจำวัน (เวลาไทย) + เวลาที่จะรีเซ็ต */
+  day: string;
+  resetAt: number;
+  serverNow: number;
+}
+
+export interface NpcTalkResponse {
+  npc: string;
+  /** เควสของ NPC นี้ที่รับได้ · ทำครบรอส่ง · กำลังทำ */
+  offers: string[];
+  turnIns: string[];
+  active: string[];
+  log: QuestLogResponse;
+}
+
+export interface QuestRewardsView {
+  exp: number;
+  coins: number;
+  items: { id: string; qty: number; tier?: string }[];
+  /** สูตรผสมที่เพิ่งค้นพบ (สายพันธุ์ผลลัพธ์) */
+  recipes: string[];
+}
+
+export interface QuestClaimResponse {
+  questId: string;
+  rewards: QuestRewardsView;
+  playerLevelUp?: { from: number; to: number };
+  log: QuestLogResponse;
+  profile: PlayerProfile;
+}
+
+/** server → client: ความคืบหน้าเควสเปลี่ยน (ขึ้นแจ้งเตือนสั้น ๆ) */
+export interface QuestUpdateMessage {
+  quest: QuestProgressView;
+  /** เป้าหมายข้อที่เพิ่งขยับ */
+  objective: number;
+}
+
 /** เลือกฉายา/กรอบโปรไฟล์ (null = ไม่ใช้) — ต้องปลดล็อกแล้ว */
 export const ProfileStyleRequest = z.object({ titleId: Id.nullable().optional(), frameId: Id.nullable().optional() });
 export type ProfileStyleRequest = z.infer<typeof ProfileStyleRequest>;
@@ -356,6 +415,8 @@ export const MSG = {
   devSummonWild: "dev:summon-wild",
   /** server → client: ข้อความแจ้งเตือนสั้น ๆ (เช่น ฟื้นฟูมอนสเตอร์แล้ว) */
   notice: "notice",
+  /** server → client: ความคืบหน้าเควส (QuestUpdateMessage) */
+  questUpdate: "quest:update",
 
   // ---- การต่อสู้ (หัวข้อ 5) ----
   /** server → client: เริ่มต่อสู้ / ภาพรวมสถานะ (ส่งซ้ำเมื่อ resync) */
@@ -510,6 +571,8 @@ export const DevToggleKeyItemMessage = z.object({ itemId: Id });
 export interface NoticeMessage {
   code?: string;
   text?: string;
+  /** ค่าประกอบข้อความสำเร็จรูป เช่น { level: 8, zone: "canyon" } */
+  params?: Record<string, string | number>;
 }
 
 export type BattleSide = "player" | "wild";

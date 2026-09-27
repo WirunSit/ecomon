@@ -170,6 +170,29 @@ export function apiRouter(s: Services) {
     res.json(result);
   });
 
+  // ---------- เควสและ NPC (หัวข้อ 9.4) ----------
+
+  r.get("/quests", requireAuth, (req: AuthedRequest, res) => {
+    res.json(s.quests.log(req.auth!.playerId));
+  });
+
+  r.post("/npcs/:id/talk", requireAuth, (req: AuthedRequest, res) => {
+    const playerId = req.auth!.playerId;
+    res.json(s.quests.talk(playerId, String(req.params.id), playerSpot(playerId)));
+  });
+
+  r.post("/quests/:id/accept", requireAuth, (req: AuthedRequest, res) => {
+    const playerId = req.auth!.playerId;
+    res.json(s.quests.accept(playerId, String(req.params.id), playerSpot(playerId)));
+  });
+
+  r.post("/quests/:id/claim", requireAuth, (req: AuthedRequest, res) => {
+    const playerId = req.auth!.playerId;
+    const result = s.quests.claim(playerId, String(req.params.id));
+    profileChanged(playerId, result.profile);
+    res.json(result);
+  });
+
   // ---------- ดันเจี้ยน (หัวข้อ 8) ----------
 
   r.get("/dungeons", requireAuth, (req: AuthedRequest, res) => {

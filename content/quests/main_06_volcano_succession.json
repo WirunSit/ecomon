@@ -1,0 +1,57 @@
+{
+  "id": "main_06_volcano_succession",
+  "type": "main",
+  "title": "ชีวิตบนลาวา",
+  "description": "บนลาวาที่เย็นตัวลง สิ่งมีชีวิตผู้บุกเบิกเริ่มกลับมา ศึกษาการเปลี่ยนแปลงแทนที่ของภูเขาไฟ",
+  "giver": "npc_prof_ton",
+  "zone": "volcano",
+  "requires": {
+    "playerLevel": 12,
+    "quests": [
+      "main_05_canyon_energy"
+    ]
+  },
+  "intro": [
+    "ภูเขาไฟทางตะวันออกเฉียงเหนือเคยปะทุจนทุกอย่างหายไป",
+    "แต่ชีวิตค่อย ๆ กลับมาเป็นขั้น ๆ ไปดูการเปลี่ยนแปลงแทนที่กับตาตัวเองเถอะ"
+  ],
+  "outro": [
+    "จากไลเคนสู่ป่าสมบูรณ์ ใช้เวลานานแต่เกิดขึ้นได้เสมอ",
+    "รับเรือใบไม้ไป ออกทะเลลึกที่ชายฝั่งตะวันออกเฉียงใต้ได้แล้ว ลุงชลรออยู่"
+  ],
+  "objectives": [
+    {
+      "kind": "reach",
+      "zone": "volcano"
+    },
+    {
+      "kind": "answer",
+      "filter": {
+        "topic": "succession"
+      },
+      "correct": 6
+    },
+    {
+      "kind": "catch",
+      "filter": {
+        "zone": "volcano"
+      },
+      "count": 2
+    },
+    {
+      "kind": "evolve",
+      "filter": {},
+      "count": 1
+    }
+  ],
+  "rewards": {
+    "exp": 600,
+    "coins": 250,
+    "items": [
+      {
+        "id": "leaf_boat",
+        "qty": 1
+      }
+    ]
+  }
+}

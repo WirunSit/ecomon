@@ -485,7 +485,9 @@ def build_tilesets(manifest: dict) -> list[str]:
                 continue
             im = Image.open(src).convert("RGBA")
             if rel.startswith("tiles/"):
-                tile = im.resize((size, size), Image.LANCZOS)
+                # ตัดขอบ 10% (ขอบช่องจาก sheet มักมีเส้น ทำให้เห็นรอยต่อเป็นตาราง) — ตรงกับ tools/make-world-map.ts
+                m = round(im.width * 0.1)
+                tile = im.crop((m, m, im.width - m, im.height - m)).resize((size, size), Image.LANCZOS)
             else:  # ของประดับ: ย่อให้พอดีช่อง ชิดล่าง พื้นโปร่งใส
                 im.thumbnail((size, size), Image.LANCZOS)
                 tile = Image.new("RGBA", (size, size), (0, 0, 0, 0))

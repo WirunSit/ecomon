@@ -1,0 +1,30 @@
+{
+  "id": "daily_water_2",
+  "type": "daily",
+  "title": "สำรวจแหล่งน้ำ",
+  "description": "ได้มอนสเตอร์ในน้ำ 2 ตัว",
+  "giver": "npc_prof_ton",
+  "requires": {
+    "playerLevel": 6,
+    "quests": []
+  },
+  "objectives": [
+    {
+      "kind": "catch",
+      "filter": {
+        "habitat": "water"
+      },
+      "count": 2
+    }
+  ],
+  "rewards": {
+    "exp": 160,
+    "coins": 90,
+    "items": [
+      {
+        "id": "honey_potion",
+        "qty": 1
+      }
+    ]
+  }
+}

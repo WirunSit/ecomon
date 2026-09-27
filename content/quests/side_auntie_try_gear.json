@@ -1,0 +1,36 @@
+{
+  "id": "side_auntie_try_gear",
+  "type": "side",
+  "title": "ลองแต่งตัวให้คู่หู",
+  "description": "ป้าส้มชวนลองสวมไอเท็มให้มอนสเตอร์ ใส่อะไรก็ได้สักชิ้น",
+  "giver": "npc_shop_auntie",
+  "zone": "village",
+  "requires": {
+    "playerLevel": 2,
+    "quests": []
+  },
+  "intro": [
+    "ไอเท็มสวมใส่ช่วยเพิ่มพลังให้มอนสเตอร์นะจ๊ะ",
+    "ป้าแถมให้ชิ้นหนึ่ง ลองสวมดูสิ"
+  ],
+  "outro": [
+    "เข้ากันดีจ้ะ! มาซื้อของที่ร้านป้าอีกนะ"
+  ],
+  "objectives": [
+    {
+      "kind": "equip",
+      "filter": {},
+      "count": 1
+    }
+  ],
+  "rewards": {
+    "exp": 60,
+    "coins": 60,
+    "items": [
+      {
+        "id": "leaf_crown",
+        "qty": 1
+      }
+    ]
+  }
+}

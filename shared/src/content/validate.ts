@@ -390,6 +390,15 @@ export function validateContent(c: GameContent, origins: ContentOrigins, opts: V
       if (!species.has(r)) err(file, ["rewards", "unlockRecipes", j], `สูตรอ้างถึงมอนสเตอร์ผลลัพธ์ "${r}" ที่ไม่มีอยู่`);
     });
   });
+  // เควสประจำวันต้องมีพอให้สุ่มทุกวัน · ทุกโซนควรมีเควสหลัก 1 บท (หัวข้อ 9.4)
+  const dailyPool = c.quests.filter((q) => q.enabled && q.type === "daily" && q.requires.playerLevel <= 1).length;
+  if (c.quests.some((q) => q.type === "daily") && dailyPool < b.daily.questCount)
+    warn(F.balance, ["daily", "questCount"], `เควสประจำวันที่เลเวล 1 รับได้มีแค่ ${dailyPool} เควส น้อยกว่า questCount (${b.daily.questCount})`);
+  if (c.quests.some((q) => q.type === "main")) {
+    c.zones.forEach((z, i) => {
+      if (!c.quests.some((q) => q.type === "main" && q.zone === z.id)) warn(F.zones, ["zones", i], `โซน "${z.id}" ยังไม่มีเควสหลัก`);
+    });
+  }
   // เควสต้องไม่วนกันเอง
   const visiting = new Set<string>();
   const done = new Set<string>();
@@ -441,6 +450,17 @@ export function validateContent(c: GameContent, origins: ContentOrigins, opts: V
       if (!startMap.markers.some((m) => m.type === "npc" && npcs.get(m.name)?.[flag]))
         warn(F.balance, ["world", "startMap"], `แผนที่เริ่มต้นยังไม่มี NPC ${label} (npcs.json: ${flag} = true)`);
     }
+    // ทุกโซนต้องอยู่บนแผนที่เริ่มต้น (เกาะเดียว หัวข้อ 10) — ยกเว้นแผนที่ทดสอบที่ทั้งแผนที่เป็นโซนเดียว
+    const onMap = new Set([...startMap.zones.map((z) => z.zone), ...(startMap.zone ? [startMap.zone] : [])]);
+    if (startMap.zones.length)
+      c.zones.forEach((z, i) => {
+        if (!onMap.has(z.id)) warn(F.zones, ["zones", i], `โซน "${z.id}" ยังไม่มีพื้นที่บนแผนที่เริ่มต้น ${startMap.id}`);
+      });
+    // NPC ทุกตัวที่เป็นผู้ให้เควสต้องยืนอยู่บนแผนที่
+    const placed = new Set(startMap.markers.filter((m) => m.type === "npc").map((m) => m.name));
+    c.quests.forEach((q, i) => {
+      if (q.type !== "daily" && !placed.has(q.giver)) warn(origins.quests[i]!, ["giver"], `NPC "${q.giver}" ยังไม่ได้วางบนแผนที่ ${startMap.id}`);
+    });
   }
 
   // ---------- quick chat ----------
@@ -463,6 +483,7 @@ export function validateContent(c: GameContent, origins: ContentOrigins, opts: V
     for (const m of map.markers.filter((x) => x.type === "dungeon")) {
       if (!dungeons.has(m.name)) err(file, ["layers"], `ทางเข้าดันเจี้ยน #${m.objectId}: ไม่มี "${m.name}" ใน dungeons.json`);
     }
+    for (const z of map.zones) if (!zones.has(z.zone)) err(file, ["layers"], `พื้นที่โซน "${z.zone}" ไม่มีใน zones.json`);
     if (opts.assetExists) {
       for (const id of new Set(map.props.map((p) => p.prop)))
         if (!opts.assetExists(`props/${id}.png`)) warn(file, ["tilesets"], `ไม่มีภาพของประดับ assets/props/${id}.png`);

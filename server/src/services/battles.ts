@@ -84,7 +84,7 @@ export class BattleService {
     result: "win" | "lose" | "fled",
     zone: string | undefined,
     now = Date.now(),
-    opts: { capture?: boolean; coins?: boolean; dungeon?: string } = {},
+    opts: { capture?: boolean; coins?: boolean; dungeon?: string; partySize?: number } = {},
   ): BattleRewards {
     const capture = opts.capture ?? true;
     const giveCoins = opts.coins ?? true;
@@ -147,10 +147,12 @@ export class BattleService {
       if (up.levelsGained > 0) rewards.playerLevelUp = { from: player.level, to: up.level };
       tx.update(players).set({ level: up.level, exp: up.exp, coins: player.coins + rewards.coins }).where(eq(players.id, p.playerId)).run();
     });
-    if (result === "win") this.events.emit("defeat", { playerId: p.playerId, speciesId: wild.speciesId, zone, dungeon: opts.dungeon });
+    const partySize = opts.partySize ?? 1;
+    if (rewards.playerLevelUp) this.events.emit("level", { playerId: p.playerId, ...rewards.playerLevelUp });
+    if (result === "win") this.events.emit("defeat", { playerId: p.playerId, speciesId: wild.speciesId, zone, dungeon: opts.dungeon, partySize });
     if (rewards.caught) {
       rewards.catalogUnlocks = this.catalogs.owned(p.playerId, [{ speciesId: rewards.caught.speciesId, form: 1 }], now).unlocks;
-      this.events.emit("catch", { playerId: p.playerId, speciesId: wild.speciesId, zone, how: "wild" });
+      this.events.emit("catch", { playerId: p.playerId, speciesId: wild.speciesId, zone, how: "wild", partySize });
     }
     return rewards;
   }

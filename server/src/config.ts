@@ -26,6 +26,8 @@ export interface ServerConfig {
   questionTimer: boolean;
   /** เว้นระหว่างห้องในดันเจี้ยน (ms) ให้อ่านสรุปผลก่อนห้องถัดไป — เทสต์ตั้งให้สั้น */
   dungeonStageBreakMs: number;
+  /** แผนที่ของห้องโลก (ไม่ตั้ง = balance.world.startMap) — เทสต์ใช้แผนที่ทดสอบเล็ก */
+  startMap?: string;
 }
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env, overrides: Partial<ServerConfig> = {}): ServerConfig {
@@ -44,6 +46,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env, overrides: Part
     includeDraftQuestions: env.INCLUDE_DRAFT_QUESTIONS ? env.INCLUDE_DRAFT_QUESTIONS === "1" : !production,
     questionTimer: env.QUESTION_TIMER !== "0",
     dungeonStageBreakMs: 4000,
+    startMap: env.START_MAP || undefined,
     ...overrides,
   };
 }

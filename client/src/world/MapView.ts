@@ -3,6 +3,14 @@ import { MAP_LAYERS, REQUIRED_TILE_LAYERS } from "@ecomon/shared";
 import { mapGround, propTextureKey, tilesetTextureKey } from "../assets";
 import type { LoadedMap } from "../content";
 
+/** gid ของ tile ที่มี property "prop" (วาดเป็นของประดับขนาดจริง) */
+function propTileGids(tiled: unknown): Set<number> {
+  const out = new Set<number>();
+  const map = tiled as { tilesets?: { firstgid: number; tiles?: { id: number; properties?: { name: string }[] }[] }[] };
+  for (const ts of map.tilesets ?? []) for (const t of ts.tiles ?? []) if (t.properties?.some((p) => p.name === "prop")) out.add(ts.firstgid + t.id);
+  return out;
+}
+
 /** depth ของสิ่งที่เรียงหน้าหลังตามแนวลึก (ตัวละคร มอน ของประดับ) — ใช้สูตรเดียวกันทุกชนิด */
 export function depthForY(y: number, bias = 0): number {
   return 10 + y / 10_000 + bias;
@@ -36,13 +44,17 @@ export class MapView {
     const tilesets = loaded.tilesetImages
       .map((t) => tilemap.addTilesetImage(t.name, tilesetTextureKey(t.file)))
       .filter((t): t is Phaser.Tilemaps.Tileset => !!t);
+    const propGids = propTileGids(loaded.tiled);
     REQUIRED_TILE_LAYERS.forEach((name, depth) => {
       const layer = tilemap.createLayer(name, tilesets);
       layer?.setDepth(depth);
       if (layer && (name === MAP_LAYERS.waterShallow || name === MAP_LAYERS.waterDeep)) {
         scene.tweens.add({ targets: layer, alpha: 0.88, duration: 1400, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
       }
+      // ช่องชนที่เป็นของประดับ: ซ่อนไอคอนเล็กในช่อง แล้ววาดเป็นภาพขนาดจริงแทน (เหมือนตอนมีภาพพื้น)
+      if (layer && name === MAP_LAYERS.collision) layer.forEachTile((t) => t.setVisible(!propGids.has(t.index)));
     });
+    this.addProps(scene, loaded);
     this.widthPx = tilemap.widthInPixels;
     this.heightPx = tilemap.heightInPixels;
   }

@@ -1,0 +1,34 @@
+{
+  "id": "col_water_friends",
+  "type": "collection",
+  "title": "เพื่อนใต้น้ำ",
+  "description": "จับมอนสเตอร์ที่อยู่ในน้ำให้ได้ 3 สายพันธุ์",
+  "giver": "npc_ranger",
+  "zone": "lake",
+  "requires": {
+    "playerLevel": 6,
+    "quests": [
+      "main_03_forest_partners"
+    ]
+  },
+  "objectives": [
+    {
+      "kind": "catch",
+      "filter": {
+        "habitat": "water",
+        "distinctSpecies": true
+      },
+      "count": 3
+    }
+  ],
+  "rewards": {
+    "exp": 300,
+    "coins": 150,
+    "items": [
+      {
+        "id": "knowledge_charm",
+        "qty": 1
+      }
+    ]
+  }
+}

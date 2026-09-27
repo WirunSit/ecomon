@@ -4,6 +4,7 @@ export { parseContent, attachLines, locateLine, SINGLE_FILES, CONTENT_DIRS } fro
 export { validateContent, monsterAssetPath } from "./content/validate";
 export * from "./world/map";
 export * from "./world/movement";
+export * from "./world/zones";
 export * from "./registry";
 export * from "./formulas/rng";
 export * from "./formulas/stats";
@@ -16,3 +17,4 @@ export * from "./world/spawn";
 export * from "./formulas/questions";
 export * from "./formulas/collection";
 export * from "./formulas/items";
+export * from "./formulas/quests";

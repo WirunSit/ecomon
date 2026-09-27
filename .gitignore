@@ -12,3 +12,4 @@ asset-src/_preview/
 *.sqlite-shm
 server/data/
 !.env.example
+*-preview.png

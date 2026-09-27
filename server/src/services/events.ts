@@ -4,10 +4,12 @@
 export interface GameEventMap {
   /** ตอบคำถาม 1 ข้อ (ทุกกิจกรรม: ต่อสู้ พัฒนาร่าง ดันเจี้ยน) */
   answer: { playerId: string; topic: string; correct: boolean; context: string };
-  /** ชนะมอนป่า/มอนดันเจี้ยน */
-  defeat: { playerId: string; speciesId: string; zone?: string; dungeon?: string };
+  /** ชนะมอนป่า/มอนดันเจี้ยน (partySize = จำนวนคนที่สู้ด้วยกัน ใช้กับเควสทีม) */
+  defeat: { playerId: string; speciesId: string; zone?: string; dungeon?: string; partySize?: number };
   /** ได้มอนสเตอร์เข้าคลัง (จับ ฟักไข่ ดรอปดันเจี้ยน) */
-  catch: { playerId: string; speciesId: string; zone?: string; how: "wild" | "egg" | "dungeon" };
+  catch: { playerId: string; speciesId: string; zone?: string; how: "wild" | "egg" | "dungeon"; partySize?: number };
+  /** เลเวลผู้เล่นขึ้น (แจ้งสิ่งที่ปลดล็อก หัวข้อ 9.3) */
+  level: { playerId: string; from: number; to: number };
   evolve: { playerId: string; speciesId: string; toForm: number };
   breed: { playerId: string; parents: [string, string]; upgraded: boolean };
   dungeon: { playerId: string; dungeonId: string; win: boolean; partySize: number };

@@ -49,6 +49,7 @@ tools/    validate.ts, make-placeholders.ts, make-test-map.ts (อนาคต: 
 | `npm run assets` | ตัด sheet ใน asset-src/ → assets/ + atlas (client/public/atlas) + tileset + contact sheet แล้ววาดภาพพื้นแผนที่ |
 | `npm run render-maps` | วาดภาพพื้นของแผนที่ใหม่ (หลังแก้แผนที่ใน Tiled หรือ asset-src/terrain.yaml) |
 | `npm run make-test-map` | สร้างแผนที่ทดสอบ + tileset placeholder (ไม่เขียนทับ ยกเว้น `--force`) |
+| `npm run make-world-map` | สร้างแผนที่เกาะนิเวศา + tileset world_tiles (ไม่เขียนทับ ยกเว้น `--force`) |
 | `npm test` | vitest |
 | `npm run typecheck` | tsc ทุก workspace |
 | `npm run build` | validate แล้ว build client |
@@ -143,6 +144,23 @@ tools/    validate.ts, make-placeholders.ts, make-test-map.ts (อนาคต: 
   ทีละห้อง ใช้ข้อความ battle:* ชุดเดิม + team:*) · มอนมลพิษ/บอส ย้อมสี + ไอพิษ + ขยายด้วยโค้ดใน `BattleScene`
 - เทสต์ตั้ง `dungeonStageBreakMs` ให้สั้น · ตอนพัฒนา client มี `window.__ecomon.game` ไว้ให้เครื่องมือทดสอบเดินเฟรมเอง
 
+## เลเวลผู้เล่น เควส และ NPC (เฟส 10)
+
+- **โลกจริง = `content/maps/eco_island.tmj`** (160x120, 8 โซน) สร้างด้วย `npm run make-world-map` (`tools/make-world-map.ts`
+  deterministic · `--force` เขียนทับ) + tileset `assets/tiles/world_tiles.png` (ลำดับตรง `_tilesets.world_tiles` ใน manifest)
+  · `test_island` ใช้ในเทสต์ห้องโลกเท่านั้น (`ServerConfig.startMap`, env `START_MAP`)
+- โซนย่อย = object layer `zones` (สี่เหลี่ยม property `zone` อันแรกที่ครอบชนะ) → `zoneAt(map, x, y)` · เข้าโซนต้องผ่าน
+  `canEnterZone()` (เลเวล `unlockLevel` + `requiresItem`) ทั้ง server (`WorldRoom.handleMove` ส่ง notice `zone_locked_*`) และ client (ทำนาย)
+  · เปลี่ยนโซน → event `reach` · การต่อสู้ใช้โซนที่ยืน (`BattleHost.zoneOf`) สำหรับหัวข้อคำถาม/ฉาก/ที่มาของมอน
+- ตารางปลดล็อก (หัวข้อ 9.3) มาจาก content: `levelUnlocks()/unlocksBetween()` · เลเวลขึ้น → event `level` → notice `level_up`
+- เควส `server/src/services/quests.ts`: ฟัง event ทั้ง 10 ชนิด (distinctSpecies เก็บใน `quest_progress.seen`, เควสทีมนับเมื่อ
+  `partySize >= minPartySize`, catalog นับค่าจริง) · REST `GET /api/quests` · `POST /api/npcs/:id/talk` (ต้องยืนใกล้ นับ talk)
+  · `POST /api/quests/:id/accept` (ต้องยืนใกล้ผู้ให้เควส) · `POST /api/quests/:id/claim` (ที่ไหนก็ได้ ให้ของสำคัญ/สูตรผสมได้)
+  · ความคืบหน้าส่ง `MSG.questUpdate` · ประจำวันสุ่ม `balance.daily.questCount` เควสต่อวัน (`dayKey()` เวลาไทย) ลบของเก่าเมื่อข้ามวัน
+- เนื้อเรื่อง 8 บท (1 บท/โซน) รางวัลบทก่อนคือ key item ของโซนถัดไป · บทพูดใน `quests.intro/outro` และ `npcs.greeting`
+- client: `ui/quests/` DialoguePanel (ภาพหน้าอก + บทพูด + รับ/ส่งเควส + ร้าน/แล็บ) · QuestLogPanel · QuestTracker · `state/quests.ts`
+- แผนที่ไม่มีภาพพื้น (ยังไม่ได้รัน render-maps) → วาด tile แต่ของประดับยังเป็นภาพขนาดจริง (`MapView`)
+
 ## ข้อตกลงของ content
 
 - id เป็น `a-z0-9_` ขึ้นต้นด้วยตัวอักษร ใช้เป็นชื่อไฟล์/โฟลเดอร์ asset ได้
@@ -195,6 +213,7 @@ tools/    validate.ts, make-placeholders.ts, make-test-map.ts (อนาคต: 
 - [x] เฟส 7 — พัฒนาร่าง ไอเท็ม ร้านค้า (ดูหัวข้อ "ไอเท็ม ร้านค้า พัฒนาร่าง" ด้านบน)
 - [x] เฟส 8 — ผสมพันธุ์และไข่ (ดูหัวข้อ "ผสมพันธุ์และไข่" ด้านบน)
 - [x] เฟส 9 — ดันเจี้ยน (ดูหัวข้อ "ดันเจี้ยน" ด้านบน)
-- [ ] เฟส 10 เป็นต้นไป — ดู docs/GAME_PLAN.md หัวข้อ 13
+- [x] เฟส 10 — เลเวลผู้เล่น เควส NPC และแผนที่เกาะนิเวศา (ดูหัวข้อ "เลเวลผู้เล่น เควส และ NPC" ด้านบน)
+- [ ] เฟส 11 เป็นต้นไป — ดู docs/GAME_PLAN.md หัวข้อ 13
 - [~] เฟส 12 — ทำ pipeline ตัดภาพ (หัวข้อ 15) และใช้ภาพจริงกับมอนสเตอร์ ตัวละคร tileset หน้า login แล้ว
       ฉากต่อสู้ (S11–S12) และเอฟเฟกต์ธาตุ (S15) ใช้แล้วในเฟส 5 · ที่เหลือ: ภาพ NPC/ไอเท็ม/ไข่ จะผูกเข้าเกมตามเฟสที่ใช้

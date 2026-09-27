@@ -424,7 +424,7 @@
       "category": "key",
       "icon": "mushroom_flashlight",
       "unlocks": "cave",
-      "description": "เข้าถ้ำมืดได้"
+      "description": "ส่องทางในหุบเขาหินและถ้ำมืดได้ (ต้องมีจึงเข้าโซนหุบเขาหินและถ้ำ)"
     },
     {
       "id": "eco_coin",

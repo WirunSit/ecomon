@@ -250,7 +250,12 @@ export class DungeonRoom extends Room<DungeonRoomState, unknown, { playerId: str
     for (const m of runner.members.values()) {
       const p = runner.participant(m);
       const result = win ? (p.outcome === "fled" ? "fled" : "win") : "lose";
-      const rewards = battles.finish(p, session.wild, result, this.dungeon.zone, Date.now(), { capture: false, coins: false, dungeon: this.dungeon.id });
+      const rewards = battles.finish(p, session.wild, result, this.dungeon.zone, Date.now(), {
+        capture: false,
+        coins: false,
+        dungeon: this.dungeon.id,
+        partySize: session.participants.length,
+      });
       this.clients.getById(m.sessionId)?.send(MSG.battleEnd, { ...rewards, profile: players.profile(m.playerId), stage } satisfies BattleEndMessage);
     }
     this.runner = undefined;

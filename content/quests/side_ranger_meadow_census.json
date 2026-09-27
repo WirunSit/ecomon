@@ -1,0 +1,38 @@
+{
+  "id": "side_ranger_meadow_census",
+  "type": "side",
+  "title": "สำรวจประชากรทุ่งหญ้า",
+  "description": "พี่ไพรอยากรู้ว่ามอนสเตอร์ในทุ่งหญ้ายังมีมากพอไหม ช่วยต่อสู้ทำความรู้จักพวกมันสัก 5 ตัว",
+  "giver": "npc_ranger",
+  "zone": "meadow",
+  "requires": {
+    "playerLevel": 2,
+    "quests": []
+  },
+  "intro": [
+    "การนับประชากรช่วยให้รู้ว่าสิ่งมีชีวิตชนิดไหนกำลังลดลง",
+    "ช่วยพี่สำรวจทุ่งหญ้าหน่อยนะ"
+  ],
+  "outro": [
+    "ขอบใจมาก! ข้อมูลนี้ช่วยให้วางแผนอนุรักษ์ได้"
+  ],
+  "objectives": [
+    {
+      "kind": "defeat",
+      "filter": {
+        "zone": "meadow"
+      },
+      "count": 5
+    }
+  ],
+  "rewards": {
+    "exp": 100,
+    "coins": 80,
+    "items": [
+      {
+        "id": "honey_potion",
+        "qty": 2
+      }
+    ]
+  }
+}

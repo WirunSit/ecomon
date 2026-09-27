@@ -1,0 +1,36 @@
+{
+  "id": "learn_energy_flow",
+  "type": "learning",
+  "title": "ทบทวน: การถ่ายทอดพลังงาน",
+  "description": "ตอบคำถามหัวข้อ \"การถ่ายทอดพลังงาน\" ให้ถูก 8 ข้อ (จากการต่อสู้ ดันเจี้ยน หรือบททดสอบพัฒนาร่าง)",
+  "giver": "npc_prof_ton",
+  "requires": {
+    "playerLevel": 8,
+    "quests": []
+  },
+  "intro": [
+    "หัวข้อ \"การถ่ายทอดพลังงาน\" ออกสอบบ่อยนะ ลองทบทวนให้แม่นขึ้น"
+  ],
+  "outro": [
+    "เยี่ยม! ทบทวนบ่อย ๆ แล้วจะจำได้ขึ้นใจ"
+  ],
+  "objectives": [
+    {
+      "kind": "answer",
+      "filter": {
+        "topic": "energy_flow"
+      },
+      "correct": 8
+    }
+  ],
+  "rewards": {
+    "exp": 160,
+    "coins": 80,
+    "items": [
+      {
+        "id": "hint_scroll",
+        "qty": 1
+      }
+    ]
+  }
+}

@@ -37,6 +37,18 @@ export function dungeonDone(playerId: string, result: "clear" | "fail" | "left")
   r?.room.dungeonDone(r.sessionId, result);
 }
 
+/** ส่งข้อความชนิดใดก็ได้ถึงผู้เล่น (ถ้าออนไลน์อยู่ในห้องโลก) */
+export function sendToPlayer(playerId: string, type: string, payload: unknown) {
+  const r = roomOf(playerId);
+  r?.room.sendTo(r.sessionId, type, payload);
+}
+
+/** โซนที่ผู้เล่นยืนอยู่ในห้องโลกตอนนี้ */
+export function playerZone(playerId: string): string | undefined {
+  const r = roomOf(playerId);
+  return r?.room.zoneOf(r.sessionId);
+}
+
 /** ส่งข้อความแจ้งเตือนสั้น ๆ ให้ผู้เล่น (ถ้าออนไลน์อยู่ในห้อง) เช่น ไข่พร้อมฟัก */
 export function notifyPlayer(playerId: string, notice: NoticeMessage) {
   const r = roomOf(playerId);

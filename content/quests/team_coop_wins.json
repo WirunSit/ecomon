@@ -1,0 +1,36 @@
+{
+  "id": "team_coop_wins",
+  "type": "team",
+  "title": "ร่วมแรงร่วมใจ",
+  "description": "ต่อสู้ร่วมกับเพื่อนแล้วชนะมอนสเตอร์ 3 ครั้ง (กดเข้าร่วมการต่อสู้ของเพื่อน)",
+  "giver": "npc_ranger",
+  "zone": "meadow",
+  "requires": {
+    "playerLevel": 3,
+    "quests": []
+  },
+  "minPartySize": 2,
+  "intro": [
+    "สู้ด้วยกันจะได้มอนสเตอร์คนละตัวเลยนะ ลองชวนเพื่อนดู"
+  ],
+  "outro": [
+    "ทีมเวิร์กยอดเยี่ยม!"
+  ],
+  "objectives": [
+    {
+      "kind": "defeat",
+      "filter": {},
+      "count": 3
+    }
+  ],
+  "rewards": {
+    "exp": 250,
+    "coins": 150,
+    "items": [
+      {
+        "id": "honey_potion",
+        "qty": 3
+      }
+    ]
+  }
+}

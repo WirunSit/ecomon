@@ -8,7 +8,9 @@ import {
   DUNGEON_ROOM,
   DungeonBossMessage,
   DungeonOpenMessage,
+  canEnterZone,
   findMarker,
+  zoneAt,
   MoveMessage,
   movementUnlocks,
   MSG,
@@ -37,6 +39,8 @@ import { DungeonLobbyState, PlayerState, WildMonsterState, WorldState } from "./
 interface ClientData {
   playerId: string;
   unlocks: Set<Unlock>;
+  /** โซนที่ยืนอยู่ (ใช้จับการเข้าโซนใหม่ → เควส "reach") */
+  zone?: string;
   /** เครดิตการเดิน (มิลลิวินาที) ใช้ตรวจความเร็วกันวาร์ป */
   moveCredit: number;
   lastMoveAt: number;
@@ -77,7 +81,7 @@ export class WorldRoom extends Room<WorldState, { code: string; classroomId: str
     if (typeof options?.classroomId !== "string" || !options.classroomId) throw new ServerError(400, "ไม่ระบุห้องเรียน");
     this.classroomId = options.classroomId;
     const world = registry.balance.world;
-    this.map = registry.maps.get(world.startMap);
+    this.map = registry.maps.get(services().config.startMap ?? world.startMap);
     this.state.mapId = this.map.id;
     this.state.code = allocateRoomCode();
     void this.setMetadata({ code: this.state.code, classroomId: this.classroomId });
@@ -114,6 +118,7 @@ export class WorldRoom extends Room<WorldState, { code: string; classroomId: str
       },
       respawn: (sid) => this.respawnAtRecovery(sid),
       nickname: (sid) => this.state.players.get(sid)?.nickname ?? "",
+      zoneOf: (sid) => this.zoneOf(sid),
     });
     this.onMessage(MSG.battleAction, (client, raw) => this.battles.action(client, raw));
     this.onMessage(MSG.battleAnswer, (client, raw) => this.battles.answer(client, raw));
@@ -158,14 +163,17 @@ export class WorldRoom extends Room<WorldState, { code: string; classroomId: str
     services().catalog.syncOwned(auth.playerId); // ข้อมูลเก่าก่อนมีสมุดภาพ
 
     const now = Date.now();
+    const zone = zoneAt(this.map, p.x, p.y);
     client.userData = {
       playerId: auth.playerId,
       unlocks,
+      zone,
       moveCredit: this.moveCreditCap(),
       lastMoveAt: now,
       lastChatAt: 0,
     };
     this.refillWild();
+    if (zone) services().events.emit("reach", { playerId: auth.playerId, zone });
   }
 
   override async onLeave(client: Client<ClientData, AuthData>, consented: boolean) {
@@ -260,12 +268,36 @@ export class WorldRoom extends Room<WorldState, { code: string; classroomId: str
       return this.correct(client, p);
     }
 
+    // โซนที่ยังไม่ปลดล็อก (เลเวล/ไอเท็มสำคัญ หัวข้อ 9.3) เข้าไม่ได้
+    const toZone = zoneAt(this.map, step.x, step.y);
+    if (toZone !== ud.zone) {
+      const { level, keyItems } = services().players.access(ud.playerId);
+      const gate = canEnterZone(registry, ud.zone, toZone, level, keyItems);
+      if (!gate.ok) {
+        const params: Record<string, string | number> = { zone: toZone ?? "" };
+        if (gate.reason === "level") params.level = gate.level;
+        else params.item = gate.item;
+        client.send(MSG.notice, { code: `zone_locked_${gate.reason}`, params } satisfies NoticeMessage);
+        return this.correct(client, p);
+      }
+    }
+
     const cost = stepDurationMs(step.terrain, registry.balance) * MOVE_COST_FACTOR;
     if (ud.moveCredit < cost) return this.correct(client, p); // เร็วเกินจริง = ปฏิเสธ
     ud.moveCredit -= cost;
     p.x = step.x;
     p.y = step.y;
+    if (toZone !== ud.zone) {
+      ud.zone = toZone;
+      if (toZone) services().events.emit("reach", { playerId: ud.playerId, zone: toZone });
+    }
     this.checkRecovery(client, ud.playerId, p);
+  }
+
+  /** โซนที่ผู้เล่นคนนี้ยืนอยู่ (ใช้เลือกหัวข้อคำถาม/ฉากต่อสู้/ที่มาของมอนที่จับได้) */
+  zoneOf(sessionId: string): string | undefined {
+    const p = this.state.players.get(sessionId);
+    return p ? zoneAt(this.map, p.x, p.y) : this.map.zone;
   }
 
   // ---------- จุดฟื้นฟู ----------
@@ -344,7 +376,10 @@ export class WorldRoom extends Room<WorldState, { code: string; classroomId: str
     const p = this.state.players.get(sessionId);
     if (!p) return;
     this.applyProfile(p, profile);
-    this.clients.getById(sessionId)?.send(MSG.profile, profile);
+    const client = this.clients.getById(sessionId) as Client<ClientData, AuthData> | undefined;
+    // ได้ของสำคัญใหม่ (เช่นรางวัลเควส) → ลงน้ำ/เข้าโซนได้ทันที
+    if (client?.userData) client.userData.unlocks = movementUnlocks(profile.keyItems, registry.items.all);
+    client?.send(MSG.profile, profile);
   }
 
   isInBattle(sessionId: string): boolean {

@@ -1,0 +1,39 @@
+{
+  "id": "side_prof_volcano_patrol",
+  "type": "side",
+  "title": "ลาดตระเวนภูเขาไฟ",
+  "description": "มอนสเตอร์บนภูเขาไฟดุร้ายขึ้น ช่วยลาดตระเวนและทำความรู้จักพวกมัน 5 ตัว",
+  "giver": "npc_prof_ton",
+  "zone": "volcano",
+  "requires": {
+    "playerLevel": 12,
+    "quests": [
+      "main_05_canyon_energy"
+    ]
+  },
+  "intro": [
+    "ภูเขาไฟร้อนมาก ระวังตัวด้วยนะ"
+  ],
+  "outro": [
+    "ปลอดภัยแล้ว นี่เครื่องรางสายฟ้าแลบ ช่วยให้ตอบไวได้นานขึ้น"
+  ],
+  "objectives": [
+    {
+      "kind": "defeat",
+      "filter": {
+        "zone": "volcano"
+      },
+      "count": 5
+    }
+  ],
+  "rewards": {
+    "exp": 350,
+    "coins": 180,
+    "items": [
+      {
+        "id": "bolt_charm",
+        "qty": 1
+      }
+    ]
+  }
+}

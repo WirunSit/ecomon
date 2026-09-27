@@ -776,3 +776,48 @@ button.equip-slot.filled { border-style: solid; }
 @media (max-width: 720px) {
   .item-list { grid-template-columns: 1fr; }
 }
+
+/* ---------- เควส NPC บทสนทนา (เฟส 10) ---------- */
+.dlg-backdrop { z-index: 4; align-items: end; padding-bottom: max(12px, env(safe-area-inset-bottom)); }
+.dlg { display: flex; align-items: flex-end; gap: 12px; width: min(820px, 100%); }
+.dlg-portrait { width: 150px; height: 150px; object-fit: contain; flex: none; filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.45)); }
+.dlg-box { flex: 1; display: flex; flex-direction: column; gap: 8px; padding: 12px 16px; background: #fdf8ec; color: #2b2320; border-radius: 16px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); max-height: min(70vh, 460px); overflow: auto; }
+.dlg-name { color: #6a4a1c; font-size: 15px; }
+.dlg-text { margin: 0; font-family: "Sarabun", sans-serif; font-size: 18px; line-height: 1.55; min-height: 2.8em; }
+.dlg-choices { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+.dlg-choices .btn { color: #fff; }
+.dlg-choices .btn.link { color: #6a4a1c; }
+.dlg-choices small.muted { color: #7a6a5a; }
+.dlg-quest { width: 100%; padding: 8px 10px; background: #efe6d2; border-radius: 10px; }
+.dlg-quest .obj-row { color: #2b2320; }
+.quest-list { display: flex; flex-direction: column; gap: 8px; }
+.quest-card { padding: 10px 12px; background: #323b52; border-radius: 12px; border-left: 5px solid #5a6680; display: flex; flex-direction: column; gap: 4px; }
+.quest-card.type-main { border-left-color: #f2c94c; }
+.quest-card.type-daily { border-left-color: #6ab4f0; }
+.quest-card.type-learning { border-left-color: #7ed36f; }
+.quest-card.type-team { border-left-color: #c96bb0; }
+.quest-card.ready { background: #3a4a3c; }
+.quest-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.quest-head b { font-size: 16px; }
+.quest-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-top: 2px; }
+.quest-where { color: #ffe28a; }
+.obj-row { display: grid; grid-template-columns: 1fr auto; column-gap: 8px; align-items: center; font-size: 14px; font-family: "Sarabun", sans-serif; }
+.obj-row .hpbar { grid-column: 1 / -1; height: 5px; margin: 1px 0 3px; }
+.obj-row.done { color: #8ef08a; }
+.quest-tracker {
+  position: absolute; top: 58px; left: max(10px, env(safe-area-inset-left));
+  display: flex; flex-direction: column; gap: 3px; max-width: min(300px, 45%);
+  padding: 6px 10px; font: inherit; text-align: left; color: var(--ui-fg);
+  background: rgba(40, 48, 68, 0.82); border: 0; border-radius: 12px; cursor: pointer;
+}
+.quest-tracker[hidden] { display: none !important; }
+.qt-title { font-size: 12px; color: var(--ui-muted); }
+.qt-row { display: flex; flex-direction: column; line-height: 1.25; }
+.qt-row b { font-size: 13px; }
+.qt-row small { font-size: 12px; color: var(--ui-muted); font-family: "Sarabun", sans-serif; }
+.qt-row.ready small, .qt-row.next b { color: #ffe28a; }
+@media (max-height: 480px) {
+  .dlg-portrait { width: 96px; height: 96px; }
+  .dlg-text { font-size: 16px; }
+  .quest-tracker { top: 50px; max-width: 38%; }
+}

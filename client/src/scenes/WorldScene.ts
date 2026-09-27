@@ -17,6 +17,12 @@ import {
   type DungeonEnterMessage,
   type NoticeMessage,
   type PlayerProfile,
+  type QuestUpdateMessage,
+  type ZoneAccess,
+  canEnterZone,
+  storageCapacity,
+  unlocksBetween,
+  zoneAt,
 } from "@ecomon/shared";
 import { BattleLink } from "../battle/BattleLink";
 import { balance, loadedMap, registry, type LoadedMap } from "../content";
@@ -26,6 +32,11 @@ import { session } from "../net/session";
 import { profile } from "../state/profile";
 import { dungeonEntranceProp, npcTextureKey, propTextureKey } from "../assets";
 import { DungeonPanel } from "../ui/dungeon/DungeonPanel";
+import { DialoguePanel } from "../ui/quests/DialoguePanel";
+import { QuestLogPanel } from "../ui/quests/QuestLogPanel";
+import { QuestTracker } from "../ui/quests/QuestTracker";
+import { objectiveText } from "../ui/quests/questText";
+import { questStore } from "../state/quests";
 import type { DungeonSceneData } from "./DungeonScene";
 import { BagPanel } from "../ui/collection/BagPanel";
 import { CatalogPanel } from "../ui/collection/CatalogPanel";
@@ -81,6 +92,12 @@ export class WorldScene extends Phaser.Scene {
   private teamQuick!: TeamQuick;
   private evolution?: EvolutionPanel;
   private shop!: ShopPanel;
+  private dialogue!: DialoguePanel;
+  private questLog!: QuestLogPanel;
+  private tracker!: QuestTracker;
+  /** โซนที่ยืนอยู่ (แสดงบน HUD) */
+  private currentZone?: string;
+  private zoneToastUntil = 0;
   private lab!: LabPanel;
   /** NPC บนแผนที่ (ภาพ + ตำแหน่ง) และปุ่ม "คุย" เมื่อยืนใกล้ */
   private npcs: { id: string; x: number; y: number; container: Phaser.GameObjects.Container }[] = [];
@@ -162,6 +179,8 @@ export class WorldScene extends Phaser.Scene {
     const bag = new BagPanel(say);
     this.shop = new ShopPanel(say);
     this.dungeonPanel = new DungeonPanel(room, say);
+    this.questLog = new QuestLogPanel(say);
+    this.dialogue = new DialoguePanel(say, { shop: (id) => void this.shop.open(id), lab: () => void this.lab.open({ atLab: true }) });
     this.npcPrompt = h("button", { className: "npc-prompt interactive" });
     this.npcPrompt.type = "button";
     this.npcPrompt.style.display = "none";
@@ -178,11 +197,14 @@ export class WorldScene extends Phaser.Scene {
         catalog: () => void this.catalog.open(),
         bag: () => void bag.open(),
         lab: () => void this.lab.open({ atLab: this.nearNpcWith("lab") }),
+        quests: () => void this.questLog.open(),
       },
     );
     this.chat = new QuickChatPanel((msg) => room.send(MSG.chat, msg));
     this.hud = new Hud({ onMenu: () => this.menu.toggle(), onChat: () => this.chat.toggle(), onPartner: () => this.teamQuick.toggle() });
-    this.hud.setZone(map.zone ? registry.zones.find(map.zone)?.name : undefined);
+    this.currentZone = undefined;
+    this.updateZone();
+    this.tracker = new QuestTracker(() => void this.questLog.open());
     if (DevPanel.enabled()) {
       this.dev = new DevPanel(
         (itemId) => room.send(MSG.devToggleKeyItem, { itemId }),
@@ -228,6 +250,7 @@ export class WorldScene extends Phaser.Scene {
     });
     room.onMessage(MSG.profile, (p: PlayerProfile) => profile.set(p));
     room.onMessage(MSG.notice, (n: NoticeMessage) => this.onNotice(n));
+    room.onMessage(MSG.questUpdate, (m: QuestUpdateMessage) => this.onQuestUpdate(m));
 
     // ---- ดันเจี้ยน: server ปฏิเสธ (บอกชื่อคนที่ยังไม่พร้อม) / ได้ที่นั่งในห้องดันเจี้ยน ----
     room.onMessage(MSG.dungeonDenied, (m: DungeonDeniedMessage) => this.dungeonPanel.onDenied(m));
@@ -247,7 +270,7 @@ export class WorldScene extends Phaser.Scene {
 
     const unsubscribe = profile.subscribe((p) => (this.unlocks = movementUnlocks(p.keyItems, registry.items.all)));
     const onKey = (e: KeyboardEvent) => {
-      if (FullPanel.isOpen || this.evolution?.isOpen || this.battle || this.inDungeon || e.target instanceof HTMLInputElement) return;
+      if (FullPanel.isOpen || this.evolution?.isOpen || this.dialogue.isOpen || this.battle || this.inDungeon || e.target instanceof HTMLInputElement) return;
       if (e.code === "Escape" || e.code === "KeyM") this.menu.toggle();
       if ((e.code === "KeyE" || e.code === "Space" || e.code === "Enter") && (this.nearNpc || this.nearEntrance) && !this.menu.isOpen) {
         e.preventDefault();
@@ -261,6 +284,8 @@ export class WorldScene extends Phaser.Scene {
       window.removeEventListener("keydown", onKey);
       room.removeAllListeners();
       this.hud.destroy();
+      this.tracker.destroy();
+      this.dialogue.close();
       this.menu.close();
       this.chat.close();
       this.toast.destroy();
@@ -287,6 +312,52 @@ export class WorldScene extends Phaser.Scene {
         if (d && this.scene.isActive()) this.startDungeon(d);
       });
     }
+  }
+
+  // ---------- โซน เควส เลเวล ----------
+
+  /** ชื่อโซนบน HUD ตามช่องที่ยืน (แผนที่เดียวมีหลายโซน) */
+  private updateZone() {
+    const zone = zoneAt(this.loaded.game, this.player.tileX, this.player.tileY);
+    if (zone === this.currentZone) return;
+    this.currentZone = zone;
+    this.hud.setZone(zone ? registry.zones.find(zone)?.name : undefined);
+  }
+
+  private zoneLockText(zoneId: string | undefined, gate: Exclude<ZoneAccess, { ok: true }>): string {
+    const zone = (zoneId && registry.zones.find(zoneId)?.name) || "";
+    return gate.reason === "level" ? UI.zoneLocked.level(zone, gate.level) : UI.zoneLocked.item(zone, registry.items.find(gate.item)?.name ?? gate.item);
+  }
+
+  /** NPC นี้มีเควสให้รับ (❗) หรือรอส่ง (✅) */
+  private questMark(npcId: string): string {
+    const log = questStore.get();
+    if (!log) return "";
+    const giverOf = (id: string) => registry.quests.find(id);
+    if (log.quests.some((q) => q.status === "done" && giverOf(q.id)?.giver === npcId && giverOf(q.id)?.type !== "daily")) return " ✅";
+    if (log.available.some((id) => giverOf(id)?.giver === npcId)) return " ❗";
+    return "";
+  }
+
+  private onQuestUpdate(m: QuestUpdateMessage) {
+    questStore.update(m.quest);
+    const q = registry.quests.find(m.quest.id);
+    const o = q?.objectives[m.objective];
+    if (!q || !o) return;
+    if (m.quest.status === "done") this.toast.show(UI.quests.done(q.title), 4000);
+    else this.toast.show(UI.quests.updated(q.title, objectiveText(o), m.quest.progress[m.objective] ?? 0, m.quest.targets[m.objective] ?? 1), 2500);
+  }
+
+  /** เลเวลขึ้น: บอกสิ่งที่ปลดล็อก (โซน ดันเจี้ยน การผสม คลังเพิ่ม หัวข้อ 9.3) แล้วโหลดเควสใหม่ */
+  private onLevelUp(from: number, to: number) {
+    const T = UI.levelUp;
+    const lines = unlocksBetween(registry, from, to).map((u) =>
+      u.kind === "zone" ? T.zone(registry.zones.get(u.id).name) : u.kind === "dungeon" ? T.dungeon(registry.dungeons.get(u.id).name) : T.breeding(UI.lab.tierName[u.id] ?? u.id),
+    );
+    const after = storageCapacity(to, balance);
+    if (after > storageCapacity(from, balance)) lines.push(T.storage(after));
+    this.toast.show([T.title(to), ...lines].join(" · "), 6000);
+    void questStore.refresh();
   }
 
   // ---------- ดันเจี้ยน ----------
@@ -326,7 +397,7 @@ export class WorldScene extends Phaser.Scene {
     this.updateEntrances();
     if (this.blocker || this.battle || this.inDungeon || time < this.encounterUntil) return;
 
-    const dir = this.menu.isOpen || FullPanel.isOpen || this.evolution?.isOpen ? null : this.controls.direction();
+    const dir = this.menu.isOpen || FullPanel.isOpen || this.evolution?.isOpen || this.dialogue.isOpen ? null : this.controls.direction();
     if (dir) this.lastInputAt = time;
     if (this.player.isMoving) return;
     if (!dir) return this.reconcile(time);
@@ -344,6 +415,20 @@ export class WorldScene extends Phaser.Scene {
       return;
     }
     const result = checkStep(map, this.player.tileX, this.player.tileY, dir, this.unlocks);
+    // โซนที่ยังไม่ปลดล็อก: ทำนายแบบเดียวกับ server (ไม่เดินเข้าไปแล้วโดนดึงกลับ)
+    if (result.ok) {
+      const p = profile.get();
+      const to = zoneAt(map, result.x, result.y);
+      const gate = canEnterZone(registry, zoneAt(map, this.player.tileX, this.player.tileY), to, p.level, p.keyItems);
+      if (!gate.ok) {
+        this.player.face(dir);
+        if (time > this.zoneToastUntil) {
+          this.toast.show(this.zoneLockText(to, gate), 2500);
+          this.zoneToastUntil = time + 2500;
+        }
+        return;
+      }
+    }
     if (!result.ok) {
       if (this.player.facing !== dir) this.player.face(dir);
       if (result.reason === "locked") {
@@ -353,7 +438,10 @@ export class WorldScene extends Phaser.Scene {
       return;
     }
     this.room.send(MSG.move, { dir });
-    this.player.walkTo(result.x, result.y, dir, result.terrain, stepDurationMs(result.terrain, balance), () => this.updateDevInfo());
+    this.player.walkTo(result.x, result.y, dir, result.terrain, stepDurationMs(result.terrain, balance), () => {
+      this.updateDevInfo();
+      this.updateZone();
+    });
   }
 
   private wildAt(x: number, y: number): WildView | undefined {
@@ -391,6 +479,7 @@ export class WorldScene extends Phaser.Scene {
   private setBattleMode(on: boolean) {
     this.controls.setEnabled(!on);
     this.hud.el.style.display = on ? "none" : "";
+    this.tracker?.setVisible(!on);
     if (this.dev) this.dev.el.style.display = on ? "none" : "";
     if (on) {
       this.menu.close();
@@ -401,6 +490,14 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private onNotice(n: NoticeMessage) {
+    const p = n.params ?? {};
+    if (n.code === "level_up") return this.onLevelUp(Number(p.from), Number(p.to));
+    if (n.code === "zone_locked_level" || n.code === "zone_locked_item") {
+      const gate: Exclude<ZoneAccess, { ok: true }> =
+        n.code === "zone_locked_level" ? { ok: false, reason: "level", level: Number(p.level) } : { ok: false, reason: "item", item: String(p.item) };
+      this.toast.show(this.zoneLockText(String(p.zone), gate), 3000);
+      return;
+    }
     const text = n.text ?? (n.code ? UI.notice[n.code] : undefined);
     if (!text) return;
     if (this.battle && n.text) this.battle.push({ type: "notice", text });
@@ -495,7 +592,7 @@ export class WorldScene extends Phaser.Scene {
   /** ยืนใกล้ NPC หรือประตูดันเจี้ยน (ระยะ interactRadius) → แสดงปุ่มคุย/เข้า */
   private updateNpcPrompt() {
     const r = balance.world.interactRadius;
-    const busy = !!this.battle || this.inDungeon || this.menu.isOpen || FullPanel.isOpen || this.evolution?.isOpen;
+    const busy = !!this.battle || this.inDungeon || this.menu.isOpen || FullPanel.isOpen || this.evolution?.isOpen || this.dialogue.isOpen;
     const close = (n: { x: number; y: number }) => Math.abs(n.x - this.player.tileX) <= r && Math.abs(n.y - this.player.tileY) <= r;
     const near = busy ? undefined : this.npcs.find(close);
     const gate = busy || near ? undefined : this.entrances.find(close);
@@ -506,7 +603,7 @@ export class WorldScene extends Phaser.Scene {
     this.npcPrompt.style.display = near || gate ? "" : "none";
     if (near) {
       const npc = registry.npcs.get(near.id);
-      this.npcPrompt.textContent = `${npc.lab ? UI.lab.talk(npc.name) : UI.shop.talk(npc.name)} (E)`;
+      this.npcPrompt.textContent = `${npc.lab ? UI.lab.talk(npc.name) : UI.shop.talk(npc.name)}${this.questMark(npc.id)} (E)`;
     } else if (gate) this.npcPrompt.textContent = `${UI.dungeon.enter(registry.dungeons.get(gate.id).name)} (E)`;
   }
 
@@ -520,8 +617,7 @@ export class WorldScene extends Phaser.Scene {
 
   private talk() {
     const npc = this.nearNpc ? registry.npcs.find(this.nearNpc) : undefined;
-    if (npc?.shop) void this.shop.open(npc.id);
-    else if (npc?.lab) void this.lab.open({ atLab: true });
+    if (npc) void this.dialogue.open(npc.id);
     else if (this.nearEntrance) void this.dungeonPanel.open(this.nearEntrance);
   }
 

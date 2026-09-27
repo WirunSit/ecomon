@@ -111,6 +111,8 @@ export const NpcDef = z.strictObject({
   shop: z.boolean().default(false),
   /** ประจำห้องแล็บผสมพันธุ์ (หัวข้อ 7) — ผสมได้เมื่อยืนใกล้ NPC นี้ */
   lab: z.boolean().default(false),
+  /** บทพูดทักทายตอนคุย (ทีละบรรทัด สุ่มหรือเรียงตามลำดับ) */
+  greeting: z.array(Text).default([]),
 });
 export type NpcDef = z.infer<typeof NpcDef>;
 export const NpcsFileSchema = z.strictObject({ npcs: z.array(NpcDef).min(1) });

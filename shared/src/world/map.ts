@@ -10,7 +10,18 @@ export const MAP_LAYERS = {
   collision: "collision",
   spawns: "spawns",
   markers: "markers",
+  /** สี่เหลี่ยมบอกโซน (property "zone") — แผนที่เดียวมีหลายโซนได้ (หัวข้อ 10.1) */
+  zones: "zones",
 } as const;
+
+/** พื้นที่ของโซน 1 โซนบนแผนที่ (หน่วยช่อง) — ซ้อนกันได้ อันที่อยู่ก่อนในเลเยอร์ชนะ */
+export interface ZoneArea {
+  zone: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
 
 export const REQUIRED_TILE_LAYERS = [MAP_LAYERS.ground, MAP_LAYERS.waterShallow, MAP_LAYERS.waterDeep, MAP_LAYERS.collision] as const;
 
@@ -87,8 +98,16 @@ export interface GameMap {
   terrain: Uint8Array;
   spawns: SpawnArea[];
   markers: MapMarker[];
+  /** โซนย่อยบนแผนที่ (ไม่มี = ทั้งแผนที่เป็นโซน `zone`) */
+  zones: ZoneArea[];
   /** ของประดับที่วาดเป็นภาพขนาดจริง (ใช้แสดงผลเท่านั้น การชนใช้ terrain) */
   props: MapProp[];
+}
+
+/** โซนของช่องนี้: สี่เหลี่ยมแรกที่ครอบ ไม่มี = โซนหลักของแผนที่ */
+export function zoneAt(map: GameMap, x: number, y: number): string | undefined {
+  for (const z of map.zones) if (x >= z.x && y >= z.y && x < z.x + z.width && y < z.y + z.height) return z.zone;
+  return map.zone;
 }
 
 export interface MapProblem {
@@ -184,6 +203,20 @@ export function buildGameMap(id: string, tiled: TiledMap): { map?: GameMap; prob
     });
   }
 
+  const zones: ZoneArea[] = [];
+  const zoneLayer = objectLayer(MAP_LAYERS.zones);
+  if (zoneLayer) {
+    const [layer, li] = zoneLayer;
+    layer.objects.forEach((o, oi) => {
+      const zone = tiledProps(o.properties).zone ?? o.name;
+      if (typeof zone !== "string" || !zone) {
+        problems.push({ path: ["layers", li, "objects", oi], message: `โซน #${o.id} ต้องมี property "zone" (หรือตั้งชื่อ object เป็น id โซน)` });
+        return;
+      }
+      zones.push({ zone, x: toTile(o.x), y: toTile(o.y), width: Math.max(1, Math.round(o.width / tileSize)), height: Math.max(1, Math.round(o.height / tileSize)) });
+    });
+  }
+
   const markers: MapMarker[] = (markerLayer?.[0].objects ?? []).map((o) => ({
     objectId: o.id,
     type: o.type,
@@ -235,7 +268,7 @@ export function buildGameMap(id: string, tiled: TiledMap): { map?: GameMap; prob
 
   const zone = tiledProps(tiled.properties).zone;
   return {
-    map: { id, width, height, tileSize, zone: typeof zone === "string" ? zone : undefined, terrain, spawns, markers, props },
+    map: { id, width, height, tileSize, zone: typeof zone === "string" ? zone : undefined, terrain, spawns, markers, zones, props },
     problems,
   };
 }

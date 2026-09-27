@@ -202,3 +202,64 @@ _tilesets:
       - props/round_bush
       - props/village_house
       - props/healing_fountain
+
+  # แผนที่เกาะนิเวศา (tools/make-world-map.ts) — ลำดับ = gid 1..n ตรงกับ TILES ในสคริปต์
+  world_tiles:
+    tileSize: 32
+    columns: 8
+    out: assets/tiles/world_tiles.png
+    tiles:
+      - tiles/src/short_grass
+      - tiles/src/grass_flowers
+      - tiles/src/tall_grass
+      - tiles/src/dirt_path
+      - tiles/src/dry_sand
+      - tiles/src/shallow_water
+      - tiles/src/deep_water
+      - tiles/src/wooden_bridge
+      - tiles/src/forest_floor
+      - tiles/src/mossy_ground
+      - tiles/src/glowing_mushroom_soil
+      - tiles/src/mountain_rock
+      - tiles/src/gravel
+      - tiles/src/cave_floor
+      - tiles/src/volcanic_ash
+      - tiles/src/cooled_lava_rock
+      - tiles/src/cracked_hot_rock
+      - tiles/src/village_road
+      - tiles/src/brick_plaza
+      - tiles/src/temple_tiles
+      - tiles/src/golden_meadow
+      - tiles/src/wet_sand
+      - tiles/src/coral_reef_floor
+      - tiles/src/swamp_water
+      - tiles/src/farmland
+      - tiles/src/flower_field
+      - tiles/src/mossy_temple_floor
+      - tiles/src/beach_pebbles
+      - props/round_tree
+      - props/pine_tree
+      - props/boulder
+      - props/round_bush
+      - props/village_house
+      - props/healing_fountain
+      - props/giant_mushroom
+      - props/glowing_mushrooms
+      - props/palm_tree
+      - props/volcanic_rock
+      - props/lava_pool
+      - props/quartz_crystals
+      - props/burnt_tree
+      - props/reeds
+      - props/greenhouse_lab
+      - props/fruit_stall
+      - props/lighthouse
+      - props/beach_rock
+      - props/fallen_log
+      - props/stone_well
+      - props/notice_board
+      - props/turtle_statue
+      - props/lamp_post
+      - props/pink_coral
+      - props/wooden_fence
+      - props/signpost

@@ -1,0 +1,47 @@
+{
+  "id": "side_prof_crystal_canyon",
+  "type": "side",
+  "title": "คริสตัลในหุบเขา",
+  "description": "ศาสตราจารย์ต้นอยากศึกษาหินหนุบในหุบเขาหิน พามาให้สักตัวพร้อมทบทวนพีระมิดนิเวศ",
+  "giver": "npc_prof_ton",
+  "zone": "canyon",
+  "requires": {
+    "playerLevel": 8,
+    "quests": [
+      "main_04_lake_cycles"
+    ]
+  },
+  "intro": [
+    "หินหนุบกินแร่ในหิน แล้วถูกผู้ล่าอื่นกินต่ออีกที",
+    "ช่วยพามาให้ดูหน่อย"
+  ],
+  "outro": [
+    "ขอบใจ! นี่หมวกเปลือกหอยสำหรับมอนของเธอ"
+  ],
+  "objectives": [
+    {
+      "kind": "catch",
+      "filter": {
+        "species": "hinnoop"
+      },
+      "count": 1
+    },
+    {
+      "kind": "answer",
+      "filter": {
+        "topic": "energy_flow"
+      },
+      "correct": 4
+    }
+  ],
+  "rewards": {
+    "exp": 250,
+    "coins": 120,
+    "items": [
+      {
+        "id": "shell_helmet",
+        "qty": 1
+      }
+    ]
+  }
+}

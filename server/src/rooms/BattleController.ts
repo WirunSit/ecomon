@@ -10,6 +10,8 @@ import { BattleRunner, type RunnerHost } from "./BattleRunner";
 interface WorldBattle {
   runner: BattleRunner;
   wildId: string;
+  /** โซนที่เริ่มต่อสู้ (หัวข้อคำถาม ฉาก ที่มาของมอนที่จับได้) */
+  zone?: string;
 }
 
 export interface BattleHost {
@@ -24,6 +26,8 @@ export interface BattleHost {
   respawn(sessionId: string): { x: number; y: number };
   /** ชื่อที่เพื่อนเห็น */
   nickname(sessionId: string): string;
+  /** โซนที่ผู้เล่นยืนอยู่ */
+  zoneOf(sessionId: string): string | undefined;
 }
 
 /**
@@ -41,10 +45,6 @@ export class BattleController {
     return this.battles.has(sessionId);
   }
 
-  private zone() {
-    return this.host.map.zone ? registry.zones.find(this.host.map.zone) : undefined;
-  }
-
   /** เดินชนมอนป่า → เริ่มต่อสู้ (หัวข้อ 5.1) คืน false ถ้าเริ่มไม่ได้ */
   start(client: Client, playerId: string, wildId: string): boolean {
     if (this.battles.has(client.sessionId)) return false;
@@ -59,7 +59,8 @@ export class BattleController {
     if (!wild) return false;
     services().catalog.seen(playerId, wild.species, 1);
 
-    const zone = this.zone();
+    const zoneId = this.host.zoneOf(client.sessionId);
+    const zone = zoneId ? registry.zones.find(zoneId) : undefined;
     const session = new BattleSession(
       registry,
       randomUUID(),
@@ -67,7 +68,7 @@ export class BattleController {
       [participant],
       { canFlee: registry.balance.battle.canFleeWild, background: zone?.battleBackground ?? "meadow", zoneTopics: zone?.topics ?? [] },
     );
-    const wb: WorldBattle = { wildId, runner: undefined as unknown as BattleRunner };
+    const wb: WorldBattle = { wildId, zone: zoneId, runner: undefined as unknown as BattleRunner };
     wb.runner = new BattleRunner(this.runnerHost(wb), session, [{ sessionId: client.sessionId, playerId }]);
     this.battles.set(client.sessionId, wb);
     this.host.setInBattle(client.sessionId, true);
@@ -143,7 +144,7 @@ export class BattleController {
     for (const m of wb.runner.members.values()) {
       const p = wb.runner.participant(m);
       const result = this.resultOf(session, p);
-      const rewards = battles.finish(p, session.wild, result, this.host.map.zone);
+      const rewards = battles.finish(p, session.wild, result, wb.zone, Date.now(), { partySize: session.participants.length });
       this.battles.delete(m.sessionId);
       this.host.setInBattle(m.sessionId, false);
       const respawn = result === "lose" ? this.host.respawn(m.sessionId) : undefined;

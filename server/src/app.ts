@@ -12,7 +12,7 @@ import { apiRouter, errorHandler } from "./http/routes";
 import { DungeonRoom } from "./rooms/DungeonRoom";
 import { WorldRoom } from "./rooms/WorldRoom";
 import { AuthService, ensureClassroom } from "./services/auth";
-import { notifyPlayer } from "./rooms/hooks";
+import { notifyPlayer, playerZone, sendToPlayer } from "./rooms/hooks";
 import { BattleService } from "./services/battles";
 import { BreedingService } from "./services/breeding";
 import { CatalogService } from "./services/catalog";
@@ -24,6 +24,7 @@ import { InventoryService } from "./services/inventory";
 import { ShopService } from "./services/shop";
 import { PlayerService } from "./services/players";
 import { QuestionService } from "./services/questions";
+import { QuestService } from "./services/quests";
 
 export interface GameServer {
   config: ServerConfig;
@@ -40,10 +41,11 @@ export function createGameServer(overrides: Partial<ServerConfig> = {}): GameSer
   const db = openDatabase(config.databasePath);
   const events = new GameEvents();
   const catalog = new CatalogService(db, events);
-  const players = new PlayerService(db, catalog);
+  const players = new PlayerService(db, catalog, events);
   const collection = new CollectionService(db, players, events);
   const questions = new QuestionService(db, config, events);
   const inventory = new InventoryService(db, players, collection);
+  const breeding = new BreedingService(db, players, collection, catalog, events, notifyPlayer);
   const s: Services = {
     config,
     db,
@@ -57,10 +59,13 @@ export function createGameServer(overrides: Partial<ServerConfig> = {}): GameSer
     shop: new ShopService(db, players, inventory),
     questions,
     evolution: new EvolutionService(db, questions, players, catalog, events),
-    breeding: new BreedingService(db, players, collection, catalog, events, notifyPlayer),
+    breeding,
     dungeons: new DungeonService(db, players, catalog, events),
+    quests: new QuestService(db, players, catalog, breeding, events, { send: sendToPlayer, zoneOf: playerZone }),
   };
   setServices(s);
+  // เลเวลผู้เล่นขึ้น → แจ้งให้ client แสดงสิ่งที่ปลดล็อก (หัวข้อ 9.3)
+  events.on("level", (e) => notifyPlayer(e.playerId, { code: "level_up", params: { from: e.from, to: e.to } }));
 
   if (config.seedClassCode) ensureClassroom(db, config.seedClassCode, "ห้องเรียนทดลอง");
   s.auth.pruneExpiredSessions();

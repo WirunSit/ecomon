@@ -1,0 +1,47 @@
+{
+  "id": "side_ranger_decomposers",
+  "type": "side",
+  "title": "ผู้ย่อยสลายแห่งป่าเห็ด",
+  "description": "ผู้ย่อยสลายเปลี่ยนซากสิ่งมีชีวิตให้กลับเป็นธาตุอาหาร ไปพามอนสเตอร์ธาตุสปอร์มาให้พี่ดู",
+  "giver": "npc_ranger",
+  "zone": "forest",
+  "requires": {
+    "playerLevel": 4,
+    "quests": [
+      "main_03_forest_partners"
+    ]
+  },
+  "intro": [
+    "ถ้าไม่มีผู้ย่อยสลาย ป่าจะเต็มไปด้วยซากใบไม้ไม่มีวันหมด",
+    "ช่วยหาเห็ดตุ้บมาให้พี่ศึกษาหน่อย"
+  ],
+  "outro": [
+    "ผู้ย่อยสลายคือนักรีไซเคิลของธรรมชาติจริง ๆ"
+  ],
+  "objectives": [
+    {
+      "kind": "catch",
+      "filter": {
+        "element": "spore"
+      },
+      "count": 2
+    },
+    {
+      "kind": "answer",
+      "filter": {
+        "topic": "eco_components"
+      },
+      "correct": 3
+    }
+  ],
+  "rewards": {
+    "exp": 150,
+    "coins": 90,
+    "items": [
+      {
+        "id": "magnifier",
+        "qty": 2
+      }
+    ]
+  }
+}
