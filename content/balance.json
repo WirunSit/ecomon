@@ -237,6 +237,12 @@
     "roomCodeLength": 6,
     "spawnCheckSec": 5,
     "spawnPerExtraPlayer": 0.5,
+    "wildWanderSec": [
+      1.5,
+      4
+    ],
+    "wildIdleChance": 0.3,
+    "wildStepMs": 400,
     "walkTilesPerSec": 5,
     "waterSpeedFactor": 0.8,
     "startMap": "test_island",

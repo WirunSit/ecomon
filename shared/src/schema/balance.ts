@@ -160,6 +160,12 @@ export const BalanceSchema = z.strictObject({
     roomCodeLength: PosInt,
     spawnCheckSec: Positive,
     spawnPerExtraPlayer: NonNeg,
+    /** มอนป่าเดินเล่นทุก ๆ [ต่ำ, สูง] วินาที (สุ่ม) */
+    wildWanderSec: z.tuple([Positive, Positive]),
+    /** โอกาสที่ถึงรอบแล้วยืนเฉย ๆ ไม่เดิน */
+    wildIdleChance: Probability,
+    /** เวลาเดิน 1 ช่องของมอนป่า (มิลลิวินาที) */
+    wildStepMs: PosInt,
     /** ความเร็วเดิน (ช่อง/วินาที) — server ใช้ค่าเดียวกันตรวจกันวาร์ป */
     walkTilesPerSec: Positive,
     /** แผนที่ที่ผู้เล่นใหม่เริ่ม (id ใน content/maps) */

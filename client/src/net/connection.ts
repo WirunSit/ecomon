@@ -18,6 +18,7 @@ export interface WorldView {
   mapId: string;
   code: string;
   players: Map<string, PlayerView>;
+  wild: Map<string, import("../world/WildMonsterSprite").WildView>;
 }
 
 export type WorldRoom = Room<WorldView>;

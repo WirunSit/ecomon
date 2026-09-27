@@ -140,6 +140,30 @@ describe("การเดิน: server ตัดสินและกันว�
   });
 });
 
+describe("มอนป่า (เฟส 4)", () => {
+  it("ทุกคนในห้องเห็นมอนป่าชุดเดียวกัน ตำแหน่งตรงกัน และจำนวนเพิ่มตามผู้เล่น", async () => {
+    const a = await t.newPlayer("wildA");
+    const b = await t.newPlayer("wildB");
+    const ra = await joinWorld(t, a.token, classroomId, "create");
+    await until(() => (ra.state.wild?.size ?? 0) > 0, 3000, "wild spawned");
+    const solo = ra.state.wild.size;
+    expect(solo).toBe(map.spawns.reduce((n, s) => n + s.maxActive, 0));
+    const rb = await joinWorld(t, b.token, classroomId, ra.roomId);
+    await until(() => (rb.state.wild?.size ?? 0) > solo, 3000, "more wild for 2 players");
+
+    const snapshot = (room: Room) =>
+      [...room.state.wild.entries()].map(([id, w]: [string, any]) => `${id}:${w.species}:${w.level}:${w.x},${w.y}`).sort();
+    await sleep(100);
+    expect(snapshot(ra)).toEqual(snapshot(rb));
+    for (const [, w] of rb.state.wild.entries() as Iterable<[string, any]>) {
+      const habitat = registry.monsters.get(w.species).habitat;
+      const terrain = terrainAt(map, w.x, w.y);
+      expect(habitat === "land" ? terrain === "land" : terrain === "shallow" || terrain === "deep").toBe(true);
+    }
+    await Promise.all([ra.leave(), rb.leave()]);
+  });
+});
+
 describe("แชทสำเร็จรูป", () => {
   it("กระจายให้ทุกคนในห้อง · id ที่ไม่มีในรายการถูกทิ้ง · ส่งถี่เกินถูกทิ้ง", async () => {
     const a = await t.newPlayer("chatA");

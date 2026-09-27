@@ -27,6 +27,7 @@ import { Toast } from "../ui/Toast";
 import { UI } from "../ui/strings";
 import { MapView } from "../world/MapView";
 import { PlayerAvatar } from "../world/PlayerAvatar";
+import { WildMonsterSprite, type WildView } from "../world/WildMonsterSprite";
 import { logoutTo } from "./LobbyScene";
 
 /** ผู้เล่นอื่นในห้อง: ตำแหน่งเป้าหมายจาก server + ตัวละครที่เดินตามไปทีละช่อง */
@@ -49,6 +50,7 @@ export class WorldScene extends Phaser.Scene {
   private loaded!: LoadedMap;
   private player!: PlayerAvatar;
   private remotes = new Map<string, Remote>();
+  private wild = new Map<string, WildMonsterSprite>();
   private controls!: InputController;
   private hud!: Hud;
   private menu!: MenuPanel;
@@ -68,6 +70,7 @@ export class WorldScene extends Phaser.Scene {
     this.room = data.room;
     this.leaving = false;
     this.remotes = new Map();
+    this.wild = new Map();
     const ready = () => !!this.room.state.players?.get(this.room.sessionId);
     if (ready()) this.build();
     else {
@@ -121,6 +124,18 @@ export class WorldScene extends Phaser.Scene {
     });
     $(room.state).listen("code", () => this.updateRoomChip());
 
+    // ---- มอนป่า (server spawn ทุกคนเห็นชุดเดียวกัน) ----
+    const wild = $(room.state).wild;
+    wild.onAdd((wv: WildView, id: string) => {
+      const sprite = new WildMonsterSprite(this, map.tileSize, balance.world.wildStepMs, wv, terrainAt(map, wv.x, wv.y));
+      this.wild.set(id, sprite);
+      $(wv).onChange(() => sprite.sync(wv));
+    }, true);
+    wild.onRemove((_wv: WildView, id: string) => {
+      this.wild.get(id)?.destroy();
+      this.wild.delete(id);
+    });
+
     // ---- ข้อความจาก server ----
     room.onMessage(MSG.correction, (c: CorrectionMessage) => {
       this.player.snapTo(c.x, c.y, terrainAt(map, c.x, c.y));
@@ -151,6 +166,7 @@ export class WorldScene extends Phaser.Scene {
       this.dev?.destroy();
       this.blocker?.remove();
       this.remotes.forEach((r) => r.avatar.destroy());
+      this.wild.forEach((w) => w.destroy());
     });
     this.updateRoomChip();
     this.updateDevInfo();
@@ -159,6 +175,7 @@ export class WorldScene extends Phaser.Scene {
   override update(time: number) {
     if (!this.player) return;
     this.updateRemotes();
+    this.sortByDepth();
     if (this.blocker) return;
 
     const dir = this.menu.isOpen ? null : this.controls.direction();
@@ -187,6 +204,14 @@ export class WorldScene extends Phaser.Scene {
     if (!self || (self.x === this.player.tileX && self.y === this.player.tileY)) return;
     this.player.snapTo(self.x, self.y, terrainAt(this.loaded.game, self.x, self.y));
     this.updateDevInfo();
+  }
+
+  /** ของที่อยู่ต่ำกว่าบนจอ (y มากกว่า) วาดทับของที่อยู่สูงกว่า */
+  private sortByDepth() {
+    const set = (c: Phaser.GameObjects.Container, bias: number) => c.setDepth(10 + c.y / 10_000 + bias);
+    set(this.player.container, 0.00002);
+    for (const r of this.remotes.values()) set(r.avatar.container, 0.00001);
+    for (const w of this.wild.values()) set(w.container, 0);
   }
 
   private addRemote(sessionId: string, view: PlayerView) {

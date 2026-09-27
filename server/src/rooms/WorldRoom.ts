@@ -21,7 +21,8 @@ import { registry } from "../content";
 import { services } from "../context";
 import type { AuthData } from "../services/auth";
 import { activePlayers, allocateRoomCode, releaseRoomCode } from "./presence";
-import { PlayerState, WorldState } from "./WorldState";
+import { SpawnManager, type WildMonster } from "../world/SpawnManager";
+import { PlayerState, WildMonsterState, WorldState } from "./WorldState";
 
 interface ClientData {
   playerId: string;
@@ -38,6 +39,8 @@ interface ClientData {
 const MOVE_BURST_STEPS = 2;
 /** เผื่อความต่างของนาฬิกา client เล็กน้อย */
 const MOVE_COST_FACTOR = 0.9;
+/** รอบตรวจการเดินเล่นของมอนป่า */
+const WANDER_TICK_MS = 250;
 
 /**
  * 1 ห้อง = 1 instance ของโลก สูงสุด balance.world.maxClients คน (หัวข้อ 2)
@@ -50,6 +53,8 @@ export class WorldRoom extends Room<WorldState, { code: string; classroomId: str
   override state = new WorldState();
   private classroomId = "";
   private map!: GameMap;
+  /** มอนป่าในห้องนี้ (อ่านได้จากเทสต์และระบบต่อสู้เฟส 5) */
+  spawner!: SpawnManager;
 
   static override async onAuth(token: string): Promise<AuthData> {
     const auth = services().auth.resolveToken(token);
@@ -72,6 +77,18 @@ export class WorldRoom extends Room<WorldState, { code: string; classroomId: str
     this.onMessage(MSG.devToggleKeyItem, (client, raw) => this.handleDevToggle(client, raw));
 
     this.clock.setInterval(() => this.saveAll(), services().config.saveIntervalSec * 1000);
+
+    this.spawner = new SpawnManager(registry, this.map, {
+      spawned: (m) => this.state.wild.set(m.id, this.syncWild(new WildMonsterState(), m)),
+      moved: (m) => {
+        const w = this.state.wild.get(m.id);
+        if (w) this.syncWild(w, m);
+      },
+      removed: (m) => this.state.wild.delete(m.id),
+    });
+    this.refillWild();
+    this.clock.setInterval(() => this.refillWild(), world.spawnCheckSec * 1000);
+    this.clock.setInterval(() => this.spawner.wander(Date.now()), WANDER_TICK_MS);
   }
 
   override onJoin(client: Client<ClientData, AuthData>, _options: unknown, auth: AuthData) {
@@ -108,6 +125,7 @@ export class WorldRoom extends Room<WorldState, { code: string; classroomId: str
       lastMoveAt: now,
       lastChatAt: 0,
     };
+    this.refillWild();
   }
 
   override async onLeave(client: Client<ClientData, AuthData>, consented: boolean) {
@@ -149,6 +167,23 @@ export class WorldRoom extends Room<WorldState, { code: string; classroomId: str
       // กำลังรอ reconnect อยู่ → ลบทิ้งเลย
       if (p) this.state.players.delete(sessionId);
     }
+  }
+
+  // ---------- มอนป่า ----------
+
+  private syncWild(w: WildMonsterState, m: WildMonster): WildMonsterState {
+    w.species = m.species;
+    w.level = m.level;
+    w.x = m.x;
+    w.y = m.y;
+    w.facing = m.facing;
+    w.locked = m.locked;
+    return w;
+  }
+
+  /** เติมมอนตามจำนวนผู้เล่นในห้อง (หัวข้อ 10.3) */
+  private refillWild() {
+    this.spawner.refill(Date.now(), this.state.players.size);
   }
 
   // ---------- การเดิน ----------

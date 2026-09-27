@@ -75,6 +75,7 @@ export function validateContent(c: GameContent, origins: ContentOrigins, opts: V
   if (Math.abs(b.questions.zoneTopicShare + b.questions.weakTopicShare - 1) > 1e-9)
     err(F.balance, ["questions"], "zoneTopicShare + weakTopicShare ต้องรวมกันได้ 1");
   if (b.damage.random[0] > b.damage.random[1]) err(F.balance, ["damage", "random"], "ต้องเป็น [ต่ำ, สูง]");
+  if (b.world.wildWanderSec[0] > b.world.wildWanderSec[1]) err(F.balance, ["world", "wildWanderSec"], "ต้องเป็น [ต่ำ, สูง]");
   const tierLevels = Object.entries(b.moves.tiers).map(([tier, r]) => [tier as MoveTier, r.learnLevel] as const);
   if (tierLevels.length > b.moves.slots) err(F.balance, ["moves"], "จำนวนขั้นท่ามากกว่าช่องท่า");
 

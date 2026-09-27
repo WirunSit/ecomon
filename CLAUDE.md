@@ -96,4 +96,5 @@ tools/    validate.ts, make-placeholders.ts, make-test-map.ts (อนาคต: 
 - [x] เฟส 1 — โลกและการเดิน
 - [x] เฟส 2 — สูตรคำนวณและ registry
 - [x] เฟส 3 — Server, ห้อง 5 คน, login, บันทึกข้อมูล
-- [ ] เฟส 4 เป็นต้นไป — ดู docs/GAME_PLAN.md หัวข้อ 13
+- [x] เฟส 4 — จุดเกิดมอนสเตอร์ (server/src/world/SpawnManager.ts)
+- [ ] เฟส 5 เป็นต้นไป — ดู docs/GAME_PLAN.md หัวข้อ 13
