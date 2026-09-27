@@ -20,6 +20,8 @@ const vfxImages = import.meta.glob<string>("../../assets/vfx/*.png", { eager: tr
 // ไอคอนไอเท็ม (S13) และ NPC (S07)
 const itemImages = import.meta.glob<string>("../../assets/items/*.png", { eager: true, query: "?url", import: "default" });
 const npcImages = import.meta.glob<string>("../../assets/npcs/*.png", { eager: true, query: "?url", import: "default" });
+// ไข่ 3 ระดับ × 4 ขั้นการฟัก + เศษพลังชีวิต (S16)
+const eggImages = import.meta.glob<string>("../../assets/eggs/*.png", { eager: true, query: "?url", import: "default" });
 
 export type Pose = "idle" | "attack";
 
@@ -143,6 +145,19 @@ export function npcTextureKey(sprite: string): string {
 /** ภาพ NPC ตัวเต็ม (sprite) หรือภาพหน้าอก (portrait) */
 export function npcImageUrl(id: string): string | undefined {
   return npcImages[`../../assets/npcs/${id}.png`];
+}
+
+// ---------- ไข่ (S16) ----------
+
+/** ภาพไข่ตามระดับและขั้นการฟัก 1–4 (4 = กำลังแตก) หรือภาพอื่นใน assets/eggs เช่น life_shard, mystery_egg */
+export function eggImageUrl(id: string): string | undefined {
+  return eggImages[`../../assets/eggs/${id}.png`];
+}
+
+/** ขั้นการฟัก 1–4 ตามความคืบหน้า (ครบ = 4) */
+export function eggStage(progress: number, required: number): number {
+  if (progress >= required) return 4;
+  return 1 + Math.min(2, Math.floor((progress / Math.max(1, required)) * 3));
 }
 
 export { fallbackUrl };

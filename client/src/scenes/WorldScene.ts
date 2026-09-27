@@ -26,6 +26,7 @@ import { npcTextureKey } from "../assets";
 import { BagPanel } from "../ui/collection/BagPanel";
 import { CatalogPanel } from "../ui/collection/CatalogPanel";
 import { CollectionPanel } from "../ui/collection/CollectionPanel";
+import { LabPanel } from "../ui/collection/LabPanel";
 import { ShopPanel } from "../ui/collection/ShopPanel";
 import { EvolutionPanel } from "../ui/collection/EvolutionPanel";
 import { TeamQuick } from "../ui/collection/TeamQuick";
@@ -76,6 +77,7 @@ export class WorldScene extends Phaser.Scene {
   private teamQuick!: TeamQuick;
   private evolution?: EvolutionPanel;
   private shop!: ShopPanel;
+  private lab!: LabPanel;
   /** NPC บนแผนที่ (ภาพ + ตำแหน่ง) และปุ่ม "คุย" เมื่อยืนใกล้ */
   private npcs: { id: string; x: number; y: number; container: Phaser.GameObjects.Container }[] = [];
   private npcPrompt?: HTMLButtonElement;
@@ -135,10 +137,15 @@ export class WorldScene extends Phaser.Scene {
     // พัฒนาร่าง: ปิดหน้าคลังระหว่างทำบททดสอบ แล้วเปิดกลับมาที่มอนตัวเดิม
     const evolution = new EvolutionPanel(say, (uid) => void this.collection.reopen(uid));
     this.evolution = evolution;
-    this.collection = new CollectionPanel(say, (m) => {
-      this.collection.close();
-      void evolution.open(m);
-    });
+    this.lab = new LabPanel(say);
+    this.collection = new CollectionPanel(
+      say,
+      (m) => {
+        this.collection.close();
+        void evolution.open(m);
+      },
+      (m) => void this.lab.open({ parent: m.uid, atLab: this.nearNpcWith("lab") }),
+    );
     this.catalog = new CatalogPanel(say);
     const bag = new BagPanel(say);
     this.shop = new ShopPanel(say);
@@ -153,7 +160,12 @@ export class WorldScene extends Phaser.Scene {
         { label: UI.room.leave, run: () => void this.leaveTo("Lobby") },
         { label: UI.room.logout, run: () => void this.leaveTo("Login") },
       ],
-      { collection: () => void this.collection.open(), catalog: () => void this.catalog.open(), bag: () => void bag.open() },
+      {
+        collection: () => void this.collection.open(),
+        catalog: () => void this.catalog.open(),
+        bag: () => void bag.open(),
+        lab: () => void this.lab.open({ atLab: this.nearNpcWith("lab") }),
+      },
     );
     this.chat = new QuickChatPanel((msg) => room.send(MSG.chat, msg));
     this.hud = new Hud({ onMenu: () => this.menu.toggle(), onChat: () => this.chat.toggle(), onPartner: () => this.teamQuick.toggle() });
@@ -383,6 +395,7 @@ export class WorldScene extends Phaser.Scene {
         .setOrigin(0.5, 1)
         .setResolution(2);
       if (npc.shop) label.setText(`🛒 ${npc.name}`);
+      else if (npc.lab) label.setText(`🧪 ${npc.name}`);
       parts.push(label);
       const container = this.add.container(m.x * T + T / 2, m.y * T + T / 2, parts);
       container.setDepth(depthForY(container.y, 0));
@@ -399,12 +412,24 @@ export class WorldScene extends Phaser.Scene {
     this.nearNpc = near?.id;
     if (!this.npcPrompt) return;
     this.npcPrompt.style.display = near ? "" : "none";
-    if (near) this.npcPrompt.textContent = `${UI.shop.talk(registry.npcs.get(near.id).name)} (E)`;
+    if (near) {
+      const npc = registry.npcs.get(near.id);
+      this.npcPrompt.textContent = `${npc.lab ? UI.lab.talk(npc.name) : UI.shop.talk(npc.name)} (E)`;
+    }
+  }
+
+  /** ยืนใกล้ NPC ที่มีบริการนี้อยู่ไหม (ใช้เปิดห้องแล็บแบบผสมได้) — server ตรวจระยะซ้ำตอนทำจริง */
+  private nearNpcWith(service: "shop" | "lab"): boolean {
+    const r = balance.world.interactRadius;
+    return this.npcs.some(
+      (n) => registry.npcs.find(n.id)?.[service] && Math.abs(n.x - this.player.tileX) <= r && Math.abs(n.y - this.player.tileY) <= r,
+    );
   }
 
   private talk() {
     const npc = this.nearNpc ? registry.npcs.find(this.nearNpc) : undefined;
     if (npc?.shop) void this.shop.open(npc.id);
+    else if (npc?.lab) void this.lab.open({ atLab: true });
   }
 
   /** คู่หูที่เดินตาม + ฉายา ตาม state จาก server */

@@ -34,6 +34,9 @@ export const players = sqliteTable(
     frameId: text("frame_id"),
     /** ได้รางวัลสมุดภาพไปแล้วกี่ขั้น */
     catalogRewards: integer("catalog_rewards").notNull().default(0),
+    /** ผสมแล้วยังไม่ได้ระดับสูงขึ้นติดกันกี่ครั้ง แยกตามระดับพ่อแม่ (pity หัวข้อ 7.1) */
+    pityNormal: integer("pity_normal").notNull().default(0),
+    pityRare: integer("pity_rare").notNull().default(0),
     mapId: text("map_id"),
     x: integer("x"),
     y: integer("y"),
@@ -136,6 +139,19 @@ export const eggs = sqliteTable(
     createdAt: integer("created_at").notNull(),
   },
   (t) => [index("eggs_player").on(t.playerId)],
+);
+
+/** สูตรผสมที่ผู้เล่นค้นพบแล้ว (หัวข้อ 7.4) — id สูตร = สายพันธุ์ผลลัพธ์ */
+export const playerRecipes = sqliteTable(
+  "player_recipes",
+  {
+    playerId: text("player_id")
+      .notNull()
+      .references(() => players.id, { onDelete: "cascade" }),
+    result: text("result").notNull(),
+    discoveredAt: integer("discovered_at").notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.playerId, t.result] })],
 );
 
 export const questProgress = sqliteTable(

@@ -1,6 +1,6 @@
 // ทางเชื่อมจาก REST ไปยังห้องที่ผู้เล่นอยู่ (process เดียว) — เช่น ตั้งคู่หูจากหน้าคลังแล้วเพื่อนในห้องเห็นทันที
 import { matchMaker } from "@colyseus/core";
-import type { PlayerProfile } from "@ecomon/shared";
+import { MSG, type NoticeMessage, type PlayerProfile } from "@ecomon/shared";
 import { activePlayers } from "./presence";
 import type { WorldRoom } from "./WorldRoom";
 
@@ -28,4 +28,10 @@ export function playerSpot(playerId: string): { mapId: string; x: number; y: num
 export function profileChanged(playerId: string, profile: PlayerProfile) {
   const r = roomOf(playerId);
   r?.room.refreshPlayer(r.sessionId, profile);
+}
+
+/** ส่งข้อความแจ้งเตือนสั้น ๆ ให้ผู้เล่น (ถ้าออนไลน์อยู่ในห้อง) เช่น ไข่พร้อมฟัก */
+export function notifyPlayer(playerId: string, notice: NoticeMessage) {
+  const r = roomOf(playerId);
+  r?.room.sendTo(r.sessionId, MSG.notice, notice);
 }

@@ -12,6 +12,7 @@ import { monsters } from "../db/schema";
 import { registry } from "../content";
 import type { CatalogService } from "./catalog";
 import { GameError } from "./errors";
+import type { GameEvents } from "./events";
 import type { PlayerService } from "./players";
 import type { QuestionService } from "./questions";
 
@@ -36,6 +37,7 @@ export class EvolutionService {
     private readonly questions: QuestionService,
     private readonly players: PlayerService,
     private readonly catalog: CatalogService,
+    private readonly events: GameEvents,
   ) {}
 
   start(playerId: string, uid: string, inBattle: boolean, now = Date.now()): EvolutionState {
@@ -109,6 +111,7 @@ export class EvolutionService {
       .where(eq(monsters.uid, m.uid))
       .run();
     const { unlocks } = this.catalog.owned(playerId, [{ speciesId: m.speciesId, form: trial.toForm }], now);
+    this.events.emit("evolve", { playerId, speciesId: m.speciesId, toForm: trial.toForm });
     return {
       evolved: { uid: m.uid, speciesId: m.speciesId, fromForm: m.form, toForm: trial.toForm, newMoves, catalogUnlocks: unlocks },
       profile: this.players.profile(playerId),

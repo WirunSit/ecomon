@@ -113,6 +113,18 @@ tools/    validate.ts, make-placeholders.ts, make-test-map.ts (อนาคต: 
   (กรอบสีตามขั้น + ย้อมสีเครื่องรางธาตุด้วย canvas) · `QuestionPanel` รับ `HelperSource` สำหรับเมนูตัวช่วย
 - คำใบ้ (`hint`) ของคำถามต้องไม่บอกคำตอบตรง ๆ — เทสต์ใน shared/test/questions.test.ts ตรวจว่าคำใบ้ไม่ซ้ำกับข้อความที่ส่งให้ client
 
+## ผสมพันธุ์และไข่ (เฟส 8)
+
+- `server/src/services/breeding.ts`: `POST /api/lab/breed` (ต้องยืนใกล้ NPC ที่ `lab: true` ใน npcs.json) · `GET /api/lab` · `POST /api/eggs/:id/hatch`
+  เงื่อนไขใช้ `canBreed()` · สุ่มด้วย `rollBreeding()` (shared) · pity เก็บที่ `players.pity_normal/pity_rare` · สูตรที่ค้นพบอยู่ตาราง `player_recipes`
+  (id สูตร = สายพันธุ์ผลลัพธ์ ใช้กับ `rewards.unlockRecipes` ของเควส ผ่าน `BreedingService.unlockRecipes()`)
+- ไข่ไม่บอกสายพันธุ์จนกว่าจะฟัก · คำตอบถูกทุกกิจกรรม +1 ให้ไข่ทุกฟอง (ฟัง event `answer`) · ครบแล้วแจ้ง `notice: egg_ready` ผู้เล่นกดฟักเอง
+- **event bus** `server/src/services/events.ts` (`GameEvents`): answer / defeat / catch / evolve / breed / dungeon / equip / catalog / talk / reach
+  ระบบใหม่ (เช่นเควส) ฟัง event แทนการแก้ service เดิม · listener พังไม่ทำให้การกระทำหลักล้ม
+- ใส่มอนตัวใหม่ให้ผู้เล่น (จับ ฟัก ดรอป) ใช้ `addMonster()` ใน `services/monsterFactory.ts` เท่านั้น (กติกาทีม/คลัง/กล่องพักที่เดียว)
+- ให้ EXP/เหรียญ/แต้มอนุรักษ์ผู้เล่นใช้ `PlayerService.grant()` · ยืนใกล้ NPC ตรวจด้วย `nearNpc()` ใน `services/spot.ts`
+- client: `ui/collection/LabPanel.ts` (แท็บ ไข่ / ผสม / สูตรและ pity + การ์ดเรื่องจริงในธรรมชาติ) · ภาพไข่ `eggImageUrl()` + `eggStage()`
+
 ## ข้อตกลงของ content
 
 - id เป็น `a-z0-9_` ขึ้นต้นด้วยตัวอักษร ใช้เป็นชื่อไฟล์/โฟลเดอร์ asset ได้
@@ -163,6 +175,7 @@ tools/    validate.ts, make-placeholders.ts, make-test-map.ts (อนาคต: 
 - [x] เฟส 5 — คำถาม การต่อสู้ และการจับมอน (ดูหัวข้อ "การต่อสู้และคำถาม" ด้านบน)
 - [x] เฟส 6 — คลังของฉัน สมุดภาพ คู่หู (ดูหัวข้อ "คลังและสมุดภาพ" ด้านบน)
 - [x] เฟส 7 — พัฒนาร่าง ไอเท็ม ร้านค้า (ดูหัวข้อ "ไอเท็ม ร้านค้า พัฒนาร่าง" ด้านบน)
-- [ ] เฟส 8 เป็นต้นไป — ดู docs/GAME_PLAN.md หัวข้อ 13
+- [x] เฟส 8 — ผสมพันธุ์และไข่ (ดูหัวข้อ "ผสมพันธุ์และไข่" ด้านบน)
+- [ ] เฟส 9 เป็นต้นไป — ดู docs/GAME_PLAN.md หัวข้อ 13
 - [~] เฟส 12 — ทำ pipeline ตัดภาพ (หัวข้อ 15) และใช้ภาพจริงกับมอนสเตอร์ ตัวละคร tileset หน้า login แล้ว
       ฉากต่อสู้ (S11–S12) และเอฟเฟกต์ธาตุ (S15) ใช้แล้วในเฟส 5 · ที่เหลือ: ภาพ NPC/ไอเท็ม/ไข่ จะผูกเข้าเกมตามเฟสที่ใช้

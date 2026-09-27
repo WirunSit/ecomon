@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { and, asc, count, eq, isNotNull } from "drizzle-orm";
-import { maxFormForLevel, type Direction, type MonsterSummary, type PlayerProfile, type ProfileStyleRequest } from "@ecomon/shared";
+import { applyPlayerExp, maxFormForLevel, type Direction, type MonsterSummary, type PlayerProfile, type ProfileStyleRequest } from "@ecomon/shared";
 import type { Db } from "../db/client";
 import { classrooms, monsters, playerItems, players } from "../db/schema";
 import { registry } from "../content";
@@ -125,6 +125,21 @@ export class PlayerService {
     if (req.frameId !== undefined) values.frameId = req.frameId;
     if (Object.keys(values).length) this.db.update(players).set(values).where(eq(players.id, playerId)).run();
     return this.profile(playerId);
+  }
+
+  /**
+   * ให้ EXP / เหรียญ / แต้มอนุรักษ์ผู้เล่น (รางวัลฟักไข่ เควส ดันเจี้ยน) คืนการเลื่อนเลเวลถ้ามี (หัวข้อ 9.3)
+   * @param db ส่ง transaction มาได้
+   */
+  grant(playerId: string, gain: { exp?: number; coins?: number; points?: number }, db: Db = this.db): { from: number; to: number } | undefined {
+    const p = db.select().from(players).where(eq(players.id, playerId)).get();
+    if (!p) throw new GameError("player_not_found", "ไม่พบผู้เล่น", 404);
+    const up = applyPlayerExp({ level: p.level, exp: p.exp }, gain.exp ?? 0, registry.balance);
+    db.update(players)
+      .set({ level: up.level, exp: up.exp, coins: p.coins + (gain.coins ?? 0), conservationPoints: p.conservationPoints + (gain.points ?? 0) })
+      .where(eq(players.id, playerId))
+      .run();
+    return up.levelsGained > 0 ? { from: p.level, to: up.level } : undefined;
   }
 
   savedPosition(playerId: string): SavedPosition | null {

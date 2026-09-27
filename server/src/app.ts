@@ -11,8 +11,11 @@ import { openDatabase } from "./db/client";
 import { apiRouter, errorHandler } from "./http/routes";
 import { WorldRoom } from "./rooms/WorldRoom";
 import { AuthService, ensureClassroom } from "./services/auth";
+import { notifyPlayer } from "./rooms/hooks";
 import { BattleService } from "./services/battles";
+import { BreedingService } from "./services/breeding";
 import { CatalogService } from "./services/catalog";
+import { GameEvents } from "./services/events";
 import { CollectionService } from "./services/collection";
 import { EvolutionService } from "./services/evolution";
 import { InventoryService } from "./services/inventory";
@@ -33,23 +36,26 @@ export interface GameServer {
 export function createGameServer(overrides: Partial<ServerConfig> = {}): GameServer {
   const config = loadConfig(process.env, overrides);
   const db = openDatabase(config.databasePath);
-  const catalog = new CatalogService(db);
+  const events = new GameEvents();
+  const catalog = new CatalogService(db, events);
   const players = new PlayerService(db, catalog);
-  const collection = new CollectionService(db, players);
-  const questions = new QuestionService(db, config);
+  const collection = new CollectionService(db, players, events);
+  const questions = new QuestionService(db, config, events);
   const inventory = new InventoryService(db, players, collection);
   const s: Services = {
     config,
     db,
+    events,
     auth: new AuthService(db, config),
     players,
-    battles: new BattleService(db, catalog),
+    battles: new BattleService(db, catalog, events),
     catalog,
     collection,
     inventory,
     shop: new ShopService(db, players, inventory),
     questions,
-    evolution: new EvolutionService(db, questions, players, catalog),
+    evolution: new EvolutionService(db, questions, players, catalog, events),
+    breeding: new BreedingService(db, players, collection, catalog, events, notifyPlayer),
   };
   setServices(s);
 

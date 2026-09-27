@@ -23,7 +23,8 @@
       "title": "นักวิจัยห้องแล็บผสมพันธุ์",
       "zone": "village",
       "sprite": "npc_lab_researcher",
-      "portrait": "npc_lab_researcher_portrait"
+      "portrait": "npc_lab_researcher_portrait",
+      "lab": true
     },
     {
       "id": "npc_fisherman",

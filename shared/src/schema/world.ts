@@ -109,6 +109,8 @@ export const NpcDef = z.strictObject({
   portrait: Id,
   /** เปิดร้านค้า (ขายไอเท็มที่มี price / pointsPrice ใน items.json) */
   shop: z.boolean().default(false),
+  /** ประจำห้องแล็บผสมพันธุ์ (หัวข้อ 7) — ผสมได้เมื่อยืนใกล้ NPC นี้ */
+  lab: z.boolean().default(false),
 });
 export type NpcDef = z.infer<typeof NpcDef>;
 export const NpcsFileSchema = z.strictObject({ npcs: z.array(NpcDef).min(1) });

@@ -55,10 +55,11 @@ export class CollectionPanel {
   private selected?: string;
   private busy = false;
 
-  /** @param evolve เปิดบททดสอบพัฒนาร่างของมอนตัวนี้ */
+  /** @param evolve เปิดบททดสอบพัฒนาร่างของมอนตัวนี้ · breed เปิดห้องแล็บโดยเลือกตัวนี้เป็นพ่อ/แม่ */
   constructor(
     private readonly toast: (text: string) => void,
     private readonly evolve?: (m: MonsterDetail) => void,
+    private readonly breed?: (m: MonsterDetail) => void,
   ) {}
 
   get isOpen() {
@@ -236,9 +237,9 @@ export class CollectionPanel {
     partner.disabled = m.teamSlot === 0 || m.boxed;
     const team = button(inTeam ? T.removeTeam : T.addTeam, () => void this.act(m, { type: inTeam ? "team_remove" : "team_add" }));
     team.disabled = m.boxed;
-    const breed = button(T.breed, () => undefined);
-    breed.disabled = true;
-    breed.title = UI.soon(8);
+    const breed = button(T.breed, () => this.breed?.(m));
+    breed.disabled = !this.breed || registry.monsters.get(m.speciesId).rarity === "legend";
+    if (m.breedReadyAt && m.breedReadyAt > Date.now()) breed.title = UI.lab.cooldown(Math.ceil((m.breedReadyAt - Date.now()) / 60_000));
     // พัฒนาร่าง (หัวข้อ 4.3): ถึงเลเวลแล้วเปิดบททดสอบ
     const sp = registry.monsters.get(m.speciesId);
     const nextForm = m.form + 1;

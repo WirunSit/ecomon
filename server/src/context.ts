@@ -2,7 +2,9 @@ import type { ServerConfig } from "./config";
 import type { Db } from "./db/client";
 import type { AuthService } from "./services/auth";
 import type { BattleService } from "./services/battles";
+import type { BreedingService } from "./services/breeding";
 import type { CatalogService } from "./services/catalog";
+import type { GameEvents } from "./services/events";
 import type { CollectionService } from "./services/collection";
 import type { EvolutionService } from "./services/evolution";
 import type { InventoryService } from "./services/inventory";
@@ -14,6 +16,7 @@ import type { QuestionService } from "./services/questions";
 export interface Services {
   config: ServerConfig;
   db: Db;
+  events: GameEvents;
   auth: AuthService;
   players: PlayerService;
   questions: QuestionService;
@@ -23,6 +26,7 @@ export interface Services {
   inventory: InventoryService;
   evolution: EvolutionService;
   shop: ShopService;
+  breeding: BreedingService;
 }
 
 let current: Services | null = null;

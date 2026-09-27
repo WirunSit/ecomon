@@ -346,12 +346,24 @@
      "width": 0,
      "x": 592,
      "y": 656
+    },
+    {
+     "height": 0,
+     "id": 7,
+     "name": "npc_lab_researcher",
+     "point": true,
+     "rotation": 0,
+     "type": "npc",
+     "visible": true,
+     "width": 0,
+     "x": 720,
+     "y": 656
     }
    ]
   }
  ],
  "nextlayerid": 7,
- "nextobjectid": 7,
+ "nextobjectid": 8,
  "orientation": "orthogonal",
  "properties": [
   {

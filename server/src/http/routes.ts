@@ -9,6 +9,7 @@ import {
   EvolutionAnswerRequest,
   HelperRequest,
   BuyRequest,
+  BreedRequest,
   ROOM_CODE_PATTERN,
   StarterRequest,
   WORLD_ROOM,
@@ -146,6 +147,24 @@ export function apiRouter(s: Services) {
   r.post("/shop/:npc/buy", requireAuth, (req: AuthedRequest, res) => {
     const playerId = req.auth!.playerId;
     const result = s.shop.buy(playerId, String(req.params.npc), BuyRequest.parse(req.body), playerSpot(playerId));
+    profileChanged(playerId, result.profile);
+    res.json(result);
+  });
+
+  // ---------- ห้องแล็บผสมพันธุ์และไข่ (หัวข้อ 7) ----------
+
+  r.get("/lab", requireAuth, (req: AuthedRequest, res) => {
+    res.json(s.breeding.view(req.auth!.playerId));
+  });
+
+  r.post("/lab/breed", requireAuth, (req: AuthedRequest, res) => {
+    const playerId = req.auth!.playerId;
+    res.json(s.breeding.breed(playerId, BreedRequest.parse(req.body), playerSpot(playerId)));
+  });
+
+  r.post("/eggs/:id/hatch", requireAuth, (req: AuthedRequest, res) => {
+    const playerId = req.auth!.playerId;
+    const result = s.breeding.hatch(playerId, String(req.params.id));
     profileChanged(playerId, result.profile);
     res.json(result);
   });

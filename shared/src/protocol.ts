@@ -85,6 +85,8 @@ export interface MonsterDetail extends MonsterSummary {
   statTotal: number;
   expToNext: number;
   obtainedAt: number;
+  /** พ้นคูลดาวน์ผสมเมื่อไร (ms ของ server) null = ผสมได้ */
+  breedReadyAt: number | null;
 }
 
 export interface CollectionResponse {
@@ -240,6 +242,63 @@ export interface EvolutionAnswerResponse {
   /** ครบแล้ว → พัฒนาร่างสำเร็จ */
   evolved?: { uid: string; speciesId: string; fromForm: number; toForm: number; newMoves: string[]; catalogUnlocks: CatalogUnlock[] };
   profile?: PlayerProfile;
+}
+
+// ---------- ห้องแล็บผสมพันธุ์และไข่ (หัวข้อ 7) ----------
+
+/** ไข่ 1 ฟอง — ไม่บอกสายพันธุ์จนกว่าจะฟัก (รู้แค่ระดับจากสีเปลือก) */
+export interface EggView {
+  id: string;
+  rarity: "normal" | "rare" | "legend";
+  /** ตอบถูกไปแล้ว / ต้องตอบถูก */
+  progress: number;
+  required: number;
+  ready: boolean;
+  /** สายพันธุ์พ่อแม่ */
+  parents: [string, string];
+  createdAt: number;
+}
+
+/** สูตรที่ค้นพบแล้ว (id = สายพันธุ์ผลลัพธ์) */
+export interface RecipeView {
+  result: string;
+  tier: "normal" | "rare";
+  /** Normal → Rare: คู่ธาตุ */
+  elements?: [string, string];
+  /** Rare → Legend: คู่สายพันธุ์ */
+  parents?: [string, string];
+}
+
+export interface LabResponse {
+  eggs: EggView[];
+  maxEggs: number;
+  /** ผสมแล้วยังไม่ได้ระดับสูงขึ้นติดกันกี่ครั้ง (ครบ pityAfter → ครั้งถัดไปการันตี) */
+  pity: { normal: number; rare: number };
+  /** สูตรที่ค้นพบแล้ว · จำนวนสูตรทั้งหมด (ที่เหลือแสดงเป็น ???) */
+  recipes: RecipeView[];
+  recipeTotal: { normal: number; rare: number };
+}
+
+export const BreedRequest = z.object({ a: z.string().min(1).max(64), b: z.string().min(1).max(64) });
+export type BreedRequest = z.infer<typeof BreedRequest>;
+
+export interface BreedResponse {
+  egg: EggView;
+  /** ได้ระดับสูงขึ้น · เพราะตรงสูตร · เพราะการันตี */
+  upgraded: boolean;
+  matchedRecipe: boolean;
+  guaranteed: boolean;
+  /** ค้นพบสูตรใหม่ (สายพันธุ์ผลลัพธ์) */
+  discovered?: string;
+  lab: LabResponse;
+  collection: CollectionResponse;
+}
+
+export interface HatchResponse {
+  monster: MonsterSummary & { newSpecies: boolean; boxed: boolean; parents: [string, string] };
+  catalogUnlocks: CatalogUnlock[];
+  lab: LabResponse;
+  profile: PlayerProfile;
 }
 
 /** เลือกฉายา/กรอบโปรไฟล์ (null = ไม่ใช้) — ต้องปลดล็อกแล้ว */

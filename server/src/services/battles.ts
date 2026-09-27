@@ -1,22 +1,12 @@
-import { randomUUID } from "node:crypto";
-import { and, asc, count, eq, isNotNull } from "drizzle-orm";
-import {
-  applyMonsterExp,
-  applyPlayerExp,
-  benchExp,
-  expForWin,
-  storageCapacity,
-  type BattleEndMessage,
-  type LevelUpView,
-} from "@ecomon/shared";
+import { and, asc, eq, isNotNull } from "drizzle-orm";
+import { applyMonsterExp, applyPlayerExp, benchExp, expForWin, type BattleEndMessage, type LevelUpView } from "@ecomon/shared";
 import type { Db } from "../db/client";
 import { monsters, players } from "../db/schema";
 import { registry } from "../content";
 import type { Combatant, CombatantInput, Participant } from "../battle/BattleSession";
 import type { CatalogService } from "./catalog";
-import { catalog } from "../db/schema";
-
-const newUid = () => `m_${randomUUID().replace(/-/g, "").slice(0, 12)}`;
+import type { GameEvents } from "./events";
+import { addMonster, padMoves } from "./monsterFactory";
 
 export type BattleRewards = Omit<BattleEndMessage, "profile" | "respawn">;
 
@@ -25,6 +15,7 @@ export class BattleService {
   constructor(
     private readonly db: Db,
     private readonly catalogs: CatalogService,
+    private readonly events: GameEvents,
   ) {}
 
   /** มอนในทีมเรียงตามช่อง (0 = คู่หู) */
@@ -109,36 +100,10 @@ export class BattleService {
           if (up.levelsGained > 0) rewards.levelUps.push({ uid: c.id, speciesId: row.speciesId, from: row.level, to: up.level, newMoves } satisfies LevelUpView);
         }
 
-        // ได้มอนป่าตัวนั้นเข้าคลัง (หัวข้อ 5.2)
-        // ครั้งแรกที่ได้ร่างนี้ = ช่องใหม่ในสมุดภาพ (ได้ EXP พิเศษ)
-        const entry = tx
-          .select({ ownedAt: catalog.ownedAt })
-          .from(catalog)
-          .where(and(eq(catalog.playerId, p.playerId), eq(catalog.speciesId, wild.speciesId), eq(catalog.form, 1)))
-          .get();
-        const inStorage = tx.select({ n: count() }).from(monsters).where(and(eq(monsters.playerId, p.playerId), eq(monsters.boxed, false))).get()?.n ?? 0;
-        const teamCount = tx.select({ n: count() }).from(monsters).where(and(eq(monsters.playerId, p.playerId), isNotNull(monsters.teamSlot))).get()?.n ?? 0;
-        const boxed = inStorage >= storageCapacity(player.level, b);
-        const uid = newUid();
-        const moves = padMoves(registry.movesAtLevel(wild.speciesId, wild.level, 1));
-        tx.insert(monsters)
-          .values({
-            uid,
-            playerId: p.playerId,
-            speciesId: wild.speciesId,
-            level: wild.level,
-            form: 1,
-            moves,
-            equipment: { head: null, body: null, charm: null },
-            originType: "wild",
-            originZone: zone ?? null,
-            teamSlot: !boxed && teamCount < b.battle.teamSize ? teamCount : null,
-            boxed,
-            obtainedAt: now,
-          })
-          .run();
-        const newSpecies = entry?.ownedAt == null;
-        rewards.caught = { uid, speciesId: wild.speciesId, nickname: null, level: wild.level, exp: 0, form: 1, newSpecies, boxed };
+        // ได้มอนป่าตัวนั้นเข้าคลัง (หัวข้อ 5.2) · ครั้งแรกที่ได้ร่างนี้ = ช่องใหม่ในสมุดภาพ (ได้ EXP พิเศษ)
+        const added = addMonster(tx as unknown as Db, p.playerId, { speciesId: wild.speciesId, level: wild.level, form: 1, originType: "wild", originZone: zone }, now);
+        const newSpecies = added.newSpecies;
+        rewards.caught = { uid: added.uid, speciesId: wild.speciesId, nickname: null, level: wild.level, exp: 0, form: 1, newSpecies, boxed: added.boxed };
         playerExp += b.player.expPerWin + (newSpecies ? b.player.expFirstCatch : 0);
         rewards.coins = Math.round(b.battle.coinsWinBase + b.battle.coinsWinPerLevel * wild.level);
       }
@@ -148,13 +113,11 @@ export class BattleService {
       if (up.levelsGained > 0) rewards.playerLevelUp = { from: player.level, to: up.level };
       tx.update(players).set({ level: up.level, exp: up.exp, coins: player.coins + rewards.coins }).where(eq(players.id, p.playerId)).run();
     });
-    if (rewards.caught) rewards.catalogUnlocks = this.catalogs.owned(p.playerId, [{ speciesId: rewards.caught.speciesId, form: 1 }], now).unlocks;
+    if (rewards.caught) {
+      rewards.catalogUnlocks = this.catalogs.owned(p.playerId, [{ speciesId: rewards.caught.speciesId, form: 1 }], now).unlocks;
+      this.events.emit("defeat", { playerId: p.playerId, speciesId: wild.speciesId, zone });
+      this.events.emit("catch", { playerId: p.playerId, speciesId: wild.speciesId, zone, how: "wild" });
+    }
     return rewards;
   }
-}
-
-/** ช่องท่าครบตามจำนวนช่อง (ช่องว่าง = null) */
-function padMoves(moves: string[]): (string | null)[] {
-  const slots = registry.balance.moves.slots;
-  return [...moves.slice(-slots), ...Array<null>(Math.max(0, slots - moves.length)).fill(null)];
 }

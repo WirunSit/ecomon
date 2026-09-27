@@ -334,6 +334,11 @@ export class WorldRoom extends Room<WorldState, { code: string; classroomId: str
     return this.battles.inBattle(sessionId);
   }
 
+  /** ส่งข้อความถึงผู้เล่นคนเดียว (ใช้จากนอกห้อง ผ่าน rooms/hooks.ts) */
+  sendTo(sessionId: string, type: string, payload: unknown) {
+    this.clients.getById(sessionId)?.send(type, payload);
+  }
+
   // ---------- โหมดทดสอบ ----------
 
   private handleDevToggle(client: Client<ClientData, AuthData>, raw: unknown) {

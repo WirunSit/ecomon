@@ -431,6 +431,13 @@ export function validateContent(c: GameContent, origins: ContentOrigins, opts: V
   if (!c.maps.some((m) => m.id === b.world.startMap)) err(F.balance, ["world", "startMap"], `ไม่มีแผนที่ "${b.world.startMap}" ใน content/maps`);
   else if (!c.maps.find((m) => m.id === b.world.startMap)!.markers.some((m) => m.type === "player_start"))
     err(F.balance, ["world", "startMap"], "แผนที่เริ่มต้นต้องมีจุด player_start");
+  const startMap = c.maps.find((m) => m.id === b.world.startMap);
+  if (startMap) {
+    for (const [flag, label] of [["shop", "ร้านค้า"], ["lab", "ห้องแล็บผสมพันธุ์"]] as const) {
+      if (!startMap.markers.some((m) => m.type === "npc" && npcs.get(m.name)?.[flag]))
+        warn(F.balance, ["world", "startMap"], `แผนที่เริ่มต้นยังไม่มี NPC ${label} (npcs.json: ${flag} = true)`);
+    }
+  }
 
   // ---------- quick chat ----------
   uniqueIds(c.quickChat.messages, (i) => [F.quickChat, ["messages", i]]);

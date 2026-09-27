@@ -301,11 +301,13 @@ function makeMap() {
           { height: 0, id: 5, name: "fountain", point: true, rotation: 0, type: "recovery", visible: true, width: 0, x: 21 * T + 16, y: 21 * T + 16 },
           // ร้านค้าของป้าส้ม หน้าบ้านหลังซ้ายบน
           { height: 0, id: 6, name: "npc_shop_auntie", point: true, rotation: 0, type: "npc", visible: true, width: 0, x: 18 * T + 16, y: 20 * T + 16 },
+          // ห้องแล็บผสมพันธุ์ของพี่ฟ้า หน้าบ้านหลังขวาบน
+          { height: 0, id: 7, name: "npc_lab_researcher", point: true, rotation: 0, type: "npc", visible: true, width: 0, x: 22 * T + 16, y: 20 * T + 16 },
         ],
       },
     ],
     nextlayerid: 7,
-    nextobjectid: 7,
+    nextobjectid: 8,
     orientation: "orthogonal",
     properties: [prop("zone", "meadow")],
     renderorder: "right-down",

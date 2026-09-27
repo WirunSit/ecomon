@@ -3,6 +3,7 @@ import { catalogRewardsReached, type CatalogResponse, type CatalogUnlock } from 
 import type { Db } from "../db/client";
 import { catalog, monsters, playerItems, players } from "../db/schema";
 import { registry } from "../content";
+import type { GameEvents } from "./events";
 
 type Slot = { speciesId: string; form: number };
 
@@ -11,7 +12,10 @@ type Slot = { speciesId: string; form: number };
  * ครบ 25/50/75/100% ได้รางวัลจาก content/collection-rewards.json ทันที (ไอเท็ม เหรียญ ฉายา กรอบโปรไฟล์)
  */
 export class CatalogService {
-  constructor(private readonly db: Db) {}
+  constructor(
+    private readonly db: Db,
+    private readonly events: GameEvents,
+  ) {}
 
   /** เคยพบ (เช่น เริ่มต่อสู้กับมอนป่า) */
   seen(playerId: string, speciesId: string, form: number, now = Date.now()) {
@@ -35,6 +39,7 @@ export class CatalogService {
       }
       if (newEntries.length) unlocks = this.grantRewards(tx as unknown as Db, playerId);
     });
+    if (newEntries.length) this.events.emit("catalog", { playerId });
     return { newEntries, unlocks };
   }
 

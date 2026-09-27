@@ -17,6 +17,7 @@ import type { Db } from "../db/client";
 import { monsters, players } from "../db/schema";
 import { registry } from "../content";
 import { GameError } from "./errors";
+import type { GameEvents } from "./events";
 import { giveItem, takeItem } from "./inventory";
 import type { PlayerService } from "./players";
 
@@ -56,6 +57,7 @@ export function monsterDetail(m: MonsterRow): MonsterDetail {
     statTotal: statTotal(stats),
     expToNext: expToNext(m.level, registry.balance),
     obtainedAt: m.obtainedAt,
+    breedReadyAt: m.breedReadyAt,
   };
 }
 
@@ -64,6 +66,7 @@ export class CollectionService {
   constructor(
     private readonly db: Db,
     private readonly players: PlayerService,
+    private readonly events: GameEvents,
   ) {}
 
   list(playerId: string): CollectionResponse {
@@ -82,6 +85,7 @@ export class CollectionService {
   action(playerId: string, uid: string, action: MonsterAction, inBattle: boolean): MonsterActionResponse {
     const b = registry.balance;
     let releasedPoints: number | undefined;
+    let equipped: string | undefined;
     this.db.transaction((tx) => {
       const m = tx.select().from(monsters).where(and(eq(monsters.uid, uid), eq(monsters.playerId, playerId))).get();
       if (!m) throw new GameError("monster_not_found", "ไม่พบมอนสเตอร์ตัวนี้", 404);
@@ -139,6 +143,7 @@ export class CollectionService {
           const old = m.equipment[item.slot];
           if (old) giveItem(tx as unknown as Db, playerId, old.id, old.tier, 1);
           set({ equipment: { ...m.equipment, [item.slot]: { id: item.id, tier: action.tier } } });
+          equipped = item.id;
           return;
         }
         case "unequip": {
@@ -158,6 +163,7 @@ export class CollectionService {
         }
       }
     });
+    if (equipped) this.events.emit("equip", { playerId, itemId: equipped });
     return { profile: this.players.profile(playerId), collection: this.list(playerId), releasedPoints };
   }
 }

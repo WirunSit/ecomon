@@ -22,6 +22,7 @@ import type { Db } from "../db/client";
 import { answerLog, topicMastery } from "../db/schema";
 import { registry } from "../content";
 import { GameError } from "./errors";
+import type { GameEvents } from "./events";
 import { takeItem } from "./inventory";
 
 /** จำนวนคำตอบล่าสุดที่โหลดจากฐานข้อมูลเพื่อสร้างสถานะกันซ้ำ/สมุดทบทวน */
@@ -65,6 +66,7 @@ export class QuestionService {
   constructor(
     private readonly db: Db,
     private readonly config: ServerConfig,
+    private readonly events: GameEvents,
     private readonly rng: Rng = defaultRng,
   ) {}
 
@@ -250,5 +252,6 @@ export class QuestionService {
     } else {
       this.db.insert(topicMastery).values({ playerId, topic: question.topic, value, updatedAt: now }).run();
     }
+    this.events.emit("answer", { playerId, topic: question.topic, correct, context: instance.context });
   }
 }

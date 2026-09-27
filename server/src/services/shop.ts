@@ -6,13 +6,7 @@ import { registry } from "../content";
 import { GameError } from "./errors";
 import { giveItem, type InventoryService } from "./inventory";
 import type { PlayerService } from "./players";
-
-/** ตำแหน่งผู้เล่นในห้องตอนนี้ (ใช้ตรวจว่ายืนอยู่หน้าร้านจริง) */
-export interface PlayerSpot {
-  mapId: string;
-  x: number;
-  y: number;
-}
+import { nearNpc, type PlayerSpot } from "./spot";
 
 /**
  * ร้านค้าในหมู่บ้าน (หัวข้อ 9.2): ซื้อด้วยเหรียญนิเวศ (price) หรือแลกด้วยแต้มอนุรักษ์ (pointsPrice)
@@ -42,18 +36,10 @@ export class ShopService {
     return { npc: npcId, entries: this.entries(npcId), bag: this.inventory.bag(playerId) };
   }
 
-  /** ยืนอยู่ใกล้ NPC ร้านนี้บนแผนที่ไหม */
-  near(npcId: string, spot: PlayerSpot | undefined): boolean {
-    if (!spot) return false;
-    const map = registry.maps.find(spot.mapId);
-    const r = registry.balance.world.interactRadius;
-    return !!map?.markers.some((m) => m.type === "npc" && m.name === npcId && Math.abs(m.x - spot.x) <= r && Math.abs(m.y - spot.y) <= r);
-  }
-
   buy(playerId: string, npcId: string, req: BuyRequest, spot: PlayerSpot | undefined): BuyResponse {
     const entry = this.entries(npcId).find((e) => e.itemId === req.itemId && e.currency === req.currency);
     if (!entry) throw new GameError("not_sold", "ร้านนี้ไม่มีของชิ้นนี้");
-    if (!this.near(npcId, spot)) throw new GameError("too_far", "ต้องเดินไปที่ร้านก่อนจึงซื้อได้");
+    if (!nearNpc(npcId, spot)) throw new GameError("too_far", "ต้องเดินไปที่ร้านก่อนจึงซื้อได้");
     const cost = entry.price * req.qty;
     this.db.transaction((tx) => {
       const p = tx.select({ coins: players.coins, cp: players.conservationPoints }).from(players).where(eq(players.id, playerId)).get();
