@@ -14,7 +14,7 @@ const propImages = import.meta.glob<string>("../../assets/props/*.png", { eager:
 // ภาพพื้นที่วาดด้วย tools/render_maps.py
 const groundMeta = import.meta.glob<GroundMeta>("../../assets/maps/*/ground.json", { eager: true, import: "default" });
 const groundImages = import.meta.glob<string>("../../assets/maps/*/*.webp", { eager: true, query: "?url", import: "default" });
-const uiImages = import.meta.glob<string>(["../../assets/ui/title.webp"], { eager: true, query: "?url", import: "default" });
+const uiImages = import.meta.glob<string>(["../../assets/ui/title.webp", "../../assets/ui/*.png"], { eager: true, query: "?url", import: "default" });
 // ฉากต่อสู้ (S11–S12) และเอฟเฟกต์ (S15) — โหลดตอนเริ่มต่อสู้ครั้งแรกเท่านั้น
 const backgroundImages = import.meta.glob<string>("../../assets/backgrounds/*.webp", { eager: true, query: "?url", import: "default" });
 const vfxImages = import.meta.glob<string>("../../assets/vfx/*.png", { eager: true, query: "?url", import: "default" });
@@ -116,7 +116,7 @@ export function mapGround(mapId: string): { meta: GroundMeta; chunks: { key: str
 }
 
 export function uiImageUrl(id: string): string | undefined {
-  return uiImages[`../../assets/ui/${id}.webp`];
+  return uiImages[`../../assets/ui/${id}.png`] ?? uiImages[`../../assets/ui/${id}.webp`];
 }
 
 // ---------- การต่อสู้ ----------

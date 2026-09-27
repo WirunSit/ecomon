@@ -4,6 +4,7 @@ import { itemIcon } from "../itemIcon";
 import { h } from "../overlay";
 import { showPicker } from "../Picker";
 import { UI } from "../strings";
+import { uiIcon } from "../uiIcon";
 import type { BattleDock } from "./BattleDock";
 
 export interface SubmittedAnswer {
@@ -109,13 +110,14 @@ export class QuestionPanel {
       setTimeout(() => input.focus(), 50);
     }
 
-    const item = this.dock.button(`🎒 ${UI.battle.item}`, () => this.openHelpers(asked), "q-item");
+    const item = this.dock.button(UI.battle.item, () => this.openHelpers(asked), "q-item");
+    item.prepend(uiIcon("bag"));
     item.disabled = !this.helpers;
     asked.inputs = inputs;
 
     const timerBar = h("i");
     const timerText = h("span", { className: "q-time" });
-    const timer = h("div", { className: "q-timer" }, [h("div", { className: "q-timer-bar" }, [timerBar]), timerText]);
+    const timer = h("div", { className: "q-timer" }, [uiIcon("timer"), h("div", { className: "q-timer-bar" }, [timerBar]), timerText]);
 
     body.append(
       h("div", { className: "q-head" }, [
@@ -235,7 +237,7 @@ export class QuestionPanel {
     next.dataset.hotkey = "Enter";
     const box = h("div", { className: `q-result ${r.correct ? "ok" : "bad"}` }, [
       h("div", { className: "q-result-head" }, [
-        h("b", { text: `${r.correct ? "✔" : "✘"} ${title}` }),
+        h("b", { className: "with-ico" }, [uiIcon(r.correct ? "check" : "cross"), title]),
         ...(r.quick && this.battle ? [h("span", { className: "q-quick", text: UI.battle.quick })] : []),
       ]),
       ...(reveal ? [h("p", { className: "q-reveal", text: reveal })] : []),

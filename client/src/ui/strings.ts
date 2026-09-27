@@ -26,6 +26,8 @@ export const UI = {
     pinHint: "ครั้งแรก: ตั้ง PIN เองแล้วจำไว้ใช้ครั้งต่อไป",
     submit: "เข้าเล่น",
     checking: "กำลังตรวจสอบ…",
+    classCodeExample: "เช่น DEMO01",
+    invalid: "ข้อมูลไม่ถูกต้อง",
   },
   starter: {
     title: "เลือกมอนสเตอร์คู่หู",
@@ -53,6 +55,7 @@ export const UI = {
     replaced: "บัญชีนี้เข้าเล่นจากที่อื่น จึงถูกให้ออกจากห้อง",
     reconnecting: "การเชื่อมต่อหลุด กำลังเชื่อมต่อใหม่…",
     reconnectFailed: "เชื่อมต่อห้องเดิมไม่สำเร็จ",
+    badCode: "รหัสห้องต้องเป็นตัวเลข 6 หลัก",
     left: "ออกจากห้องแล้ว",
   },
   chat: "แชท",
@@ -405,7 +408,7 @@ export const UI = {
   },
   worldMap: {
     title: "แผนที่เกาะนิเวศา",
-    button: "🗺 แผนที่",
+    button: "แผนที่",
     hint: "ใช้แผนที่นักสำรวจเพื่อดูจุดเกิดมอนสเตอร์",
     reveal: (time: string) => `แผนที่นักสำรวจ: เห็นจุดเกิดมอนอีก ${time}`,
     used: (min: number) => `กางแผนที่นักสำรวจแล้ว! เห็นจุดเกิดมอนสเตอร์บนแผนที่ ${min} นาที (กด N)`,
@@ -427,6 +430,7 @@ export const UI = {
   battle: {
     appear: (name: string, lv: number) => `${name} Lv. ${lv} ปรากฏตัว!`,
     choose: "จะใช้ท่าไหนดี?",
+    usedMove: (monster: string, move: string) => `${monster} ใช้ท่า ${move}!`,
     waiting: "รอสักครู่…",
     switchBtn: "สลับตัว",
     switchTitle: "เลือกมอนสเตอร์ที่จะออกไปสู้",

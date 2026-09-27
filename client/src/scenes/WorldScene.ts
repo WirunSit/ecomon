@@ -32,7 +32,7 @@ import { InputController } from "../input/InputController";
 import { connection, type PlayerView, type WorldRoom } from "../net/connection";
 import { session } from "../net/session";
 import { profile } from "../state/profile";
-import { dungeonEntranceProp, npcTextureKey, propTextureKey } from "../assets";
+import { dungeonEntranceProp, npcTextureKey, propTextureKey, vfxImageUrl, vfxTextureKey } from "../assets";
 import { DungeonPanel } from "../ui/dungeon/DungeonPanel";
 import { DialoguePanel } from "../ui/quests/DialoguePanel";
 import { QuestLogPanel } from "../ui/quests/QuestLogPanel";
@@ -373,7 +373,29 @@ export class WorldScene extends Phaser.Scene {
     const after = storageCapacity(to, balance);
     if (after > storageCapacity(from, balance)) lines.push(T.storage(after));
     this.toast.show([T.title(to), ...lines].join(" · "), 6000);
+    this.levelUpFx();
     void questStore.refresh();
+  }
+
+  /** แสงเลเวลอัป (S15 level_up) เหนือตัวละคร — โหลดภาพตอนใช้ครั้งแรก */
+  private levelUpFx() {
+    const key = vfxTextureKey("level_up");
+    const show = () => {
+      if (!this.player || !this.textures.exists(key)) return;
+      const c = this.player.container;
+      const fx = this.add.image(c.x, c.y - 16, key).setDepth(c.depth - 0.000001).setAlpha(0); // อยู่หลังตัวละคร
+      const size = 110 / Math.max(fx.width, 1);
+      fx.setScale(size * 0.3);
+      this.tweens.add({ targets: fx, alpha: 1, scale: size, y: c.y - 34, duration: 450, ease: "Back.easeOut" });
+      this.tweens.add({ targets: fx, alpha: 0, y: c.y - 70, delay: 1100, duration: 500, onComplete: () => fx.destroy() });
+    };
+    const url = vfxImageUrl("level_up");
+    if (this.textures.exists(key)) show();
+    else if (url) {
+      this.load.image(key, url);
+      this.load.once(Phaser.Loader.Events.COMPLETE, show);
+      this.load.start();
+    }
   }
 
   // ---------- ดันเจี้ยน ----------

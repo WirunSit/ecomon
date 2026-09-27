@@ -7,6 +7,7 @@ import { itemIcon } from "../itemIcon";
 import { showPicker } from "../Picker";
 import { monsterThumb } from "../monsterThumb";
 import { h } from "../overlay";
+import { elementChip, rarityChip, roleChip, statLabel, uiIcon } from "../uiIcon";
 import { UI } from "../strings";
 
 type SortKey = "level" | "power" | "new";
@@ -38,10 +39,7 @@ function select(label: string, value: string, options: [string, string][], onCha
 }
 
 function elementChips(speciesId: string) {
-  return (registry.monsters.find(speciesId)?.elements ?? []).map((id) => {
-    const el = registry.elements.find(id);
-    return h("span", { className: "chip", text: el?.name ?? id, style: { background: el?.color ?? "#999" } });
-  });
+  return (registry.monsters.find(speciesId)?.elements ?? []).map(elementChip);
 }
 
 /**
@@ -137,7 +135,7 @@ export class CollectionPanel {
       if (m.teamSlot === 0) badges.push(h("span", { className: "badge partner", text: `★ ${T.partner}` }));
       else if (m.teamSlot !== null) badges.push(h("span", { className: "badge team", text: T.teamSlot(m.teamSlot) }));
       if (m.boxed) badges.push(h("span", { className: "badge boxed", text: T.boxed }));
-      if (m.locked) badges.push(h("span", { className: "badge lock", text: "🔒" }));
+      if (m.locked) badges.push(h("span", { className: "badge lock" }, [uiIcon("lock")]));
       const card = h("button", { className: `mon-card${m.boxed ? " is-boxed" : ""}` }, [
         h("div", { className: "mon-badges" }, badges),
         img,
@@ -173,7 +171,7 @@ export class CollectionPanel {
     const maxStat = Math.max(...Object.values(m.stats)) * 1.15;
     const stats = (["hp", "atk", "def", "spd"] as const).map((k) =>
       h("div", { className: "stat-row" }, [
-        h("span", { text: T.statNames[k] }),
+        statLabel(k),
         h("div", { className: "stat-bar" }, [h("i", { style: { width: `${(m.stats[k] / maxStat) * 100}%` } })]),
         h("b", { text: String(m.stats[k]) }),
       ]),
@@ -209,7 +207,7 @@ export class CollectionPanel {
           h("p", { className: "muted", text: `${speciesName(m.speciesId, m.form)} · ${UI.level(m.level)} · ${T.formN(m.form)}` }),
           h("div", { className: "chips" }, [
             ...elementChips(m.speciesId),
-            h("span", { className: "chip light", text: UI.catalog.rarity[sp.rarity] ?? sp.rarity }),
+            rarityChip(sp.rarity),
             h("span", { className: "chip light", text: sp.habitat === "water" ? UI.catalog.habitatWater : UI.catalog.habitatLand }),
           ]),
           h("div", { className: "bar-row" }, [h("small", { text: `HP ${m.hp}/${m.stats.hp}` }), h("div", { className: "hpbar" }, [h("i", { className: hpPct > 50 ? "" : hpPct > 20 ? "mid" : "low", style: { width: `${hpPct}%` } })])]),
@@ -223,7 +221,7 @@ export class CollectionPanel {
           h("h4", { text: T.equipment }),
           h("div", { className: "equip-slots" }, equipment),
           h("h4", { text: T.role }),
-          h("p", { className: "detail-text" }, [h("b", { text: role?.name ?? sp.role }), role?.description ? ` — ${role.description}` : ""]),
+          h("p", { className: "detail-text" }, [roleChip(sp.role), role?.description ? ` ${role.description}` : ""]),
           h("p", { className: "detail-text muted" }, [`${T.origin}: ${origin}`, ...(m.parents ? [` · ${T.parents}: ${m.parents.map((p) => speciesName(p)).join(" × ")}`] : []), ` · ${T.obtained(new Date(m.obtainedAt).toLocaleDateString("th-TH"))}`]),
         ]),
       ]),

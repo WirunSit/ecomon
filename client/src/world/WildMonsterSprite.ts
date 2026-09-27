@@ -1,9 +1,13 @@
 import Phaser from "phaser";
 import type { Direction, TileTerrain } from "@ecomon/shared";
 import { monsterTexture } from "../assets";
+import { stepHop } from "./stepHop";
 
 /** ขนาดภาพมอนป่าบนแผนที่ (px) — มอนป่าเป็นร่าง 1 เสมอ */
 const MAP_SIZE = 52;
+/** ระดับเท้าในช่อง (px จากกลางช่อง) และความสูงที่เด้งตอนเดิน */
+const FEET_Y = 10;
+const HOP_PX = 5;
 
 export interface WildView {
   species: string;
@@ -25,6 +29,9 @@ export class WildMonsterSprite {
   private tileX: number;
   private tileY: number;
   private moveTween?: Phaser.Tweens.Tween;
+  /** ห่อภาพไว้สำหรับท่าเดิน (เด้ง + ยืดหด) */
+  private readonly body: Phaser.GameObjects.Container;
+  private readonly inWater: boolean;
 
   constructor(
     private readonly scene: Phaser.Scene,
@@ -37,7 +44,9 @@ export class WildMonsterSprite {
     this.tileY = view.y;
     const inWater = terrain === "shallow" || terrain === "deep";
     const tex = monsterTexture(scene, view.species, 1, "idle");
-    this.sprite = scene.add.image(0, 10, tex.key, tex.frame).setOrigin(0.5, 1);
+    this.sprite = scene.add.image(0, 0, tex.key, tex.frame).setOrigin(0.5, 1);
+    this.body = scene.add.container(0, FEET_Y, [this.sprite]);
+    this.inWater = inWater;
     const scale = MAP_SIZE / Math.max(this.sprite.width, this.sprite.height);
     this.sprite.setScale(scale);
 
@@ -49,7 +58,7 @@ export class WildMonsterSprite {
         scene.tweens.add({ targets: ring, scaleX: 1.6, scaleY: 1.6, alpha: 0, duration: 1600, delay: i * 800, repeat: -1 });
         under.push(ring);
       }
-      scene.tweens.add({ targets: this.sprite, y: 7, duration: 900, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
+      scene.tweens.add({ targets: this.sprite, y: -3, duration: 900, yoyo: true, repeat: -1, ease: "Sine.easeInOut" });
     } else {
       under.push(scene.add.ellipse(0, 9, 30, 9, 0x000000, 0.2));
       // หายใจเบา ๆ ตอนยืน
@@ -68,7 +77,7 @@ export class WildMonsterSprite {
       .setResolution(2);
     this.lockIcon = scene.add.text(14, 4 - MAP_SIZE, "⚔️", { fontSize: "14px" }).setOrigin(0.5, 1).setVisible(false);
 
-    this.container = scene.add.container(0, 0, [...under, this.sprite, label, this.lockIcon]);
+    this.container = scene.add.container(0, 0, [...under, this.body, label, this.lockIcon]);
     this.placeAt(view.x, view.y);
     this.sync(view);
   }
@@ -95,6 +104,7 @@ export class WildMonsterSprite {
     if (far) return this.placeAt(view.x, view.y);
     const { px, py } = this.pixel(view.x, view.y);
     this.moveTween = this.scene.tweens.add({ targets: this.container, x: px, y: py, duration: this.stepMs, ease: "Sine.easeInOut" });
+    stepHop(this.scene, this.body, FEET_Y, this.stepMs, this.inWater ? 0 : HOP_PX);
   }
 
   destroy() {

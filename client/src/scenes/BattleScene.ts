@@ -178,6 +178,7 @@ export class BattleScene extends Phaser.Scene {
       case "end":
         return this.enqueue(async () => {
           this.dock.hide();
+          if (m.msg.caught) await this.captureSparkle();
           await showEndPanel(m.msg);
           this.close(m.msg);
         });
@@ -477,7 +478,7 @@ export class BattleScene extends Phaser.Scene {
     const side: Side = e.side;
     const other: Side = side === "wild" ? "player" : "wild";
     const move = registry.moves.find(e.moveId);
-    if (attacker) this.dock.message(`${speciesName(attacker.speciesId, attacker.form)} ใช้ท่า ${move?.name ?? e.moveId}!`);
+    if (attacker) this.dock.message(UI.battle.usedMove(speciesName(attacker.speciesId, attacker.form), move?.name ?? e.moveId));
 
     // พุ่งเข้าหาเป้าหมายด้วยท่าโจมตี
     const s = this.holders[side];
@@ -498,9 +499,12 @@ export class BattleScene extends Phaser.Scene {
         this.card(other).setHp(e.targetHp, target.maxHp);
         this.card(other).flash();
       }
+      // โดนตี = กระพริบขาว 2 ครั้ง (หัวข้อ 14.1)
       const t = this.sprites[other];
       t.setTintFill(0xffffff);
-      this.time.delayedCall(90, () => this.applyTint(other));
+      this.time.delayedCall(80, () => this.applyTint(other));
+      this.time.delayedCall(160, () => t.setTintFill(0xffffff));
+      this.time.delayedCall(240, () => this.applyTint(other));
       this.cameras.main.shake(140, e.effectiveness === "super" ? 0.012 : 0.006);
       const color = e.effectiveness === "super" ? "#ffd84a" : e.effectiveness === "weak" ? "#c9c2b0" : "#ffffff";
       await this.floatText(other, `-${e.damage}`, color, e.effectiveness === "super" ? 36 : 30);
@@ -510,6 +514,21 @@ export class BattleScene extends Phaser.Scene {
     await this.tween({ targets: s, x: SPOT[side].x, y: SPOT[side].y, duration: 200, ease: "Quad.easeIn" });
     if (attacker) this.setMonster(side, { ...attacker, hp: Math.max(attacker.hp, 1) }, "idle");
     await this.wait(e.effectiveness !== "normal" && !e.missed ? 500 : 250);
+  }
+
+  /** ชนะแล้วได้มอน: ประกายรอบมอนป่า แล้วมอนย่อตัวหายเข้าคลัง (S15 capture_sparkle) */
+  private async captureSparkle() {
+    const key = vfxTextureKey("capture_sparkle");
+    const holder = this.holders.wild;
+    holder.setAlpha(1);
+    if (this.textures.exists(key)) {
+      const fx = this.add.image(SPOT.wild.x, SPOT.wild.y - SPOT.wild.size * 0.45, key).setDepth(20).setScale(0.2).setAlpha(0.95);
+      void this.tween({ targets: fx, scale: (SPOT.wild.size * 1.3) / Math.max(fx.width, 1), angle: 90, duration: 700, ease: "Back.easeOut" }).then(() =>
+        this.tween({ targets: fx, alpha: 0, duration: 350 }).then(() => fx.destroy()),
+      );
+    }
+    await this.tween({ targets: holder, scale: 0.2, alpha: 0, y: SPOT.wild.y - 40, duration: 650, delay: 250, ease: "Back.easeIn" });
+    await this.wait(200);
   }
 
   /** เอฟเฟกต์ธาตุ 4 เฟรม (S15) แล้วประกายกระทบ */

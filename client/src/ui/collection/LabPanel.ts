@@ -17,6 +17,7 @@ import { profile } from "../../state/profile";
 import { FullPanel } from "../FullPanel";
 import { monsterThumb } from "../monsterThumb";
 import { h } from "../overlay";
+import { elementChip, rarityChip } from "../uiIcon";
 import { showPicker } from "../Picker";
 import { UI } from "../strings";
 import { displayName } from "./CollectionPanel";
@@ -38,10 +39,6 @@ function img(src: string, className: string): HTMLImageElement {
   return el;
 }
 
-function elementChip(id: string) {
-  const el = registry.elements.find(id);
-  return h("span", { className: "chip", text: el?.name ?? id, style: { background: el?.color ?? "#999" } });
-}
 
 const eggSrc = (e: Pick<EggView, "rarity" | "progress" | "required">) =>
   eggImageUrl(`egg_${e.rarity}_${eggStage(e.progress, e.required)}`) ?? eggImageUrl("mystery_egg") ?? "";
@@ -342,7 +339,7 @@ export class LabPanel {
       h("span", { className: "breed-x", text: "→" }),
       img(monsterThumb(r.result, 1), "pick-mon"),
       h("b", { text: speciesName(r.result) }),
-      h("small", { className: "chip light", text: UI.catalog.rarity[registry.monsters.get(r.result).rarity] ?? "" }),
+      rarityChip(registry.monsters.get(r.result).rarity),
     ]);
   }
 

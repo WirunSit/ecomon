@@ -2,6 +2,7 @@ import type { BattleStateView } from "@ecomon/shared";
 import { balance, registry, speciesName } from "../../content";
 import { h, uiRoot } from "../overlay";
 import { UI } from "../strings";
+import { uiIcon } from "../uiIcon";
 
 export interface ActionHandlers {
   move(moveId: string): void;
@@ -53,7 +54,7 @@ export class BattleDock {
       const move = registry.moves.find(m.id);
       const el = move ? registry.elements.find(move.element) : undefined;
       const btn = h("button", { className: "move-btn", style: { borderColor: el?.color ?? "#777" } }, [
-        h("span", { className: "move-name", text: move?.name ?? m.id }),
+        h("span", { className: "move-name" }, [...(move ? [uiIcon(`element_${move.element}`, "move-el")] : []), move?.name ?? m.id]),
         h("small", { text: m.cooldown > 0 ? UI.battle.cooldown(m.cooldown) : `${el?.name ?? ""} · ${UI.battle.power(move?.power ?? 0)}` }),
         h("kbd", { text: String(i + 1) }),
       ]);
@@ -84,7 +85,8 @@ export class BattleDock {
       on.flee();
     }, "side-btn flee");
     fleeBtn.hidden = !state.canFlee;
-    const itemBtn = this.button(`🎒 ${UI.battleItem.button}`, () => on.item?.(), "side-btn");
+    const itemBtn = this.button(UI.battleItem.button, () => on.item?.(), "side-btn");
+    itemBtn.prepend(uiIcon("bag"));
     itemBtn.hidden = !on.item;
 
     this.set([

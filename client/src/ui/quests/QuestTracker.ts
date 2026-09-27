@@ -3,6 +3,7 @@ import { registry } from "../../content";
 import { questStore } from "../../state/quests";
 import { h, uiRoot } from "../overlay";
 import { UI } from "../strings";
+import { uiIcon } from "../uiIcon";
 import { objectiveText } from "./questText";
 
 /**
@@ -41,7 +42,7 @@ export class QuestTracker {
       const giver = registry.npcs.find(next.giver);
       rows.unshift(h("div", { className: "qt-row next" }, [h("b", { text: `❗ ${next.title}` }), h("small", { text: UI.quests.giveBy(giver?.name ?? "", "") })]));
     }
-    this.el.replaceChildren(h("span", { className: "qt-title", text: `📜 ${UI.quests.tracker}` }), ...rows);
+    this.el.replaceChildren(h("span", { className: "qt-title" }, [uiIcon("quest_scroll"), UI.quests.tracker]), ...rows);
     this.el.style.display = rows.length ? "" : "none";
   }
 

@@ -41,7 +41,7 @@ export class LoginScene extends Phaser.Scene {
 
   private showForm() {
     const last = session.lastLogin;
-    const classCode = input({ value: last?.classCode ?? "", autocomplete: "off", maxLength: 8, placeholder: "เช่น DEMO01" });
+    const classCode = input({ value: last?.classCode ?? "", autocomplete: "off", maxLength: 8, placeholder: UI.login.classCodeExample });
     classCode.style.textTransform = "uppercase";
     const nickname = input({ value: last?.nickname ?? "", autocomplete: "off", maxLength: 16 });
     const pin = input({ type: "password", inputMode: "numeric", autocomplete: "off", maxLength: 4, pattern: "\\d{4}" });
@@ -49,7 +49,7 @@ export class LoginScene extends Phaser.Scene {
 
     const submit = asyncButton(UI.login.submit, error, async () => {
       const parsed = LoginRequest.safeParse({ classCode: classCode.value, nickname: nickname.value, pin: pin.value });
-      if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? "ข้อมูลไม่ถูกต้อง");
+      if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? UI.login.invalid);
       const res = await api<LoginResponse>("/auth/login", { body: parsed.data });
       session.token = res.token;
       session.lastLogin = { classCode: parsed.data.classCode, nickname: parsed.data.nickname };

@@ -32,7 +32,7 @@ export class LobbyScene extends Phaser.Scene {
     const code = input({ inputMode: "numeric", maxLength: 6, placeholder: "000000", autocomplete: "off" });
     const join = asyncButton(UI.lobby.join, error, async () => {
       const c = code.value.trim();
-      if (!ROOM_CODE_PATTERN.test(c)) throw new Error("รหัสห้องต้องเป็นตัวเลข 6 หลัก");
+      if (!ROOM_CODE_PATTERN.test(c)) throw new Error(UI.room.badCode);
       await enter(() => connection.joinByCode(c, p.classroomId))();
     });
     code.addEventListener("keydown", (e) => e.key === "Enter" && join.click());

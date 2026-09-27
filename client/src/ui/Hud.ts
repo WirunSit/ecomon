@@ -3,6 +3,7 @@ import { monsterThumb } from "./monsterThumb";
 import { profile } from "../state/profile";
 import { h, uiRoot } from "./overlay";
 import { UI } from "./strings";
+import { uiIcon } from "./uiIcon";
 
 /** HUD บนจอ: ชื่อ เลเวล เหรียญ ชื่อโซน และปุ่มเมนู (HTML overlay ฟอนต์ Kanit) */
 export class Hud {
@@ -31,7 +32,7 @@ export class Hud {
       h("span", { text: UI.menu }),
     ]);
     menuBtn.addEventListener("click", opts.onMenu);
-    const mapBtn = h("button", { className: "hud-menu-btn interactive", text: UI.worldMap.button });
+    const mapBtn = h("button", { className: "hud-menu-btn interactive" }, [uiIcon("world_map"), UI.worldMap.button]);
     if (opts.onMap) mapBtn.addEventListener("click", opts.onMap);
     else mapBtn.style.display = "none";
     const chatBtn = h("button", { className: "hud-menu-btn interactive", text: `💬 ${UI.chat}` });
@@ -42,7 +43,7 @@ export class Hud {
       h("div", { className: "hud-card" }, [
         avatar,
         h("div", { className: "hud-who" }, [name, h("span", {}, [level, title])]),
-        h("span", { className: "hud-coins", style: { marginLeft: "8px" } }, [h("span", { className: "coin-icon" }), coins]),
+        h("span", { className: "hud-coins", style: { marginLeft: "8px" } }, [uiIcon("coin", "hud-coin"), coins]),
       ]),
       h("span", { className: "spacer" }),
       this.roomEl,

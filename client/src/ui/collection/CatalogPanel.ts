@@ -5,6 +5,7 @@ import { profile } from "../../state/profile";
 import { FullPanel } from "../FullPanel";
 import { monsterThumb } from "../monsterThumb";
 import { h } from "../overlay";
+import { elementChip, rarityChip, roleChip, statLabel } from "../uiIcon";
 import { UI } from "../strings";
 
 const T = UI.catalog;
@@ -121,17 +122,13 @@ export class CatalogPanel {
       left.push(h("h3", { text: T.unknown }), h("p", { className: "muted", text: T.neverSeen }));
       right.push(h("div", { className: "fact-card hint" }, [h("b", { text: T.hint(sp.habitatHint) })]));
     } else {
-      const role = registry.roles.find(sp.role);
       left.push(
         h("h3", { text: speciesName(speciesId, form) }),
         h("p", { className: "muted", text: `#${String(sp.dex).padStart(3, "0")} · ${UI.collection.formN(form)} · ${st === "owned" ? T.owned : T.seen}` }),
         h("div", { className: "chips" }, [
-          ...sp.elements.map((id) => {
-            const el = registry.elements.find(id);
-            return h("span", { className: "chip", text: el?.name ?? id, style: { background: el?.color ?? "#999" } });
-          }),
-          h("span", { className: "chip light", text: T.rarity[sp.rarity] ?? sp.rarity }),
-          h("span", { className: "chip light", text: role?.name ?? sp.role }),
+          ...sp.elements.map(elementChip),
+          rarityChip(sp.rarity),
+          roleChip(sp.role),
         ]),
       );
       const maxStat = Math.max(...STAT_KEYS.map((k) => sp.baseStats[k])) * 1.15;
@@ -139,7 +136,7 @@ export class CatalogPanel {
         h("h4", { text: T.baseStats }),
         ...STAT_KEYS.map((k) =>
           h("div", { className: "stat-row" }, [
-            h("span", { text: UI.collection.statNames[k] }),
+            statLabel(k),
             h("div", { className: "stat-bar" }, [h("i", { style: { width: st === "owned" ? `${(sp.baseStats[k] / maxStat) * 100}%` : "0%" } })]),
             h("b", { text: st === "owned" ? String(sp.baseStats[k]) : "?" }),
           ]),

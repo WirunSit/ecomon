@@ -2,6 +2,17 @@ import { registry } from "../content";
 import { profile } from "../state/profile";
 import { h, uiRoot } from "./overlay";
 import { UI } from "./strings";
+import { uiIcon } from "./uiIcon";
+
+/** ไอคอนของแต่ละเมนู (assets/ui) */
+const MENU_ICON: Record<string, string> = {
+  collection: "team",
+  catalog: "creature_book",
+  bag: "bag",
+  lab: "egg_nest",
+  quests: "quest_scroll",
+  settings: "settings",
+};
 
 /** เมนูหลัก (modal) — หน้าต่าง ๆ จะเปิดใช้ทีละเฟส */
 export interface MenuAction {
@@ -34,7 +45,11 @@ export class MenuPanel {
     const p = profile.get();
     const entries = UI.menuItems.map((m) => {
       const run = this.features[m.id];
-      const b = h("button", { className: "menu-entry", text: m.label }, run ? [] : [h("small", { text: UI.soon(m.phase) })]);
+      const b = h("button", { className: "menu-entry" }, [
+        ...(MENU_ICON[m.id] ? [uiIcon(MENU_ICON[m.id]!, "menu-ico")] : []),
+        h("span", { text: m.label }),
+        ...(run ? [] : [h("small", { text: UI.soon(m.phase) })]),
+      ]);
       b.disabled = !run;
       b.addEventListener("click", () => {
         this.close();

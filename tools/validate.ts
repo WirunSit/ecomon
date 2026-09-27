@@ -28,7 +28,25 @@ function groundIssues(): ContentIssue[] {
   });
 }
 
-result.issues.push(...groundIssues());
+/** ทุกร่าง × ท่า (idle/attack) ของมอนที่เปิดใช้ต้องมี frame ใน atlas ที่ client ใช้ (ไม่มี = เกมแสดงภาพสำรอง) */
+function atlasIssues(): ContentIssue[] {
+  const atlasPath = join(REPO_ROOT, "client", "public", "atlas", "monsters.json");
+  if (!existsSync(atlasPath)) return [{ severity: "warning", file: "client/public/atlas/monsters.json", path: [], message: "ยังไม่มี atlas มอนสเตอร์ — รัน npm run assets" }];
+  const atlas = JSON.parse(readFileSync(atlasPath, "utf8")) as { textures?: { frames: { filename: string }[] }[] };
+  const frames = new Set((atlas.textures ?? []).flatMap((t) => t.frames.map((f) => f.filename)));
+  return (result.content?.monsters ?? [])
+    .filter((m) => m.enabled !== false)
+    .flatMap((m) =>
+      m.forms.flatMap((f) =>
+        (["idle", "attack"] as const)
+          .map((pose) => `${m.id}/f${f.form}_${pose}`)
+          .filter((frame) => !frames.has(frame))
+          .map((frame): ContentIssue => ({ severity: "warning", file: `monsters/${m.id}.json`, path: [], message: `ภาพ ${frame} ยังไม่อยู่ใน atlas — รัน npm run assets` })),
+      ),
+    );
+}
+
+result.issues.push(...groundIssues(), ...atlasIssues());
 const errors = result.issues.filter((i) => i.severity === "error");
 const warnings = result.issues.filter((i) => i.severity === "warning");
 
