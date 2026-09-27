@@ -11,14 +11,14 @@ export const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", 
 export const CONTENT_DIR = join(REPO_ROOT, "content");
 export const ASSETS_DIR = join(REPO_ROOT, "assets");
 
-/** อ่านไฟล์ .json ทุกไฟล์ใน content/ (รวมโฟลเดอร์ย่อย) เป็น map ชื่อไฟล์ → ข้อความ */
+/** อ่านไฟล์ .json และแผนที่ .tmj ทุกไฟล์ใน content/ (รวมโฟลเดอร์ย่อย) เป็น map ชื่อไฟล์ → ข้อความ */
 export function readContentFiles(dir = CONTENT_DIR): ContentFiles {
   const files: ContentFiles = {};
   const walk = (d: string) => {
     for (const name of readdirSync(d)) {
       const full = join(d, name);
       if (statSync(full).isDirectory()) walk(full);
-      else if (name.endsWith(".json")) files[relative(dir, full).split(sep).join("/")] = readFileSync(full, "utf8");
+      else if (name.endsWith(".json") || name.endsWith(".tmj")) files[relative(dir, full).split(sep).join("/")] = readFileSync(full, "utf8");
     }
   };
   walk(dir);

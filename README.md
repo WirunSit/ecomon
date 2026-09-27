@@ -16,8 +16,15 @@ npm run validate      # ตรวจไฟล์ content ทั้งหมด
 npm run dev           # server http://localhost:2567 + client http://localhost:5173
 ```
 
-เปิด http://localhost:5173 จะเห็นหน้าตรวจ content ของเฟส 0: มอนสเตอร์ 18 สายพันธุ์ × 3 ร่าง (ภาพ placeholder)
-ชี้หรือแตะที่มอนสเตอร์เพื่อดูท่าโจมตีและข้อมูล มุมขวาบนบอกว่า server ทำงานอยู่หรือไม่
+เปิด http://localhost:5173 จะเข้าแผนที่ทดสอบ (เฟส 1)
+
+| การควบคุม | |
+| --- | --- |
+| เดิน | ลูกศร หรือ W A S D · บนมือถือใช้จอยมุมซ้ายล่าง |
+| เมนู | ปุ่ม "เมนู" มุมขวาบน หรือกด M / Esc |
+| โหมดทดสอบ | แผงขวาบน (เปิดอัตโนมัติตอน `npm run dev` หรือใส่ `?dev=1`) ให้/เอาออก ห่วงยาง เรือ ไฟฉาย เพื่อทดสอบการลงน้ำ |
+
+หน้าตรวจ content ของเฟส 0 (มอนสเตอร์ครบทุกร่าง) เปิดได้ที่ http://localhost:5173/?scene=preview
 
 ## คำสั่งอื่น
 
@@ -25,8 +32,14 @@ npm run dev           # server http://localhost:2567 + client http://localhost:5
 npm test              # unit test (vitest)
 npm run typecheck     # ตรวจชนิดข้อมูล TypeScript ทุกส่วน
 npm run placeholders  # วาดภาพ placeholder ใหม่ (ไม่เขียนทับภาพจริง)
+npm run make-test-map # สร้างแผนที่ทดสอบใหม่ (ไม่เขียนทับ ถ้าแก้ใน Tiled แล้ว)
 npm run build         # validate + build client สำหรับ deploy
 ```
+
+## แก้แผนที่
+
+เปิด `content/maps/test_island.tmj` ด้วย [Tiled](https://www.mapeditor.org/) ได้เลย กติกาเลเยอร์อยู่ใน [`CLAUDE.md`](CLAUDE.md)
+บันทึกแล้วรัน `npm run validate` เพื่อตรวจ
 
 ## เพิ่มมอนสเตอร์หรือคำถาม
 

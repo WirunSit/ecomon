@@ -22,12 +22,13 @@
 ```
 client/   Phaser 3 + Vite + HTML overlay (ฟอนต์ Kanit/Sarabun) — ความละเอียดฐาน 960x540
 server/   Node + Colyseus 0.16 (WorldRoom สูงสุด balance.world.maxClients คน) + express (/api/*)
-shared/   zod schema (shared/src/schema), parser/validator ของ content, (เฟส 2) registry + สูตรคำนวณ
+shared/   zod schema (shared/src/schema), parser/validator ของ content, กติกาโลก (shared/src/world:
+          ภูมิประเทศ + checkStep การเดิน), (เฟส 2) registry + สูตรคำนวณ
           "@ecomon/shared" ใช้ได้ทุกที่ · "@ecomon/shared/node" ใช้ fs ได้เฉพาะ server/tools/test
 content/  ข้อมูลเกมทั้งหมด (JSON) — ดูหัวข้อ 12
 assets/   ภาพที่ใช้ในเกม · assets/monsters/<id>/f{1-3}_{idle|attack}.png (ชื่อตายตัว)
 asset-src/ sheet ดิบจาก GPT + manifest.yaml (เฟส 12)
-tools/    validate.ts, make-placeholders.ts (อนาคต: import-questions, slice_sheets.py)
+tools/    validate.ts, make-placeholders.ts, make-test-map.ts (อนาคต: import-questions, slice_sheets.py)
 ```
 
 ## คำสั่ง
@@ -37,6 +38,7 @@ tools/    validate.ts, make-placeholders.ts (อนาคต: import-questions, 
 | `npm run dev` | เปิด server (:2567) + client (:5173) พร้อมกัน |
 | `npm run validate` | ตรวจ content ทั้งหมด (schema + อ้างอิงข้ามไฟล์ + ภาพ) error = ล้ม, `--strict` ให้ warning ล้มด้วย |
 | `npm run placeholders` | วาดภาพ placeholder มอนสเตอร์ทุกร่าง (ไม่เขียนทับภาพจริง ยกเว้น `--force`) |
+| `npm run make-test-map` | สร้างแผนที่ทดสอบ + tileset placeholder (ไม่เขียนทับ ยกเว้น `--force`) |
 | `npm test` | vitest |
 | `npm run typecheck` | tsc ทุก workspace |
 | `npm run build` | validate แล้ว build client |
@@ -54,6 +56,17 @@ tools/    validate.ts, make-placeholders.ts (อนาคต: import-questions, 
 - schema ใช้ `z.strictObject` ฟิลด์สะกดผิดจะไม่ผ่าน · validator รายงานชื่อไฟล์ + บรรทัด
 - เพิ่มกติกาใหม่ที่ตรวจได้ → เพิ่มใน `shared/src/content/validate.ts` + เทสต์ใน `shared/test/`
 
+## แผนที่ (Tiled)
+
+- ไฟล์ `content/maps/<id>.tmj` · ต้อง orthogonal, ไม่ infinite, ช่องขนาด `balance.world.tileSize`
+- บันทึก Tile Layer Format เป็น **CSV** และ **ฝัง tileset ในไฟล์** (Embed) ภาพ tileset อยู่ใน `assets/tiles/`
+- เลเยอร์ที่ engine อ่าน: `ground`, `water_shallow`, `water_deep`, `collision` (tile) · `spawns`, `markers` (object)
+  - ภูมิประเทศตัดสินตามลำดับ collision > water_deep > water_shallow > land
+  - `spawns`: สี่เหลี่ยม มี property `table`, `terrain`, `maxActive`, `respawnSec`, `wander` (หัวข้อ 10.3)
+  - `markers`: จุด type `player_start` (อนาคต: NPC, ทางเข้าดันเจี้ยน, จุดฟื้นฟู)
+- map property `zone` = id โซนใน zones.json
+- กติกาเดินได้/ไม่ได้อยู่ที่ `checkStep()` ใน shared เท่านั้น client ห้ามตัดสินจาก tile ของ Phaser
+
 ## ภาษา
 
 - ข้อความที่ผู้เล่นเห็นเป็นภาษาไทยและมาจาก content · comment ในโค้ดเป็นภาษาไทยได้
@@ -62,6 +75,6 @@ tools/    validate.ts, make-placeholders.ts (อนาคต: import-questions, 
 ## สถานะเฟส (หัวข้อ 13)
 
 - [x] เฟส 0 — ตั้งโปรเจคและกติกา
-- [ ] เฟส 1 — โลกและการเดิน
+- [x] เฟส 1 — โลกและการเดิน
 - [ ] เฟส 2 — สูตรคำนวณและ registry
 - [ ] เฟส 3 เป็นต้นไป — ดู docs/GAME_PLAN.md หัวข้อ 13

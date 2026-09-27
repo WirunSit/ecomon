@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { BootScene } from "./scenes/BootScene";
 import { PreviewScene } from "./scenes/PreviewScene";
+import { WorldScene } from "./scenes/WorldScene";
 
 /** ความละเอียดฐาน 960x540 ขยายแบบคงสัดส่วน */
 export const GAME_WIDTH = 960;
@@ -18,13 +19,14 @@ async function start() {
     parent: "game",
     backgroundColor: "#1b2130",
     pixelArt: false,
+    roundPixels: true,
     scale: {
       mode: Phaser.Scale.FIT,
       autoCenter: Phaser.Scale.CENTER_BOTH,
       width: GAME_WIDTH,
       height: GAME_HEIGHT,
     },
-    scene: [BootScene, PreviewScene],
+    scene: [BootScene, WorldScene, PreviewScene],
   });
 }
 

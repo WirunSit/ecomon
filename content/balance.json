@@ -140,7 +140,9 @@
     "reconnectSec": 60,
     "roomCodeLength": 6,
     "spawnCheckSec": 5,
-    "spawnPerExtraPlayer": 0.5
+    "spawnPerExtraPlayer": 0.5,
+    "walkTilesPerSec": 5,
+    "waterSpeedFactor": 0.8
   },
   "daily": {
     "questCount": 3,

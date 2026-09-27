@@ -15,6 +15,7 @@ import type {
   TopicDef,
   ZoneDef,
 } from "../schema";
+import type { GameMap } from "../world/map";
 
 /** เนื้อหาเกมทั้งหมดที่โหลดจากโฟลเดอร์ content/ แล้ว */
 export interface GameContent {
@@ -33,6 +34,8 @@ export interface GameContent {
   spawnTables: SpawnTable[];
   quests: QuestDef[];
   questions: Question[];
+  /** แผนที่จาก content/maps/<id>.tmj */
+  maps: GameMap[];
 }
 
 /** ตำแหน่งในไฟล์: ชื่อไฟล์ (สัมพัทธ์กับ content/) + JSON path */
@@ -46,6 +49,7 @@ export interface ContentOrigins {
   monsters: string[];
   quests: string[];
   questions: { file: string; index: number }[];
+  maps: string[];
 }
 
 export interface ContentIssue extends Location {

@@ -157,6 +157,10 @@ export const BalanceSchema = z.strictObject({
     roomCodeLength: PosInt,
     spawnCheckSec: Positive,
     spawnPerExtraPlayer: NonNeg,
+    /** ความเร็วเดิน (ช่อง/วินาที) — server ใช้ค่าเดียวกันตรวจกันวาร์ป */
+    walkTilesPerSec: Positive,
+    /** ความเร็วเมื่ออยู่ในน้ำ (ห่วงยาง/เรือ) เป็นสัดส่วนของความเร็วเดิน */
+    waterSpeedFactor: Positive,
   }),
   daily: z.strictObject({
     questCount: PosInt,

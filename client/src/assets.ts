@@ -3,6 +3,7 @@
 import fallbackUrl from "../../assets/monsters/_fallback.png?url";
 
 const monsterImages = import.meta.glob<string>("../../assets/monsters/*/*.png", { eager: true, query: "?url", import: "default" });
+const tileImages = import.meta.glob<string>("../../assets/tiles/*.png", { eager: true, query: "?url", import: "default" });
 
 export type Pose = "idle" | "attack";
 
@@ -14,6 +15,15 @@ export function monsterTextureKey(speciesId: string, form: number, pose: Pose): 
 
 export function monsterImageUrl(speciesId: string, form: number, pose: Pose): string | undefined {
   return monsterImages[`../../assets/monsters/${speciesId}/f${form}_${pose}.png`];
+}
+
+/** ภาพ tileset ใน assets/tiles/<file> */
+export function tileImageUrl(file: string): string | undefined {
+  return tileImages[`../../assets/tiles/${file}`];
+}
+
+export function tilesetTextureKey(file: string): string {
+  return `tiles_${file}`;
 }
 
 export { fallbackUrl };

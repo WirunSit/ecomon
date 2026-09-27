@@ -1,5 +1,6 @@
 import { STAT_KEYS, type MoveTier } from "../schema";
 import { SINGLE_FILES } from "./parse";
+import { terrainAt } from "../world/map";
 import type { ContentIssue, ContentOrigins, GameContent } from "./types";
 
 export interface ValidateOptions {
@@ -390,6 +391,29 @@ export function validateContent(c: GameContent, origins: ContentOrigins, opts: V
   c.topics.forEach((t, i) => {
     if (t.enabled && !approvedPerTopic.get(t.id))
       warn(F.topics, ["topics", i], `หัวข้อ "${t.id}" ยังไม่มีคำถามที่ครูอนุมัติ (approved)`);
+  });
+
+  // ---------- maps ----------
+  c.maps.forEach((map, i) => {
+    const file = origins.maps[i]!;
+    if (map.tileSize !== b.world.tileSize) err(file, ["tilewidth"], `ขนาดช่องต้องเป็น ${b.world.tileSize} px ตาม balance.world.tileSize`);
+    if (map.zone) zoneRef(file, ["properties"], map.zone);
+    const start = map.markers.filter((m) => m.type === "player_start");
+    if (start.length === 0) warn(file, ["layers"], "ไม่มีจุดเริ่มผู้เล่น (object type \"player_start\" ในเลเยอร์ markers)");
+    for (const s of start) {
+      if (terrainAt(map, s.x, s.y) !== "land") err(file, ["layers"], `จุดเริ่มผู้เล่น #${s.objectId} ต้องอยู่บนช่องบกที่เดินได้`);
+    }
+    map.spawns.forEach((sp) => {
+      const where = `จุดเกิด #${sp.objectId}`;
+      const table = tables.get(sp.table);
+      if (!table) err(file, ["layers"], `${where}: ไม่มีตารางสุ่ม "${sp.table}"`);
+      else if (table.terrain !== sp.terrain) err(file, ["layers"], `${where}: terrain = ${sp.terrain} แต่ตาราง "${sp.table}" เป็น ${table.terrain}`);
+      let match = 0;
+      for (let y = sp.y; y < sp.y + sp.height; y++)
+        for (let x = sp.x; x < sp.x + sp.width; x++) if (terrainAt(map, x, y) === sp.terrain) match++;
+      if (match === 0) err(file, ["layers"], `${where}: ในพื้นที่ไม่มีช่องภูมิประเทศ ${sp.terrain} เลย`);
+      else if (match < sp.maxActive) warn(file, ["layers"], `${where}: มีช่อง ${sp.terrain} แค่ ${match} ช่อง น้อยกว่า maxActive (${sp.maxActive})`);
+    });
   });
 
   return issues;

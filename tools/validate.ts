@@ -23,6 +23,7 @@ if (c) {
       `โซน ${c.zones.length}`,
       `ดันเจี้ยน ${c.dungeons.length}`,
       `เควส ${c.quests.length}`,
+      `แผนที่ ${c.maps.length}`,
       `คำถาม ${c.questions.length} ข้อ (อนุมัติแล้ว ${approved})`,
     ].join(" · "),
   );

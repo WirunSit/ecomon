@@ -13,9 +13,11 @@ import {
   QuestionsFileSchema,
   RolesFileSchema,
   SpawnTablesFileSchema,
+  TiledMapSchema,
   TopicsFileSchema,
   ZonesFileSchema,
 } from "../schema";
+import { buildGameMap } from "../world/map";
 import type { ContentFiles, ContentIssue, ContentOrigins, GameContent } from "./types";
 
 /** ไฟล์เดี่ยวที่ต้องมีใน content/ */
@@ -34,7 +36,7 @@ export const SINGLE_FILES = {
 } as const;
 
 /** โฟลเดอร์ที่ 1 ไฟล์ = 1 record */
-export const CONTENT_DIRS = ["monsters", "quests", "questions"] as const;
+export const CONTENT_DIRS = ["monsters", "quests", "questions", "maps"] as const;
 
 export interface ParseResult {
   /** undefined ถ้ามีไฟล์ใดไม่ผ่าน schema */
@@ -111,7 +113,7 @@ function check<S extends z.ZodType>(schema: S, file: string, value: unknown, iss
  */
 export function parseContent(files: ContentFiles): ParseResult {
   const issues: ContentIssue[] = [];
-  const origins: ContentOrigins = { monsters: [], quests: [], questions: [] };
+  const origins: ContentOrigins = { monsters: [], quests: [], questions: [], maps: [] };
 
   const single = <S extends z.ZodType>(file: string, schema: S) => {
     const text = files[file];
@@ -134,9 +136,9 @@ export function parseContent(files: ContentFiles): ParseResult {
   const dungeons = single(SINGLE_FILES.dungeons, DungeonsFileSchema);
   const spawnTables = single(SINGLE_FILES.spawnTables, SpawnTablesFileSchema);
 
-  const inDir = (dir: string) =>
+  const inDir = (dir: string, ext = ".json") =>
     Object.keys(files)
-      .filter((f) => f.startsWith(`${dir}/`) && f.endsWith(".json"))
+      .filter((f) => f.startsWith(`${dir}/`) && f.endsWith(ext))
       .sort();
 
   const monsters: GameContent["monsters"] = [];
@@ -173,6 +175,22 @@ export function parseContent(files: ContentFiles): ParseResult {
     });
   }
 
+  const maps: GameContent["maps"] = [];
+  for (const file of inDir("maps", ".tmj")) {
+    const tiled = check(TiledMapSchema, file, readJson(file, files[file]!, issues), issues);
+    if (!tiled) {
+      dirsOk = false;
+      continue;
+    }
+    const id = file.slice("maps/".length, -".tmj".length);
+    const built = buildGameMap(id, tiled);
+    for (const p of built.problems) issues.push({ severity: "error", file, path: p.path, message: p.message });
+    if (built.map && built.problems.length === 0) {
+      maps.push(built.map);
+      origins.maps.push(file);
+    } else dirsOk = false;
+  }
+
   if (
     !dirsOk ||
     !balance ||
@@ -206,6 +224,7 @@ export function parseContent(files: ContentFiles): ParseResult {
     spawnTables: spawnTables.tables,
     quests,
     questions,
+    maps,
   };
   // เรียงมอนสเตอร์ตาม dex (ลำดับใน catalog) พร้อมเรียงที่มาของไฟล์ตาม
   const sorted = monsters.map((m, i) => ({ m, file: origins.monsters[i]! })).sort((a, b) => a.m.dex - b.m.dex);

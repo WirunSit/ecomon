@@ -1,8 +1,9 @@
 import Phaser from "phaser";
-import { FALLBACK_TEXTURE, fallbackUrl, monsterImageUrl, monsterTextureKey } from "../assets";
-import { monsters } from "../content";
+import { FALLBACK_TEXTURE, fallbackUrl, monsterImageUrl, monsterTextureKey, tileImageUrl, tilesetTextureKey } from "../assets";
+import { maps, monsters } from "../content";
+import { createPlaceholderTextures } from "../textures/placeholders";
 
-/** โหลดภาพทั้งหมดที่ต้องใช้ แล้วไปฉากถัดไป */
+/** โหลดภาพทั้งหมดที่ต้องใช้ แล้วไปฉากถัดไป (?scene=preview เพื่อเปิดหน้าตรวจ content ของเฟส 0) */
 export class BootScene extends Phaser.Scene {
   constructor() {
     super("Boot");
@@ -23,9 +24,18 @@ export class BootScene extends Phaser.Scene {
         }
       }
     }
+
+    const tilesetFiles = new Set([...maps.values()].flatMap((m) => m.tilesetImages.map((t) => t.file)));
+    for (const file of tilesetFiles) {
+      const url = tileImageUrl(file);
+      if (url) this.load.image(tilesetTextureKey(file), url);
+      else console.error(`ไม่พบภาพ tileset assets/tiles/${file}`);
+    }
   }
 
   create() {
-    this.scene.start("Preview");
+    createPlaceholderTextures(this);
+    const next = new URLSearchParams(location.search).get("scene") === "preview" ? "Preview" : "World";
+    this.scene.start(next);
   }
 }
