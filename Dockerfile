@@ -1,5 +1,6 @@
 # EcoMon Quest — server + หน้าเกม + หน้าครู ในบริการเดียว (ดู docs/DEPLOY.md)
 # docker build -t ecomon . && docker run -p 8080:8080 -v ecomon-data:/data -e TEACHER_INVITE_CODE=... ecomon
+# Render (ฟรี): render.yaml ใช้ไฟล์นี้ + สำรองฐานข้อมูลไป GitHub (BACKUP_GITHUB_REPO/TOKEN)
 FROM node:22-bookworm-slim
 
 WORKDIR /app
@@ -22,4 +23,6 @@ ENV NODE_ENV=production \
 EXPOSE 8080
 VOLUME ["/data"]
 
-CMD ["npm", "start", "-w", "server"]
+# รัน node ตรง ๆ (ไม่ผ่าน npm) ให้ SIGTERM ถึง server — ปิดแล้วบันทึกผู้เล่น + สำรองฐานข้อมูลครั้งสุดท้ายก่อนออก
+WORKDIR /app/server
+CMD ["node", "--import", "tsx", "src/index.ts"]

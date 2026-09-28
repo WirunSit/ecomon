@@ -249,7 +249,13 @@ tools/    validate.ts, make-placeholders.ts, make-test-map.ts (อนาคต: 
       · `npm run load-test` (40 คน 8 ห้อง ผ่าน) · จำกัด login ต่อ IP ใหม่ (NAT โรงเรียน) · server เสิร์ฟ client/dist เอง (`clientDist`)
       · Dockerfile + .env.example (docker build + รันจริงผ่านแล้ว) · docs/DEPLOY.md · docs/TEACHER_GUIDE.md
       · `npm run backup -w server` (สำรอง SQLite ขณะเปิดอยู่ — ฐานข้อมูลเป็น WAL ห้ามคัดลอกไฟล์ตรง ๆ)
-      · ที่เหลือ: deploy จริง (ต้องถามผู้ใช้ก่อน) · ครูอนุมัติคำถาม (ตอนนี้ 0 ข้อ) · ตัดสินข้อเสนอใน BALANCE_REPORT.md
+      · ปรับสมดุลตาม BALANCE_REPORT.md แล้ว (บอส ×2, EXP ^1.2, `bossHpMultiplier` รายดันเจี้ยนใน dungeons.json)
+      · กันต่อสู้ค้าง: `BattleRunner` ข้ามเทิร์นคนที่ไม่สั่ง (`battle.teammateWaitSec`) · ปิดตัวจับเวลาแต่สู้หลายคน → `idleAnswerSec`
+      · deploy = Render ฟรี (`render.yaml`, region singapore, deploy เมื่อ GitHub Actions `.github/workflows/ci.yml` ผ่าน)
+        ไม่มีดิสก์ถาวร → `server/src/db/snapshot.ts` กู้ฐานข้อมูลจาก GitHub Release (repo ส่วนตัว `BACKUP_GITHUB_REPO/TOKEN`)
+        ตอนเริ่ม · สำรองทุก 5 นาที + ตอนปิด (`gameServer.onShutdown` — Colyseus ดัก SIGTERM เอง ห้ามปิด DB ก่อนห้องบันทึกเสร็จ)
+        · กู้ไม่ได้ (GitHub ล่ม/token หมดอายุ) = ไม่ยอมเริ่ม (กันฐานข้อมูลว่างสำรองทับของจริง)
+      · ที่เหลือ: ผู้ใช้สมัคร Render + สร้าง repo/token ตาม docs/DEPLOY.md แล้ว merge เข้า main (ยังไม่ได้ deploy จริง)
 - [x] เฟส 12 — ภาพจริงครบทุก sheet: มอน/ตัวละคร/tileset/NPC/ไอเท็ม/ไข่/ฉาก/เอฟเฟกต์ (จับได้ `capture_sparkle`, เลเวลอัป
       `level_up`) · ไอคอน UI (S14) ผ่าน `ui/uiIcon.ts` (`uiIcon()`, `elementChip()`, `rarityChip()`, `roleChip()`, `statLabel()`)
       · ท่าเดินมอนบนแผนที่ `world/stepHop.ts` · validate เตือนถ้า frame ใน atlas ไม่ครบ · ภาพพื้น eco_island วาดแล้ว

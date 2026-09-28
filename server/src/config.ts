@@ -2,6 +2,7 @@
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { REPO_ROOT } from "@ecomon/shared/node";
+import type { SnapshotConfig } from "./db/snapshot";
 
 export interface ServerConfig {
   port: number;
@@ -35,6 +36,8 @@ export interface ServerConfig {
   loginPerIpPer5Min: number;
   /** รหัสเชิญสำหรับสมัครบัญชีครู (null = ปิดการสมัคร) — ตอนพัฒนาใช้ DEVTEACHER */
   teacherInviteCode: string | null;
+  /** สำรองฐานข้อมูลไป GitHub Release ของ repo ส่วนตัว (บริการฟรีที่ไม่มีดิสก์ถาวร) — null = ปิด · ดู db/snapshot.ts */
+  backup: SnapshotConfig | null;
 }
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env, overrides: Partial<ServerConfig> = {}): ServerConfig {
@@ -61,6 +64,10 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env, overrides: Part
         : (env.CLIENT_DIST ?? (production && existsSync(join(REPO_ROOT, "client", "dist", "index.html")) ? join(REPO_ROOT, "client", "dist") : null)),
     loginPerIpPer5Min: Number(env.LOGIN_PER_IP_PER_5MIN ?? 400),
     teacherInviteCode: env.TEACHER_INVITE_CODE || (production ? null : "DEVTEACHER"),
+    backup:
+      env.BACKUP_GITHUB_REPO && env.BACKUP_GITHUB_TOKEN
+        ? { repo: env.BACKUP_GITHUB_REPO, token: env.BACKUP_GITHUB_TOKEN, intervalMin: Number(env.BACKUP_INTERVAL_MIN ?? 5), keep: Number(env.BACKUP_KEEP ?? 10) }
+        : null,
     ...overrides,
   };
 }

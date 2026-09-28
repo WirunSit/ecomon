@@ -9,6 +9,7 @@ import { DUNGEON_ROOM, WORLD_ROOM } from "@ecomon/shared";
 import { loadConfig, type ServerConfig } from "./config";
 import { setServices, type Services } from "./context";
 import { openDatabase } from "./db/client";
+import { GithubSnapshotStore, SnapshotScheduler } from "./db/snapshot";
 import { apiRouter, errorHandler } from "./http/routes";
 import { DungeonRoom } from "./rooms/DungeonRoom";
 import { WorldRoom } from "./rooms/WorldRoom";
@@ -42,9 +43,12 @@ export interface GameServer {
   close(): Promise<void>;
 }
 
-export function createGameServer(overrides: Partial<ServerConfig> = {}): GameServer {
+/** @param deps ส่วนที่เทสต์เปลี่ยนได้ (ที่เก็บไฟล์สำรองปลอม) */
+export function createGameServer(overrides: Partial<ServerConfig> = {}, deps: { snapshotStore?: GithubSnapshotStore } = {}): GameServer {
   const config = loadConfig(process.env, overrides);
   const db = openDatabase(config.databasePath);
+  const store = config.backup ? (deps.snapshotStore ?? new GithubSnapshotStore(config.backup)) : undefined;
+  const snapshots = store ? new SnapshotScheduler(db.$client, config.databasePath, store, config.backup!.intervalMin) : undefined;
   const events = new GameEvents();
   const catalog = new CatalogService(db, events);
   const players = new PlayerService(db, catalog, events);
@@ -102,6 +106,15 @@ export function createGameServer(overrides: Partial<ServerConfig> = {}): GameSer
   const gameServer = new Server({ transport: new WebSocketTransport({ server: http }), greet: false });
   gameServer.define(WORLD_ROOM, WorldRoom).filterBy(["classroomId"]);
   gameServer.define(DUNGEON_ROOM, DungeonRoom);
+  // ทุกทางที่ปิด server (SIGTERM/SIGINT ที่ Colyseus ดักเอง, error ร้ายแรง, close() ในเทสต์) มาที่นี่หลังห้องทั้งหมดบันทึกผู้เล่นแล้ว
+  // ทำครั้งเดียว: สำรองครั้งสุดท้าย แล้วปิดฐานข้อมูล
+  let finished: Promise<void> | undefined;
+  const finish = () =>
+    (finished ??= (async () => {
+      await snapshots?.flush();
+      db.$client.close();
+    })());
+  gameServer.onShutdown(finish);
 
   return {
     config,
@@ -114,7 +127,8 @@ export function createGameServer(overrides: Partial<ServerConfig> = {}): GameSer
     },
     async close() {
       await gameServer.gracefullyShutdown(false);
-      db.$client.close();
+      // matchMaker ของ Colyseus ใช้ร่วมกันทั้งโปรเซส — ถ้ากำลังปิดอยู่แล้ว gracefullyShutdown จะไม่เรียก onShutdown ให้
+      await finish();
     },
   };
 }
