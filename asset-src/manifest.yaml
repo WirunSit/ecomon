@@ -9,6 +9,7 @@
 #   cellIds         ชื่อทีละช่อง (ซ้ายไปขวา บนลงล่าง) ใช้กับ out ที่มี {id}
 #   bg              auto | alpha | white | none (none = ไม่ลบพื้นหลัง ใช้กับ tile/ฉาก)
 #   split           gutter (หาเส้นช่องว่างระหว่างภาพ ค่าเริ่มต้น) | grid (แบ่งเท่ากัน)
+#                   | seams (ช่องชิดกันไม่มีร่องแต่ขนาดไม่เท่ากัน: ตัดตามรอยต่อระหว่างลาย)
 #   atlas           (ไม่บังคับ) ชื่อ texture atlas ที่จะรวมภาพไว้ให้ Phaser
 
 S02.png:
@@ -75,7 +76,7 @@ S08.png:
   cols: 6
   category: tile
   bg: none
-  split: grid
+  split: seams
   cellIds: [short_grass, grass_flowers, tall_grass, dirt_path, dry_sand, cobblestone,
             shallow_water, deep_water, swamp_water, wet_sand, beach_pebbles, wooden_bridge,
             forest_floor, mossy_ground, glowing_mushroom_soil, cave_floor, dark_cave_rock, crystal_cave_floor,

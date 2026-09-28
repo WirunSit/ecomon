@@ -53,6 +53,7 @@ KEEP_SCALE = {"monster", "character", "vfx"}
 ALPHA_MIN = 16  # alpha ต่ำกว่านี้ถือว่าโปร่งใส
 WHITE_TOL = 12  # ห่างจากสีขาวไม่เกินนี้ถือว่าเป็นพื้นหลัง
 GUTTER_WINDOW = 0.22  # ค้นหาเส้นแบ่งในช่วง ±22% ของขนาดช่อง
+SEAM_WINDOW = 0.25  # split: seams ค้นหารอยต่อในช่วง ±25% ของขนาดช่อง
 
 
 @dataclass
@@ -118,6 +119,23 @@ def find_cuts(profile: np.ndarray, n: int) -> tuple[list[int], list[int]]:
 
 def grid_cuts(length: int, n: int) -> list[int]:
     return [round(k * length / n) for k in range(n + 1)]
+
+
+def seam_cuts(rgb: np.ndarray, n: int, axis: int) -> list[int]:
+    """เส้นแบ่งของ sheet ที่ช่องชิดกันไม่มีร่อง (เช่น ลายพื้น S08 ที่ GPT วาดแถวสูงไม่เท่ากัน)
+    หาตำแหน่งที่พิกเซลสองแถวติดกันต่างกันมากที่สุด (รอยต่อระหว่างลายสองชนิด) ใกล้ตำแหน่งตารางเท่ากัน
+    axis 0 = เส้นแนวนอน (แบ่งแถว) · 1 = เส้นแนวตั้ง (แบ่งคอลัมน์)"""
+    diff = np.abs(np.diff(rgb.astype(np.int16), axis=axis)).sum(axis=2).mean(axis=1 - axis)
+    length = rgb.shape[axis]
+    size = length / n
+    cuts = [0]
+    for k in range(1, n):
+        center = k * size
+        lo = max(0, int(center - SEAM_WINDOW * size))
+        hi = min(len(diff), int(center + SEAM_WINDOW * size))
+        cuts.append(int(np.argmax(diff[lo:hi])) + lo + 1)
+    cuts.append(length)
+    return cuts
 
 
 def clean_cell(cell: np.ndarray) -> np.ndarray:
@@ -317,11 +335,14 @@ def slice_sheet(name: str, spec: dict, args: argparse.Namespace) -> tuple[SheetR
     if split == "grid":
         ys = grid_cuts(h, rows)
         xs_rows = [grid_cuts(w, cols) for _ in range(rows)]
+    elif split == "seams":
+        ys = seam_cuts(rgba[..., :3], rows, 0)
+        xs_rows = [seam_cuts(rgba[..., :3], cols, 1)] * rows
     else:
         ys, _ = find_cuts(filled.sum(axis=1), rows)
         xs_rows = [find_cuts(filled[ys[r] : ys[r + 1]].sum(axis=0), cols)[0] for r in range(rows)]
     owners = None
-    if mode != "none" and split != "grid":
+    if mode != "none" and split == "gutter":
         owners = assign_components(filled, ys, xs_rows, report)
 
     # อัตราย่อเดียวกันทั้ง sheet สำหรับหมวดที่ต้องคงขนาดเทียบกัน
