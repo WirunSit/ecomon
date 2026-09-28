@@ -5,6 +5,7 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import {
+  bossMaxHp,
   applyMonsterExp,
   applyPlayerExp,
   benchExp,
@@ -44,7 +45,8 @@ args.forEach((a, i) => {
   }
   for (const k of keys.slice(0, -1)) obj = obj[k] as Record<string, unknown>;
   const last = keys.at(-1)!;
-  if (!(last in obj)) throw new Error(`ไม่มีค่า ${path}`);
+  // ค่าเสริมของดันเจี้ยนที่ไม่บังคับ (เช่น bossHpMultiplier) ใส่ใหม่ได้
+  if (!(last in obj) && !(path.startsWith("dungeons.") && last === "bossHpMultiplier")) throw new Error(`ไม่มีค่า ${path}`);
   obj[last] = JSON.parse(raw);
   overrides.push(`${path}=${raw}`);
 });
@@ -164,7 +166,7 @@ function bossOf(dungeonId: string, players: number): { enemy: Combatant; phase2M
   const learn = reg.monsters.get(def.species).learnset.map((l) => l.move);
   const phase1 = learn.filter((id) => reg.moves.get(id).tier !== "signature").slice(-b.moves.slots);
   const enemy = makeCombatant(reg, { id: `boss_${def.species}`, speciesId: def.species, level: d.bossLevel, form: 1, moves: phase1 });
-  enemy.maxHp = Math.floor(enemy.stats.hp * b.dungeon.bossHpMultiplier * BattleSession.wildHpMultiplier(reg, players));
+  enemy.maxHp = bossMaxHp(b, enemy.stats.hp, players, d.bossHpMultiplier);
   enemy.hp = enemy.maxHp;
   return { enemy, phase2Moves: learn.slice(-b.moves.slots) };
 }

@@ -175,8 +175,11 @@ describe("ดาเมจ (หัวข้อ 4.5)", () => {
   it("HP มอนป่า/บอสเพิ่มตามจำนวนคน", () => {
     expect(coopHpMultiplier(b, 1)).toBe(1);
     expect(coopHpMultiplier(b, 5)).toBeCloseTo(3.8);
-    expect(bossMaxHp(b, 100, 1)).toBe(600);
-    expect(bossMaxHp(b, 100, 3)).toBe(1440);
+    expect(bossMaxHp(b, 100, 1)).toBe(200);
+    expect(bossMaxHp(b, 100, 3)).toBe(480);
+    // ตัวคูณเฉพาะดันเจี้ยน (dungeons.json) แทนค่ากลาง
+    expect(bossMaxHp(b, 100, 1, 0.6)).toBe(60);
+    expect(bossMaxHp(b, 100, 3, 0.3)).toBe(72);
   });
 });
 
@@ -198,9 +201,9 @@ describe("EXP (หัวข้อ 4.6, 9.3)", () => {
     expect(applyMonsterExp({ level: 5, exp: 10 }, 0, b)).toEqual({ level: 5, exp: 10, levelsGained: 0 });
   });
 
-  it("EXP ผู้เล่น = ⌊100 × lv^1.4⌋ และคลังเพิ่ม 5 ช่องทุก 5 เลเวล", () => {
+  it("EXP ผู้เล่น = ⌊100 × lv^1.2⌋ และคลังเพิ่ม 5 ช่องทุก 5 เลเวล", () => {
     expect(playerExpToNext(1, b)).toBe(100);
-    expect(playerExpToNext(2, b)).toBe(263);
+    expect(playerExpToNext(2, b)).toBe(229);
     expect(applyPlayerExp({ level: 40, exp: 0 }, 5000, b).level).toBe(40);
     expect([1, 4, 5, 9, 10, 40].map((lv) => storageCapacity(lv, b))).toEqual([40, 40, 45, 45, 50, 80]);
   });

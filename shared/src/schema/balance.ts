@@ -79,6 +79,10 @@ export const BalanceSchema = z.strictObject({
     switchCostsTurn: z.boolean(),
     explanationSkipSec: NonNeg,
     lateAnswerGraceSec: NonNeg,
+    /** ต่อสู้หลายคน: เพื่อนพร้อมแล้วแต่คนนี้ยังไม่เลือกคำสั่งเกินกี่วินาที → ข้ามเทิร์นของคนนั้น (กันการต่อสู้ค้าง) */
+    teammateWaitSec: Positive,
+    /** ต่อสู้หลายคนตอนปิดตัวจับเวลา: ไม่ตอบเกินกี่วินาที → นับเป็นหมดเวลา (กันเพื่อนรอไม่รู้จบ) */
+    idleAnswerSec: Positive,
     canFleeWild: z.boolean(),
     canFleeBoss: z.boolean(),
     targetWildQuestions: z.tuple([PosInt, PosInt]),

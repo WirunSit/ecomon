@@ -230,7 +230,7 @@ export class QuestionService {
     if (wrong[0]) return wrong[0].topic;
     const learner = this.learner(playerId);
     const topics = registry.topics.all.filter((t) => t.enabled !== false && available.has(t.id));
-    if (topics.length === 0) throw new GameError("no_questions", "ยังไม่มีคำถามที่ครูอนุมัติ");
+    if (topics.length === 0) throw new GameError("no_questions", "ยังไม่มีคำถามในหัวข้อที่ครูเลือก");
     return topics.reduce((best, t) => ((learner.mastery[t.id] ?? 0) < (learner.mastery[best.id] ?? 0) ? t : best)).id;
   }
 

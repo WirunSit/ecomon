@@ -202,7 +202,7 @@ export class DungeonRoom extends Room<DungeonRoomState, unknown, { playerId: str
   private bossEnemy(players: number): Combatant {
     const def = this.dungeon.bosses.find((x) => x.species === this.boss) ?? this.dungeon.bosses[0]!;
     const c = makeCombatant(registry, { id: `boss_${def.species}`, speciesId: def.species, level: this.dungeon.bossLevel, form: 1, moves: this.bossMoves(def.species, false) });
-    c.maxHp = bossMaxHp(registry.balance, c.stats.hp, players);
+    c.maxHp = bossMaxHp(registry.balance, c.stats.hp, players, this.dungeon.bossHpMultiplier);
     c.hp = c.maxHp;
     c.form = def.form;
     return c;

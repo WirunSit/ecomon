@@ -85,7 +85,10 @@ export function coopHpMultiplier(balance: Balance, participants: number): number
   return 1 + balance.coop.hpPerExtraPlayer * (Math.max(1, participants) - 1);
 }
 
-/** HP บอสดันเจี้ยน: HP มอนเลเวลเดียวกัน × bossHpMultiplier × ตัวคูณจำนวนคน (หัวข้อ 8.3) */
-export function bossMaxHp(balance: Balance, baseHp: number, participants: number): number {
-  return Math.floor(baseHp * balance.dungeon.bossHpMultiplier * coopHpMultiplier(balance, participants));
+/**
+ * HP บอสดันเจี้ยน: HP มอนเลเวลเดียวกัน × bossHpMultiplier × ตัวคูณจำนวนคน (หัวข้อ 8.3)
+ * @param dungeonMultiplier ตัวคูณเฉพาะดันเจี้ยน (dungeons.json bossHpMultiplier) แทนค่าใน balance
+ */
+export function bossMaxHp(balance: Balance, baseHp: number, participants: number, dungeonMultiplier?: number): number {
+  return Math.floor(baseHp * (dungeonMultiplier ?? balance.dungeon.bossHpMultiplier) * coopHpMultiplier(balance, participants));
 }

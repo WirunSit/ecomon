@@ -107,6 +107,8 @@
     "switchCostsTurn": true,
     "explanationSkipSec": 2,
     "lateAnswerGraceSec": 2,
+    "teammateWaitSec": 30,
+    "idleAnswerSec": 120,
     "canFleeWild": true,
     "canFleeBoss": false,
     "targetWildQuestions": [
@@ -205,7 +207,7 @@
     },
     "dropLevel": 1,
     "waves": 2,
-    "bossHpMultiplier": 6,
+    "bossHpMultiplier": 2,
     "teamQuestionAtHp": 0.5,
     "teamQuestionPassRatio": 0.5,
     "shieldBreakDamageMultiplier": 1.5,
@@ -223,7 +225,7 @@
   "player": {
     "maxLevel": 40,
     "expBase": 100,
-    "expExponent": 1.4,
+    "expExponent": 1.2,
     "expPerCorrect": 5,
     "expPerWin": 20,
     "expFirstCatch": 50,

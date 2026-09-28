@@ -60,6 +60,8 @@ export class BattleRunner {
   readonly members = new Map<string, RunnerMember>();
   private team?: TeamRound;
   private done = false;
+  /** ตัวจับเวลา "เพื่อนรออยู่" — คนที่ยังไม่เลือกคำสั่งจะถูกข้ามเทิร์น (กันการต่อสู้ค้าง) */
+  private waitTimer?: Delayed;
 
   constructor(
     private readonly host: RunnerHost,
@@ -134,10 +136,10 @@ export class BattleRunner {
     const { questions } = services();
     try {
       const result = questions.useHelper(instanceId, m.playerId, parsed.data.itemId);
-      if (result.addSeconds && !teamOwn) {
-        const deadline = questions.deadline(questions.get(instanceId)!);
+      const deadline = result.addSeconds && !teamOwn ? questions.deadline(questions.get(instanceId)!) : null;
+      if (deadline !== null) {
         m.timer?.clear();
-        if (deadline !== null) m.timer = this.host.clock.setTimeout(() => this.resolveAnswer(m, null), deadline - Date.now());
+        m.timer = this.host.clock.setTimeout(() => this.resolveAnswer(m, null), deadline - Date.now());
       }
       this.host.send(sessionId, MSG.battleHelper, result);
     } catch (e) {
@@ -169,7 +171,10 @@ export class BattleRunner {
     const outcome = this.session.leave(m.playerId);
     if (outcome) this.afterTurn(outcome);
     else if (this.team) this.maybeFinishTeam();
-    else this.broadcastState();
+    else {
+      this.broadcastState();
+      this.armWait();
+    }
   }
 
   /** เอาคนที่ออกจากการต่อสู้แล้ว (phase out) ออกจากรายชื่อที่ได้รับข้อความ — ยังอยู่ใน session ให้เพื่อนเห็นว่าออกแล้ว */
@@ -183,6 +188,7 @@ export class BattleRunner {
   /** ยกเลิกทั้งหมด (ปิดห้อง) โดยไม่ให้รางวัล */
   dispose() {
     this.done = true;
+    this.clearWait();
     for (const m of this.members.values()) {
       m.timer?.clear();
       const p = this.participant(m);
@@ -213,7 +219,7 @@ export class BattleRunner {
     const q = this.host.ask(m.playerId, this, this.pendingQuestions(m));
     this.session.attachQuestion(m.playerId, q.id);
     this.host.send(m.sessionId, MSG.battleQuestion, questions.toMessage(q));
-    const deadline = questions.deadline(q);
+    const deadline = this.answerDeadline(q);
     // หมดเวลา → ถือว่าตอบผิด (ทำงานแม้ผู้เล่นกำลังหลุดอยู่)
     if (deadline !== null) m.timer = this.host.clock.setTimeout(() => this.resolveAnswer(m, null), deadline - Date.now());
   }
@@ -260,8 +266,10 @@ export class BattleRunner {
   private afterTurn(outcome: TurnOutcome | null, by?: RunnerMember) {
     if (!outcome) {
       if (by) this.broadcastState();
+      this.armWait();
       return;
     }
+    this.clearWait();
     const wasOut = new Set([...this.members.values()].filter((m) => this.participant(m).phase === "out").map((m) => m.sessionId));
     for (const m of this.members.values()) {
       this.host.send(m.sessionId, MSG.battleTurn, {
@@ -292,7 +300,55 @@ export class BattleRunner {
     this.host.onMemberOut?.(this, m);
     const outcome = this.session.resolvePending();
     if (outcome) this.afterTurn(outcome);
-    else this.broadcastState();
+    else {
+      this.broadcastState();
+      this.armWait();
+    }
+  }
+
+  // ---------- กันการต่อสู้ค้าง (ต่อสู้หลายคน) ----------
+
+  private live(): RunnerMember[] {
+    return [...this.members.values()].filter((m) => this.participant(m).phase !== "out");
+  }
+
+  /**
+   * เวลาหมดของคำถาม: ตามตัวจับเวลาปกติ · ถ้าปิดตัวจับเวลา (โหมดฝึก) แต่มีเพื่อนสู้ด้วย → ให้ idleAnswerSec
+   * คนเดียวไม่จำกัดเวลา (ไม่มีใครต้องรอ)
+   */
+  private answerDeadline(q: QuestionInstance): number | null {
+    const deadline = services().questions.deadline(q);
+    if (deadline !== null || this.live().length < 2) return deadline;
+    return Date.now() + registry.balance.battle.idleAnswerSec * 1000;
+  }
+
+  /** มีคนพร้อมแล้วแต่บางคนยังไม่เลือกคำสั่ง → เริ่มนับ teammateWaitSec (ถ้ายังไม่ได้นับ) */
+  private armWait() {
+    if (this.waitTimer || this.ended || !this.someoneWaiting()) return;
+    this.waitTimer = this.host.clock.setTimeout(() => this.skipIdle(), registry.balance.battle.teammateWaitSec * 1000);
+  }
+
+  private clearWait() {
+    this.waitTimer?.clear();
+    this.waitTimer = undefined;
+  }
+
+  private someoneWaiting(): boolean {
+    const phases = this.live().map((m) => this.participant(m).phase);
+    return phases.includes("ready") && phases.includes("awaiting_action");
+  }
+
+  /** ครบเวลารอ: คนที่ยังไม่เลือกคำสั่งถูกข้ามเทิร์นนี้ (ไม่โจมตี ไม่ถือว่าตอบผิด) · คนที่กำลังตอบอยู่ใช้เวลาของคำถามต่อ */
+  private skipIdle() {
+    this.waitTimer = undefined;
+    if (this.ended || !this.someoneWaiting()) return;
+    for (const m of this.live()) {
+      if (this.participant(m).phase !== "awaiting_action") continue;
+      this.host.send(m.sessionId, MSG.notice, { code: "turn_skipped" } satisfies NoticeMessage);
+      const outcome = this.session.skipTurn(m.playerId);
+      if (outcome) return this.afterTurn(outcome);
+    }
+    this.broadcastState();
   }
 
   private broadcastState() {
@@ -315,7 +371,7 @@ export class BattleRunner {
       const q = instances[i]!;
       round.instances.set(m.sessionId, q.id);
       this.host.send(m.sessionId, MSG.teamQuestion, questions.toMessage(q));
-      const deadline = questions.deadline(q);
+      const deadline = this.answerDeadline(q);
       if (deadline !== null) round.timers.push(this.host.clock.setTimeout(() => this.teamAnswerFor(m, null), deadline - Date.now()));
     });
   }

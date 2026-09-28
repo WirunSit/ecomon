@@ -19,6 +19,7 @@
         }
       ],
       "bossLevel": 14,
+      "bossHpMultiplier": 0.6,
       "waves": [
         {
           "species": [
@@ -181,6 +182,7 @@
         }
       ],
       "bossLevel": 30,
+      "bossHpMultiplier": 0.3,
       "waves": [
         {
           "species": [

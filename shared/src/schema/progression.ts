@@ -48,6 +48,8 @@ export const DungeonDef = z.strictObject({
     )
     .min(1),
   bossLevel: z.number().int().positive(),
+  /** ตัวคูณ HP บอสเฉพาะดันเจี้ยนนี้ (ไม่ใส่ = balance.dungeon.bossHpMultiplier) */
+  bossHpMultiplier: z.number().positive().optional(),
   waves: z.array(z.strictObject({ species: z.array(Id).min(1), level: LevelRange })),
   topics: z.array(Id).min(1),
   /** ดันเจี้ยนนี้เพิ่มโจทย์คำนวณประชากร */

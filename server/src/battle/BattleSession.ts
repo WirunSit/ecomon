@@ -85,7 +85,9 @@ export function makeCombatant(reg: Registry, input: CombatantInput, hpMultiplier
 export type PlayerAction =
   | { kind: "attack"; moveId: string; answer: AnswerResult }
   | { kind: "switch"; to: number }
-  | { kind: "item"; itemId: string; target: number; effect: "heal" | "revive"; percent: number };
+  | { kind: "item"; itemId: string; target: number; effect: "heal" | "revive"; percent: number }
+  /** ไม่ได้สั่งทันเวลาขณะที่เพื่อนรออยู่ — เทิร์นนี้ไม่ทำอะไร (มอนป่า/บอสยังโจมตีตามปกติ) */
+  | { kind: "wait" };
 
 export interface Participant {
   playerId: string;
@@ -262,6 +264,14 @@ export class BattleSession {
     if (effect === "heal" && c.hp >= c.maxHp) throw new BattleError("HP เต็มอยู่แล้ว");
     if (effect === "revive" && c.hp > 0) throw new BattleError("มอนตัวนี้ยังไม่หมดแรง");
     p.action = { kind: "item", itemId, target, effect, percent };
+    p.phase = "ready";
+    return this.tryResolve();
+  }
+
+  /** ข้ามเทิร์น (ห้องเรียกเมื่อเพื่อนรอนานเกิน balance.battle.teammateWaitSec) — ไม่มีทางลัดข้ามคำถาม: ข้าม = ไม่โจมตี */
+  skipTurn(playerId: string): TurnOutcome | null {
+    const p = this.requirePhase(playerId, "awaiting_action");
+    p.action = { kind: "wait" };
     p.phase = "ready";
     return this.tryResolve();
   }

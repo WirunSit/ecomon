@@ -208,3 +208,45 @@ describe("ต่อสู้ร่วมกัน: หนีก่อนเพ�
     await guest.room.leave();
   });
 });
+
+describe("ต่อสู้ร่วมกัน: กันการต่อสู้ค้าง", () => {
+  it("เพื่อนพร้อมแล้วแต่อีกคนไม่เลือกคำสั่ง → ครบ teammateWaitSec ข้ามเทิร์นคนนั้น เทิร์นเดินต่อ", async () => {
+    const b = registry.balance.battle;
+    const saved = b.teammateWaitSec;
+    b.teammateWaitSec = 0.3;
+    try {
+      const { host, guest } = await pair(["idle_a", "idle_b"], "fungfiw", 12);
+      await startAndJoin(host, guest);
+      await attack(host);
+      await until(() => host.box[MSG.battleTurn]!.length > 0, 3000, "turn resolved without guest");
+      expect(guest.box[MSG.notice]!.some((n) => n.code === "turn_skipped")).toBe(true);
+      expect(host.box[MSG.notice]!.some((n) => n.code === "turn_skipped")).toBe(false);
+      await host.room.leave();
+      await guest.room.leave();
+    } finally {
+      b.teammateWaitSec = saved;
+    }
+  });
+
+  it("ปิดตัวจับเวลา: คนที่เลือกท่าแล้วไม่ตอบ → ครบ idleAnswerSec นับเป็นหมดเวลา เพื่อนไม่ต้องรอไม่รู้จบ", async () => {
+    const b = registry.balance.battle;
+    const saved = b.idleAnswerSec;
+    b.idleAnswerSec = 0.4;
+    t.server.config.questionTimer = false;
+    try {
+      const { host, guest } = await pair(["idle_c", "idle_d"], "fungfiw", 12);
+      await startAndJoin(host, guest);
+      const q = await choose(guest);
+      expect(q.timeLimitSec ?? null).toBeNull();
+      await attack(host);
+      await until(() => guest.box[MSG.battleResult]!.length > 0, 3000, "guest timed out");
+      expect(guest.box[MSG.battleResult]![0]).toMatchObject({ timedOut: true, correct: false });
+      await until(() => host.box[MSG.battleTurn]!.length > 0, 3000, "turn resolved");
+      await host.room.leave();
+      await guest.room.leave();
+    } finally {
+      b.idleAnswerSec = saved;
+      t.server.config.questionTimer = true;
+    }
+  });
+});

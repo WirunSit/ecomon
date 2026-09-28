@@ -417,7 +417,7 @@ export function validateContent(c: GameContent, origins: ContentOrigins, opts: V
   });
 
   // ---------- questions ----------
-  const approvedPerTopic = new Map<string, number>();
+  const usablePerTopic = new Map<string, number>();
   c.questions.forEach((q, i) => {
     const { file, index } = origins.questions[i]!;
     const path = ["questions", index];
@@ -426,11 +426,11 @@ export function validateContent(c: GameContent, origins: ContentOrigins, opts: V
     topicRef(file, [...path, "topic"], q.topic);
     // กติกาเดียวกับตอนนำเข้า CSV
     for (const problem of questionProblems(q)) err(file, path, problem);
-    if (q.status === "approved") approvedPerTopic.set(q.topic, (approvedPerTopic.get(q.topic) ?? 0) + 1);
+    // เกมใช้ทั้งข้อร่างและข้อที่อนุมัติแล้ว (ถอนออก = ไม่ใช้)
+    if (q.status !== "retired") usablePerTopic.set(q.topic, (usablePerTopic.get(q.topic) ?? 0) + 1);
   });
   c.topics.forEach((t, i) => {
-    if (t.enabled && !approvedPerTopic.get(t.id))
-      warn(F.topics, ["topics", i], `หัวข้อ "${t.id}" ยังไม่มีคำถามที่ครูอนุมัติ (approved)`);
+    if (t.enabled && !usablePerTopic.get(t.id)) warn(F.topics, ["topics", i], `หัวข้อ "${t.id}" ยังไม่มีคำถามที่ใช้ได้ (ร่างหรืออนุมัติแล้ว)`);
   });
 
   // ---------- player / world settings ----------

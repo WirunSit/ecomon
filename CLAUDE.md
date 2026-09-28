@@ -74,7 +74,8 @@ tools/    validate.ts, make-placeholders.ts, make-test-map.ts (อนาคต: 
 - `shared/src/formulas/questions.ts` — เลือกคำถามแบบปรับตามความชำนาญ (หัวข้อ 11.3) สมุดทบทวน สลับตัวเลือก ตรวจคำตอบ
   (ฟังก์ชันล้วน รับ `Rng` เทสต์ได้) · คำถามที่ส่งให้ client ผ่าน `toClientQuestion()` เท่านั้น (ไม่มีเฉลย/คำอธิบาย/คำใบ้)
 - `server/src/services/questions.ts` — ถาม/ตรวจ/บันทึก `answer_log` + `topic_mastery` · หมดเวลา = ผิด (มีเวลาผ่อนผัน `lateAnswerGraceSec`)
-  คำถาม `draft` ใช้ได้เฉพาะตอนพัฒนา (`INCLUDE_DRAFT_QUESTIONS`) · ปิดตัวจับเวลาได้ด้วย `QUESTION_TIMER=0`
+  คำถาม `draft` ใช้ในเกมได้ทันทีทั้งตอนพัฒนาและใช้จริง (ผู้ออกแบบเลือกไม่ต้องรอครูอนุมัติ · `retired` = ไม่ใช้ ·
+  `INCLUDE_DRAFT_QUESTIONS=0` = เฉพาะ approved) · ปิดตัวจับเวลาได้ด้วย `QUESTION_TIMER=0`
 - `server/src/battle/BattleSession.ts` — กติกาการต่อสู้ล้วน ๆ (ไม่ผูก Colyseus) ผู้เข้าร่วมเป็น array รองรับหลายคนในอนาคต
 - `server/src/services/battles.ts` — โหลดทีม บันทึก HP (null = เต็ม) แจก EXP/เหรียญ บันทึกมอนที่จับได้
 - `server/src/rooms/BattleController.ts` — ผูกการต่อสู้เข้ากับห้อง: เดินชนมอนป่า → `battle:state` → เลือกท่า → `battle:question`
