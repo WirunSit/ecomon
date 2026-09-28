@@ -1,7 +1,9 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { Room } from "colyseus.js";
+import { matchMaker } from "@colyseus/core";
 import { CLOSE_CODES, MSG, terrainAt, type ChatBroadcast, type CorrectionMessage, type Direction } from "@ecomon/shared";
 import { registry } from "../src/content";
+import type { WorldRoom } from "../src/rooms/WorldRoom";
 import { ensureClassroom } from "../src/services/auth";
 import { joinWorld, sleep, startTestServer, until, type TestServer } from "./helpers";
 
@@ -133,8 +135,14 @@ describe("การเดิน: server ตัดสินและกันว�
     await until(() => profiles.length === 1, 3000, "profile");
     expect(profiles[0].keyItems).toEqual(["swim_ring"]);
     await sleep(300);
-    room.send(MSG.move, { dir: shore.dir });
     const [dx, dy] = DIRS[shore.dir];
+    // ช่องน้ำนี้อยู่ในเขตเกิดมอนน้ำตื้น: ถ้ามอนป่าเดินมายืนทับ การเดินจะกลายเป็นเริ่มต่อสู้แทน (สุ่ม — เคยทำให้ CI ล้ม)
+    const server = matchMaker.getLocalRoomById(room.roomId) as WorldRoom;
+    for (const w of [...server.spawner.monsters.values()]) {
+      w.nextMoveAt = Number.POSITIVE_INFINITY;
+      if (w.x === shore.x + dx && w.y === shore.y + dy) server.spawner.remove(w.id, Date.now());
+    }
+    room.send(MSG.move, { dir: shore.dir });
     await until(() => me(room).x === shore.x + dx && me(room).y === shore.y + dy, 3000, "in water");
     expect(terrainAt(map, me(room).x, me(room).y)).toBe("shallow");
     await room.leave();
