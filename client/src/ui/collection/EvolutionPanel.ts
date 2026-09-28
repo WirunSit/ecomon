@@ -1,5 +1,6 @@
 import type { BagResponse, EvolutionAnswerResponse, EvolutionState, HelperResult, MonsterDetail } from "@ecomon/shared";
 import { vfxImageUrl } from "../../assets";
+import { audio } from "../../audio/engine";
 import { registry, speciesName } from "../../content";
 import { api } from "../../net/api";
 import { profile } from "../../state/profile";
@@ -120,6 +121,7 @@ export class EvolutionPanel {
   /** แอนิเมชันพัฒนาร่าง: เรืองแสงกระพริบ → เปลี่ยนภาพ + ประกาย → ข้อความ */
   private celebrate(m: MonsterDetail, ev: NonNullable<EvolutionAnswerResponse["evolved"]>) {
     this.dock?.hide();
+    audio.sfx("evolve");
     const stage = this.el?.querySelector(".evo-stage");
     const img = stage?.querySelector("img");
     if (!stage || !img) return;

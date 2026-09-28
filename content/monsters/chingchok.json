@@ -1,0 +1,61 @@
+{
+  "id": "chingchok",
+  "dex": 25,
+  "rarity": "rare",
+  "elements": [
+    "pyro",
+    "flora"
+  ],
+  "role": "consumer",
+  "habitat": "land",
+  "archetype": "attacker",
+  "baseStats": {
+    "hp": 72,
+    "atk": 98,
+    "def": 60,
+    "spd": 70
+  },
+  "forms": [
+    {
+      "form": 1,
+      "name": "จิ้งจอกลูกสน",
+      "minLevel": 1,
+      "sprite": "chingchok_f1"
+    },
+    {
+      "form": 2,
+      "name": "จิ้งจอกเถ้าถ่าน",
+      "minLevel": 16,
+      "sprite": "chingchok_f2"
+    },
+    {
+      "form": 3,
+      "name": "จิ้งจอกไฟฟื้นไพร",
+      "minLevel": 36,
+      "sprite": "chingchok_f3"
+    }
+  ],
+  "learnset": [
+    {
+      "level": 1,
+      "move": "pyro_basic"
+    },
+    {
+      "level": 8,
+      "move": "flora_mid"
+    },
+    {
+      "level": 16,
+      "move": "pyro_adv"
+    },
+    {
+      "level": 36,
+      "move": "sig_ashen_bloom"
+    }
+  ],
+  "habitatHint": "ตำนานเล่าว่าปรากฏตัวในป่าหลังไฟป่าดับ",
+  "dexFact": "หลังไฟป่า ป่าฟื้นตัวแบบการเปลี่ยนแปลงแทนที่ทุติยภูมิ เพราะยังมีดินและเมล็ดเดิม สนบางชนิดต้องใช้ความร้อนให้ลูกสนแตกและปล่อยเมล็ด",
+  "factTopic": "succession",
+  "enabled": true,
+  "addedInVersion": "1.1"
+}

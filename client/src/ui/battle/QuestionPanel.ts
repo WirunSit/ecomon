@@ -3,6 +3,7 @@ import { balance, registry } from "../../content";
 import { itemIcon } from "../itemIcon";
 import { h } from "../overlay";
 import { showPicker } from "../Picker";
+import { audio } from "../../audio/engine";
 import { UI } from "../strings";
 import { uiIcon } from "../uiIcon";
 import type { BattleDock } from "./BattleDock";
@@ -229,6 +230,7 @@ export class QuestionPanel {
     }
 
     const title = r.correct ? UI.battle.correct : r.timedOut ? UI.battle.timedOut : UI.battle.wrong;
+    audio.sfx(r.correct ? (r.quick ? "quick" : "correct") : "wrong");
     const reveal =
       q?.type === "numeric" || (!q && typeof r.answer.value === "number")
         ? UI.battle.answerIs(`${r.answer.value}${r.answer.unit ? ` ${r.answer.unit}` : ""}`)

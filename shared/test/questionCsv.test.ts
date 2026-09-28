@@ -85,7 +85,8 @@ describe("questionsFromCsv (หัวข้อ 12.4)", () => {
     const csv = toCsv([[...QUESTION_CSV_COLUMNS], ...all.map(questionToCsvRow)]);
     const r = questionsFromCsv(csv, opts);
     expect(r.errors).toEqual([]);
-    const strip = (q: object) => JSON.parse(JSON.stringify(q)) as unknown;
+    // CSV ไม่มีคอลัมน์ version (ตัวนำเข้ากำหนดเอง) จึงไม่นำมาเทียบ
+    const strip = ({ version: _v, ...q }: { version: number }) => JSON.parse(JSON.stringify(q)) as unknown;
     expect(r.questions.map((x) => strip(x.question))).toEqual(all.map(strip));
   });
 });

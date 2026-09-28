@@ -9,7 +9,8 @@
       "dropMode": "pool",
       "dropPool": [
         "silarak",
-        "mossmoth"
+        "mossmoth",
+        "khangkhao"
       ],
       "bosses": [
         {
@@ -61,7 +62,8 @@
       "dropRarity": "rare",
       "dropMode": "pool",
       "dropPool": [
-        "ploengpha"
+        "ploengpha",
+        "chingchok"
       ],
       "bosses": [
         {
@@ -112,7 +114,8 @@
       "dropMode": "pool",
       "dropPool": [
         "napawan",
-        "praiwan"
+        "praiwan",
+        "mafueang"
       ],
       "bosses": [
         {

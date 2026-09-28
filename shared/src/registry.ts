@@ -54,6 +54,7 @@ export class Registry {
   readonly breeding: GameContent["breeding"];
   readonly quickChat: GameContent["quickChat"];
   readonly collectionRewards: GameContent["collectionRewards"];
+  readonly audio: GameContent["audio"];
   readonly monsters: IdTable<MonsterSpecies>;
   readonly moves: IdTable<GameContent["moves"][number]>;
   readonly items: IdTable<GameContent["items"][number]>;
@@ -78,6 +79,7 @@ export class Registry {
     this.breeding = content.breeding;
     this.quickChat = content.quickChat;
     this.collectionRewards = content.collectionRewards;
+    this.audio = content.audio;
     this.monsters = new IdTable("มอนสเตอร์", [...content.monsters].sort((a, b) => a.dex - b.dex));
     this.moves = new IdTable("ท่า", content.moves);
     this.items = new IdTable("ไอเท็ม", content.items);

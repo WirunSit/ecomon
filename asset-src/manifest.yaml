@@ -8,6 +8,7 @@
 #   rowIds/colIds   ชื่อแถว/คอลัมน์ ใช้กับ out ที่มี {row} {col}
 #   cellIds         ชื่อทีละช่อง (ซ้ายไปขวา บนลงล่าง) ใช้กับ out ที่มี {id}
 #   bg              auto | alpha | white | none (none = ไม่ลบพื้นหลัง ใช้กับ tile/ฉาก)
+#   gutterWindow    (ไม่บังคับ) ช่วงค้นหาเส้นช่องว่าง ±สัดส่วนของขนาดช่อง ค่าเริ่มต้น 0.22
 #   split           gutter (หาเส้นช่องว่างระหว่างภาพ ค่าเริ่มต้น) | grid (แบ่งเท่ากัน)
 #                   | seams (ช่องชิดกันไม่มีร่องแต่ขนาดไม่เท่ากัน: ตัดตามรอยต่อระหว่างลาย)
 #   atlas           (ไม่บังคับ) ชื่อ texture atlas ที่จะรวมภาพไว้ให้ Phaser
@@ -48,6 +49,28 @@ S05.png:
   category: monster
   bg: alpha
   rowIds: [gaiara, varithara, suriya]
+  colIds: [f1_idle, f1_attack, f2_idle, f2_attack, f3_idle, f3_attack]
+  out: assets/monsters/{row}/{col}.png
+  atlas: monsters
+
+# มอนสเตอร์ชุดเพิ่ม (หัวข้อ 14.8) — พื้นขาว ไม่โปร่งใส
+S18.png:
+  rows: 5
+  cols: 6
+  category: monster
+  bg: auto
+  rowIds: [ngueak, duangpui, kongkang, hinghoi, parakang]
+  colIds: [f1_idle, f1_attack, f2_idle, f2_attack, f3_idle, f3_attack]
+  out: assets/monsters/{row}/{col}.png
+  atlas: monsters
+
+S19.png:
+  rows: 3
+  cols: 6
+  category: monster
+  bg: auto
+  gutterWindow: 0.45  # แถวค้างคาววางเบี้ยวไปทางซ้าย เส้นช่องว่างจริงห่างจากตารางเท่ากันเกิน ±22%
+  rowIds: [khangkhao, chingchok, mafueang]
   colIds: [f1_idle, f1_attack, f2_idle, f2_attack, f3_idle, f3_attack]
   out: assets/monsters/{row}/{col}.png
   atlas: monsters

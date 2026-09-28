@@ -11,6 +11,7 @@ import {
   type CombatantView,
 } from "@ecomon/shared";
 import { backgroundImageUrl, backgroundTextureKey, monsterTexture, vfxImageUrl, vfxTextureKey } from "../assets";
+import { audio } from "../audio/engine";
 import type { BattleIncoming, BattleLink } from "../battle/BattleLink";
 import { registry, speciesName } from "../content";
 import { BattleCards } from "../ui/battle/BattleCards";
@@ -137,7 +138,10 @@ export class BattleScene extends Phaser.Scene {
       })
       .catch(() => undefined);
     this.toast = new Toast();
+    // เพลงต่อสู้ซ้อนบนบรรยากาศของโซน/ดันเจี้ยน · บอสมีเพลงของตัวเอง
+    const popScape = audio.push(this.state.wild.boss ? registry.audio.boss : registry.audio.battle);
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      popScape();
       this.closed = true;
       this.cards.destroy();
       this.dock.destroy();
@@ -179,6 +183,7 @@ export class BattleScene extends Phaser.Scene {
         return this.enqueue(async () => {
           this.dock.hide();
           if (m.msg.caught) await this.captureSparkle();
+          else audio.sfx(m.msg.result === "win" ? "win" : m.msg.result === "lose" ? "lose" : "notice");
           await showEndPanel(m.msg);
           this.close(m.msg);
         });
@@ -347,7 +352,12 @@ export class BattleScene extends Phaser.Scene {
       this.tween({ targets: player, x: SPOT.player.x, duration: 450, ease: "Back.easeOut", delay: 150 }),
     ]);
     this.breathe();
-    await this.wait(700);
+    // เสียงร้องตอนปรากฏตัว: มอนป่า (ขวา) แล้วมอนเรา (ซ้าย)
+    const me = this.state.team[this.state.active];
+    audio.cry(this.state.wild.speciesId, this.state.wild.form, { pan: 0.5 });
+    await this.wait(450);
+    if (me) audio.cry(me.speciesId, me.form, { pan: -0.5 });
+    await this.wait(400);
   }
 
   /** หายใจเบา ๆ ตอนยืน */
@@ -420,6 +430,7 @@ export class BattleScene extends Phaser.Scene {
           this.dock.message(UI.battleItem.used(name, target ? speciesName(target.speciesId, target.form) : ""));
           await this.wait(400);
         }
+        audio.sfx("heal");
         const c = this.combatant(e.target);
         if (c) c.hp = e.hp;
         const side = this.sideOf(e.target);
@@ -442,6 +453,8 @@ export class BattleScene extends Phaser.Scene {
         const c = this.combatant(e.target);
         const side = this.sideOf(e.target);
         this.dock.message(UI.battle.faint(c ? speciesName(c.speciesId, c.form) : ""));
+        if (c) audio.cry(c.speciesId, c.form, { faint: true, pan: side === "wild" ? 0.5 : -0.5 });
+        audio.sfx("faint");
         const s = this.holders[side];
         await this.tween({ targets: s, alpha: 0, y: SPOT[side].y + 30, duration: 500, ease: "Quad.easeIn" });
         s.y = SPOT[side].y;
@@ -458,6 +471,7 @@ export class BattleScene extends Phaser.Scene {
         this.setMonster("player", next);
         this.cards.player.show(next, this.state.team);
         this.dock.message(UI.battle.go(speciesName(next.speciesId, next.form)));
+        audio.cry(next.speciesId, next.form, { pan: -0.5 });
         s.x = SPOT.player.x - 320;
         s.setAlpha(1);
         await this.tween({ targets: s, x: SPOT.player.x, duration: 380, ease: "Back.easeOut" });
@@ -485,15 +499,18 @@ export class BattleScene extends Phaser.Scene {
     if (attacker) this.setMonster(side, attacker, "attack");
     const dx = side === "player" ? 60 : -60;
     const dy = side === "player" ? -20 : 20;
+    audio.attack(move?.element);
     await this.tween({ targets: s, x: SPOT[side].x + dx, y: SPOT[side].y + dy, duration: 180, ease: "Quad.easeOut" });
 
     if (e.missed) {
+      audio.sfx("miss");
       await Promise.all([
         this.floatText(other, UI.battle.missed, "#e8e8e8"),
         this.tween({ targets: this.holders[other], x: SPOT[other].x + (other === "wild" ? 26 : -26), duration: 140, yoyo: true }),
       ]);
     } else {
       await this.playVfx(move?.element, other);
+      audio.sfx(e.effectiveness === "super" ? "super" : e.effectiveness === "weak" ? "weak" : "hit");
       if (target) target.hp = e.targetHp;
       if (target && this.isShown(other, target.id)) {
         this.card(other).setHp(e.targetHp, target.maxHp);
@@ -518,6 +535,7 @@ export class BattleScene extends Phaser.Scene {
 
   /** ชนะแล้วได้มอน: ประกายรอบมอนป่า แล้วมอนย่อตัวหายเข้าคลัง (S15 capture_sparkle) */
   private async captureSparkle() {
+    audio.sfx("catch");
     const key = vfxTextureKey("capture_sparkle");
     const holder = this.holders.wild;
     holder.setAlpha(1);

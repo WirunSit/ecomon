@@ -539,6 +539,144 @@
         }
       ],
       "description": "รับพลังงานจากดวงอาทิตย์แล้วส่งต่อเป็นการโจมตี เพิ่ม ATK ตัวเอง 25%"
+    },
+    {
+      "id": "sig_seed_gale",
+      "name": "ลมหอบเมล็ด",
+      "element": "aero",
+      "tier": "signature",
+      "power": 95,
+      "cooldown": 2,
+      "effects": [
+        {
+          "kind": "stat_mod",
+          "target": "self",
+          "stat": "spd",
+          "percent": 20,
+          "turns": 2
+        }
+      ],
+      "description": "โบกปีกหอบเมล็ดพันธุ์เป็นพายุ แล้วเร่งความเร็วตัวเอง"
+    },
+    {
+      "id": "sig_compost_roll",
+      "name": "ลูกปุ๋ยกลิ้งทับ",
+      "element": "spore",
+      "tier": "signature",
+      "power": 95,
+      "cooldown": 2,
+      "effects": [
+        {
+          "kind": "stat_mod",
+          "target": "enemy",
+          "stat": "def",
+          "percent": -15,
+          "turns": 2
+        }
+      ],
+      "description": "กลิ้งลูกปุ๋ยหมักก้อนยักษ์ทับศัตรู ทำให้ป้องกันลดลง"
+    },
+    {
+      "id": "sig_mangrove_shelter",
+      "name": "รากค้ำโอบชายฝั่ง",
+      "element": "flora",
+      "tier": "signature",
+      "power": 95,
+      "cooldown": 2,
+      "effects": [
+        {
+          "kind": "heal",
+          "percent": 15
+        }
+      ],
+      "description": "รากค้ำจุนแผ่คลุมรับแรงคลื่น แล้วฟื้น HP ตัวเอง 15%"
+    },
+    {
+      "id": "sig_lantern_flash",
+      "name": "แสงโคมวาบ",
+      "element": "aero",
+      "tier": "signature",
+      "power": 95,
+      "cooldown": 2,
+      "effects": [
+        {
+          "kind": "stat_mod",
+          "target": "enemy",
+          "stat": "atk",
+          "percent": -15,
+          "turns": 2
+        }
+      ],
+      "description": "กะพริบแสงโคมจ้าจนศัตรูตาพร่า พลังโจมตีลดลง"
+    },
+    {
+      "id": "sig_reef_sanctuary",
+      "name": "แนวปะการังคุ้มภัย",
+      "element": "aqua",
+      "tier": "signature",
+      "power": 95,
+      "cooldown": 2,
+      "effects": [
+        {
+          "kind": "stat_mod",
+          "target": "self",
+          "stat": "def",
+          "percent": 20,
+          "turns": 2
+        }
+      ],
+      "description": "เรียกแนวปะการังขึ้นมากำบัง เพิ่มพลังป้องกันตัวเอง"
+    },
+    {
+      "id": "sig_night_pollen",
+      "name": "ละอองเรณูราตรี",
+      "element": "flora",
+      "tier": "signature",
+      "power": 95,
+      "cooldown": 2,
+      "effects": [
+        {
+          "kind": "heal",
+          "percent": 15
+        }
+      ],
+      "description": "โปรยละอองเรณูเรืองแสงยามค่ำ แล้วฟื้น HP ตัวเอง 15%"
+    },
+    {
+      "id": "sig_ashen_bloom",
+      "name": "เถ้าผลิใบ",
+      "element": "pyro",
+      "tier": "signature",
+      "power": 95,
+      "cooldown": 2,
+      "effects": [
+        {
+          "kind": "stat_mod",
+          "target": "enemy",
+          "stat": "def",
+          "percent": -15,
+          "turns": 2
+        }
+      ],
+      "description": "หางเพลิงกวาดเป็นวง ทิ้งเถ้าที่มีหน่ออ่อนผลิขึ้น ศัตรูป้องกันลดลง"
+    },
+    {
+      "id": "sig_seagrass_tide",
+      "name": "กระแสทุ่งหญ้าทะเล",
+      "element": "aqua",
+      "tier": "signature",
+      "power": 95,
+      "cooldown": 2,
+      "effects": [
+        {
+          "kind": "stat_mod",
+          "target": "enemy",
+          "stat": "spd",
+          "percent": -20,
+          "turns": 2
+        }
+      ],
+      "description": "โบกครีบเรียกกระแสน้ำพาหญ้าทะเลพันรอบศัตรู ความเร็วลดลง"
     }
   ]
 }

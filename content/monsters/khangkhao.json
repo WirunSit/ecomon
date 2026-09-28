@@ -1,0 +1,61 @@
+{
+  "id": "khangkhao",
+  "dex": 24,
+  "rarity": "rare",
+  "elements": [
+    "aero",
+    "flora"
+  ],
+  "role": "consumer",
+  "habitat": "land",
+  "archetype": "speedster",
+  "baseStats": {
+    "hp": 66,
+    "atk": 74,
+    "def": 54,
+    "spd": 106
+  },
+  "forms": [
+    {
+      "form": 1,
+      "name": "ค้างคาวดอกไม้",
+      "minLevel": 1,
+      "sprite": "khangkhao_f1"
+    },
+    {
+      "form": 2,
+      "name": "ค้างคาวละอองเรณู",
+      "minLevel": 16,
+      "sprite": "khangkhao_f2"
+    },
+    {
+      "form": 3,
+      "name": "พญาค้างคาวราตรี",
+      "minLevel": 36,
+      "sprite": "khangkhao_f3"
+    }
+  ],
+  "learnset": [
+    {
+      "level": 1,
+      "move": "aero_basic"
+    },
+    {
+      "level": 8,
+      "move": "flora_mid"
+    },
+    {
+      "level": 16,
+      "move": "aero_adv"
+    },
+    {
+      "level": 36,
+      "move": "sig_night_pollen"
+    }
+  ],
+  "habitatHint": "ตำนานเล่าว่าบินหาน้ำหวานในสวนผลไม้ยามค่ำคืน",
+  "dexFact": "ค้างคาวกินน้ำหวานช่วยผสมเกสรดอกทุเรียนและสะตอซึ่งบานตอนกลางคืน ค้างคาวได้อาหาร พืชได้ติดผล",
+  "factTopic": "relationships",
+  "enabled": true,
+  "addedInVersion": "1.1"
+}

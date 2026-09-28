@@ -1,0 +1,60 @@
+{
+  "id": "parakang",
+  "dex": 23,
+  "rarity": "normal",
+  "elements": [
+    "aqua"
+  ],
+  "role": "consumer",
+  "habitat": "water",
+  "archetype": "tank",
+  "baseStats": {
+    "hp": 95,
+    "atk": 58,
+    "def": 97,
+    "spd": 50
+  },
+  "forms": [
+    {
+      "form": 1,
+      "name": "ปะการังจิ๋ว",
+      "minLevel": 1,
+      "sprite": "parakang_f1"
+    },
+    {
+      "form": 2,
+      "name": "ปะการังเขากวาง",
+      "minLevel": 16,
+      "sprite": "parakang_f2"
+    },
+    {
+      "form": 3,
+      "name": "ผู้พิทักษ์แนวปะการัง",
+      "minLevel": 36,
+      "sprite": "parakang_f3"
+    }
+  ],
+  "learnset": [
+    {
+      "level": 1,
+      "move": "aqua_basic"
+    },
+    {
+      "level": 8,
+      "move": "aqua_mid"
+    },
+    {
+      "level": 16,
+      "move": "aqua_adv"
+    },
+    {
+      "level": 36,
+      "move": "sig_reef_sanctuary"
+    }
+  ],
+  "habitatHint": "พบในแนวปะการังน้ำตื้น",
+  "dexFact": "ปะการังได้อาหารจากสาหร่ายซูแซนเทลลีที่อาศัยในเนื้อเยื่อ เป็นภาวะพึ่งพากัน ถ้าน้ำร้อนเกินไปสาหร่ายจะออกไปจนปะการังฟอกขาว",
+  "factTopic": "relationships",
+  "enabled": true,
+  "addedInVersion": "1.1"
+}

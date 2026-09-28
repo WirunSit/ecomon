@@ -24,8 +24,8 @@ describe("registry", () => {
   });
 
   it("มอนสเตอร์เรียงตาม dex และกรองตามความหายากได้", () => {
-    expect(reg.monsters.all.map((m) => m.dex)).toEqual([...Array(18)].map((_, i) => i + 1));
-    expect(reg.enabledMonsters("rare").map((m) => m.id)).toEqual(["praiwan", "ploengpha", "napawan", "mossmoth", "silarak"]);
+    expect(reg.monsters.all.map((m) => m.dex)).toEqual([...Array(26)].map((_, i) => i + 1));
+    expect(reg.enabledMonsters("rare").map((m) => m.id)).toEqual(["praiwan", "ploengpha", "napawan", "mossmoth", "silarak", "khangkhao", "chingchok", "mafueang"]);
   });
 
   it("ผู้พิทักษ์ได้ความสามารถติดตัวครบทั้ง 3 บทบาท", () => {

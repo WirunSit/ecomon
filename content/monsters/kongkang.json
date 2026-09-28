@@ -1,0 +1,60 @@
+{
+  "id": "kongkang",
+  "dex": 21,
+  "rarity": "normal",
+  "elements": [
+    "flora"
+  ],
+  "role": "producer",
+  "habitat": "water",
+  "archetype": "tank",
+  "baseStats": {
+    "hp": 90,
+    "atk": 60,
+    "def": 95,
+    "spd": 55
+  },
+  "forms": [
+    {
+      "form": 1,
+      "name": "ฝักโกงกาง",
+      "minLevel": 1,
+      "sprite": "kongkang_f1"
+    },
+    {
+      "form": 2,
+      "name": "โกงกางน้อย",
+      "minLevel": 16,
+      "sprite": "kongkang_f2"
+    },
+    {
+      "form": 3,
+      "name": "พญาโกงกาง",
+      "minLevel": 36,
+      "sprite": "kongkang_f3"
+    }
+  ],
+  "learnset": [
+    {
+      "level": 1,
+      "move": "flora_basic"
+    },
+    {
+      "level": 8,
+      "move": "flora_mid"
+    },
+    {
+      "level": 16,
+      "move": "flora_adv"
+    },
+    {
+      "level": 36,
+      "move": "sig_mangrove_shelter"
+    }
+  ],
+  "habitatHint": "พบในน้ำกร่อยริมชายฝั่ง",
+  "dexFact": "ป่าชายเลนเป็นแหล่งอนุบาลสัตว์น้ำวัยอ่อน รากค้ำจุนของโกงกางช่วยลดแรงคลื่นและการกัดเซาะชายฝั่ง",
+  "factTopic": "biomes",
+  "enabled": true,
+  "addedInVersion": "1.1"
+}

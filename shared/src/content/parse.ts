@@ -4,6 +4,7 @@ import {
   BalanceSchema,
   BreedingFileSchema,
   CollectionRewardsFileSchema,
+  AudioFileSchema,
   DungeonsFileSchema,
   ElementsFileSchema,
   ItemsFileSchema,
@@ -37,6 +38,7 @@ export const SINGLE_FILES = {
   spawnTables: "spawn-tables.json",
   quickChat: "quick-chat.json",
   collection: "collection-rewards.json",
+  audio: "audio.json",
 } as const;
 
 /** โฟลเดอร์ที่ 1 ไฟล์ = 1 record */
@@ -141,6 +143,7 @@ export function parseContent(files: ContentFiles): ParseResult {
   const spawnTables = single(SINGLE_FILES.spawnTables, SpawnTablesFileSchema);
   const quickChat = single(SINGLE_FILES.quickChat, QuickChatFileSchema);
   const collection = single(SINGLE_FILES.collection, CollectionRewardsFileSchema);
+  const audio = single(SINGLE_FILES.audio, AudioFileSchema);
 
   const inDir = (dir: string, ext = ".json") =>
     Object.keys(files)
@@ -211,7 +214,8 @@ export function parseContent(files: ContentFiles): ParseResult {
     !dungeons ||
     !spawnTables ||
     !quickChat ||
-    !collection
+    !collection ||
+    !audio
   ) {
     return { origins, issues: attachLines(issues, files) };
   }
@@ -235,6 +239,7 @@ export function parseContent(files: ContentFiles): ParseResult {
     quickChat,
     collectionRewards: collection.rewards,
     maps,
+    audio,
   };
   // เรียงมอนสเตอร์ตาม dex (ลำดับใน catalog) พร้อมเรียงที่มาของไฟล์ตาม
   const sorted = monsters.map((m, i) => ({ m, file: origins.monsters[i]! })).sort((a, b) => a.m.dex - b.m.dex);

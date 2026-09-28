@@ -352,8 +352,9 @@ const mark = (type: string, name: string, x: number, y: number) => {
 };
 
 // หมู่บ้าน: น้ำพุกลางลาน จุดเริ่ม ร้านค้า ห้องแล็บ บ้าน
-place(80, 75, G.fountain);
+// mark() เคลียร์ช่องรอบจุด → วางน้ำพุหลัง mark ไม่งั้นน้ำพุถูกลบ
 mark("recovery", "village_fountain", 80, 76);
+place(80, 75, G.fountain);
 mark("player_start", "start", 80, 80);
 mark("npc", "npc_prof_ton", 77, 72);
 place(76, 70, G.board);
@@ -390,8 +391,8 @@ const fountains: [string, number, number][] = [
   ["meadow_south", 84, 106],
 ];
 for (const [name, x, y] of fountains) {
-  place(x, y, G.fountain);
   mark("recovery", name, x, y + 1);
+  place(x, y, G.fountain);
 }
 
 // ทางเข้าดันเจี้ยนในโซนของตัวเอง (หัวข้อ 10.1)

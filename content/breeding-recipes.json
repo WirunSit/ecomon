@@ -34,6 +34,27 @@
         "spore"
       ],
       "result": "silarak"
+    },
+    {
+      "elements": [
+        "aero",
+        "flora"
+      ],
+      "result": "khangkhao"
+    },
+    {
+      "elements": [
+        "pyro",
+        "flora"
+      ],
+      "result": "chingchok"
+    },
+    {
+      "elements": [
+        "aqua",
+        "terra"
+      ],
+      "result": "mafueang"
     }
   ],
   "rareToLegend": [

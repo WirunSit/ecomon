@@ -1,4 +1,6 @@
 import Phaser from "phaser";
+import { audio } from "../audio/engine";
+import { registry } from "../content";
 import { LoginRequest, type LoginResponse, type PlayerProfile } from "@ecomon/shared";
 import { uiImageUrl } from "../assets";
 import { api, ApiRequestError } from "../net/api";
@@ -25,6 +27,7 @@ export class LoginScene extends Phaser.Scene {
   }
 
   async create() {
+    audio.setBase(registry.audio.title);
     // มี token อยู่แล้ว → ข้ามหน้า login
     if (session.token) {
       const wait = openScreen(this, [h("p", { text: UI.login.checking })]);
