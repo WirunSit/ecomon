@@ -1,0 +1,60 @@
+{
+  "id": "duangpui",
+  "dex": 20,
+  "rarity": "normal",
+  "elements": [
+    "spore"
+  ],
+  "role": "decomposer",
+  "habitat": "land",
+  "archetype": "tank",
+  "baseStats": {
+    "hp": 92,
+    "atk": 62,
+    "def": 96,
+    "spd": 50
+  },
+  "forms": [
+    {
+      "form": 1,
+      "name": "ด้วงกลิ้ง",
+      "minLevel": 1,
+      "sprite": "duangpui_f1"
+    },
+    {
+      "form": 2,
+      "name": "ด้วงเห็ดปุ๋ย",
+      "minLevel": 16,
+      "sprite": "duangpui_f2"
+    },
+    {
+      "form": 3,
+      "name": "อัศวินด้วงพงเห็ด",
+      "minLevel": 36,
+      "sprite": "duangpui_f3"
+    }
+  ],
+  "learnset": [
+    {
+      "level": 1,
+      "move": "spore_basic"
+    },
+    {
+      "level": 8,
+      "move": "spore_mid"
+    },
+    {
+      "level": 16,
+      "move": "spore_adv"
+    },
+    {
+      "level": 36,
+      "move": "sig_compost_roll"
+    }
+  ],
+  "habitatHint": "พบใต้กองใบไม้และมูลสัตว์ในทุ่งหญ้า",
+  "dexFact": "ด้วงมูลสัตว์ปั้นมูลเป็นก้อนแล้วฝังลงดิน ช่วยคืนธาตุอาหารสู่ดินและลดแหล่งเพาะพันธุ์แมลงวัน",
+  "factTopic": "eco_components",
+  "enabled": true,
+  "addedInVersion": "1.1"
+}

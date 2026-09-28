@@ -27,19 +27,20 @@ describe("content จริงใน content/", () => {
     expect(errors(run(realFiles))).toEqual([]);
   });
 
-  it("มีมอนสเตอร์ครบ 18 สายพันธุ์ 54 ร่าง: Normal 10, Rare 5, Legend 3", () => {
+  // ชุดแรก 18 ตัว (หัวข้อ 3) + ชุดเพิ่ม S18–S19 อีก 8 ตัว (หัวข้อ 14.8)
+  it("มีมอนสเตอร์ครบ 26 สายพันธุ์ 78 ร่าง: Normal 15, Rare 8, Legend 3", () => {
     const c = parsed.content!;
-    expect(c.monsters).toHaveLength(18);
-    expect(c.monsters.flatMap((m) => m.forms)).toHaveLength(54);
+    expect(c.monsters).toHaveLength(26);
+    expect(c.monsters.flatMap((m) => m.forms)).toHaveLength(78);
     const count = (r: string) => c.monsters.filter((m) => m.rarity === r).length;
-    expect([count("normal"), count("rare"), count("legend")]).toEqual([10, 5, 3]);
-    expect(c.monsters.map((m) => m.dex)).toEqual(Array.from({ length: 18 }, (_, i) => i + 1));
+    expect([count("normal"), count("rare"), count("legend")]).toEqual([15, 8, 3]);
+    expect(c.monsters.map((m) => m.dex)).toEqual(Array.from({ length: 26 }, (_, i) => i + 1));
   });
 
-  it("มีท่า 36 ท่า (ท่าธาตุ 18 + ท่าประจำตัว 18)", () => {
+  it("มีท่า 44 ท่า (ท่าธาตุ 18 + ท่าประจำตัว 1 ท่าต่อสายพันธุ์)", () => {
     const c = parsed.content!;
-    expect(c.moves).toHaveLength(36);
-    expect(c.moves.filter((m) => m.tier === "signature")).toHaveLength(18);
+    expect(c.moves).toHaveLength(44);
+    expect(c.moves.filter((m) => m.tier === "signature")).toHaveLength(26);
   });
 
   it("ตารางแพ้ทางเป็น 2 วง วงละ 3 ธาตุ", () => {

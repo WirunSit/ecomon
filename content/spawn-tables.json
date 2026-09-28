@@ -19,6 +19,22 @@
             3,
             8
           ]
+        },
+        {
+          "species": "duangpui",
+          "weight": 25,
+          "level": [
+            2,
+            7
+          ]
+        },
+        {
+          "species": "hinghoi",
+          "weight": 20,
+          "level": [
+            3,
+            8
+          ]
         }
       ]
     },
@@ -40,6 +56,22 @@
           "level": [
             5,
             10
+          ]
+        },
+        {
+          "species": "ngueak",
+          "weight": 30,
+          "level": [
+            6,
+            12
+          ]
+        },
+        {
+          "species": "duangpui",
+          "weight": 20,
+          "level": [
+            5,
+            11
           ]
         }
       ]
@@ -121,6 +153,14 @@
             16,
             22
           ]
+        },
+        {
+          "species": "kongkang",
+          "weight": 60,
+          "level": [
+            16,
+            22
+          ]
         }
       ]
     },
@@ -131,6 +171,14 @@
         {
           "species": "plapoong",
           "weight": 100,
+          "level": [
+            18,
+            24
+          ]
+        },
+        {
+          "species": "parakang",
+          "weight": 60,
           "level": [
             18,
             24
@@ -195,6 +243,30 @@
             20,
             30
           ]
+        },
+        {
+          "species": "ngueak",
+          "weight": 20,
+          "level": [
+            20,
+            30
+          ]
+        },
+        {
+          "species": "hinghoi",
+          "weight": 20,
+          "level": [
+            20,
+            30
+          ]
+        },
+        {
+          "species": "duangpui",
+          "weight": 20,
+          "level": [
+            20,
+            30
+          ]
         }
       ]
     },
@@ -236,6 +308,22 @@
         },
         {
           "species": "pupluek",
+          "weight": 20,
+          "level": [
+            20,
+            30
+          ]
+        },
+        {
+          "species": "kongkang",
+          "weight": 20,
+          "level": [
+            20,
+            30
+          ]
+        },
+        {
+          "species": "parakang",
           "weight": 20,
           "level": [
             20,

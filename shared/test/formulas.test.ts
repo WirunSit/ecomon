@@ -311,8 +311,10 @@ describe("ดันเจี้ยน (หัวข้อ 8)", () => {
     const { rate, counts, shards } = simulate("root_cave", 11);
     expect(Math.abs(rate - 0.3)).toBeLessThan(0.01);
     expect(shards).toBe(100_000 - Math.round(rate * 100_000));
+    // สุ่มเท่ากันทุกตัวในกลุ่มดรอป
+    const pool = reg.dungeons.get("root_cave").dropPool;
     const silarak = counts.get("silarak")! / (rate * 100_000);
-    expect(Math.abs(silarak - 0.5)).toBeLessThan(0.02);
+    expect(Math.abs(silarak - 1 / pool.length)).toBeLessThan(0.02);
     for (const id of ["dormant_crater", "cloud_bay"]) expect(Math.abs(simulate(id, 12).rate - 0.3)).toBeLessThan(0.01);
   });
 

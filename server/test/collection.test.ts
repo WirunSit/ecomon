@@ -143,11 +143,11 @@ describe("คลังของฉัน (หัวข้อ 6.1)", () => {
 });
 
 describe("สมุดภาพ (หัวข้อ 6.2)", () => {
-  it("มอนตั้งต้นลงสมุดภาพ · นับแยกทุกร่าง 54 ช่อง", async () => {
+  it("มอนตั้งต้นลงสมุดภาพ · นับแยกทุกร่าง 78 ช่อง", async () => {
     const { token } = await t.newPlayer("dexer");
     const r = await t.api<CatalogResponse>("/catalog", { token });
     expect(r.body.total).toBe(registry.catalogSlots().length);
-    expect(r.body.total).toBe(54);
+    expect(r.body.total).toBe(78);
     expect(r.body.owned).toBe(1);
     expect(r.body.entries).toEqual([{ speciesId: "puibai", form: 1, status: "owned" }]);
   });

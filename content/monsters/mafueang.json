@@ -1,0 +1,61 @@
+{
+  "id": "mafueang",
+  "dex": 26,
+  "rarity": "rare",
+  "elements": [
+    "aqua",
+    "terra"
+  ],
+  "role": "consumer",
+  "habitat": "water",
+  "archetype": "tank",
+  "baseStats": {
+    "hp": 98,
+    "atk": 60,
+    "def": 94,
+    "spd": 48
+  },
+  "forms": [
+    {
+      "form": 1,
+      "name": "มะเฟืองน้อย",
+      "minLevel": 1,
+      "sprite": "mafueang_f1"
+    },
+    {
+      "form": 2,
+      "name": "มะเฟืองหญ้าทะเล",
+      "minLevel": 16,
+      "sprite": "mafueang_f2"
+    },
+    {
+      "form": 3,
+      "name": "พญามะเฟืองมหาสมุทร",
+      "minLevel": 36,
+      "sprite": "mafueang_f3"
+    }
+  ],
+  "learnset": [
+    {
+      "level": 1,
+      "move": "aqua_basic"
+    },
+    {
+      "level": 8,
+      "move": "terra_mid"
+    },
+    {
+      "level": 16,
+      "move": "aqua_adv"
+    },
+    {
+      "level": 36,
+      "move": "sig_seagrass_tide"
+    }
+  ],
+  "habitatHint": "ตำนานเล่าว่าว่ายข้ามมหาสมุทรมาวางไข่ที่หาดทราย",
+  "dexFact": "เต่ามะเฟืองกินแมงกะพรุนเป็นอาหารหลัก และมักกินถุงพลาสติกเพราะคิดว่าเป็นแมงกะพรุน จึงเป็นสัตว์ใกล้สูญพันธุ์ที่ต้องช่วยกันอนุรักษ์",
+  "factTopic": "conservation",
+  "enabled": true,
+  "addedInVersion": "1.1"
+}

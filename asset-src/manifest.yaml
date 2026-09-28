@@ -52,6 +52,27 @@ S05.png:
   out: assets/monsters/{row}/{col}.png
   atlas: monsters
 
+# มอนสเตอร์ชุดเพิ่ม (หัวข้อ 14.8) — พื้นขาว ไม่โปร่งใส
+S18.png:
+  rows: 5
+  cols: 6
+  category: monster
+  bg: auto
+  rowIds: [ngueak, duangpui, kongkang, hinghoi, parakang]
+  colIds: [f1_idle, f1_attack, f2_idle, f2_attack, f3_idle, f3_attack]
+  out: assets/monsters/{row}/{col}.png
+  atlas: monsters
+
+S19.png:
+  rows: 3
+  cols: 6
+  category: monster
+  bg: auto
+  rowIds: [khangkhao, chingchok, mafueang]
+  colIds: [f1_idle, f1_attack, f2_idle, f2_attack, f3_idle, f3_attack]
+  out: assets/monsters/{row}/{col}.png
+  atlas: monsters
+
 S06.png:
   rows: 4
   cols: 6
