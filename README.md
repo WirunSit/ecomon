@@ -5,6 +5,8 @@
 
 - แผนพัฒนาทั้งหมด: [`docs/GAME_PLAN.md`](docs/GAME_PLAN.md)
 - กติกาโปรเจคสำหรับนักพัฒนาและ Claude: [`CLAUDE.md`](CLAUDE.md)
+- ขึ้นระบบจริง (Docker, ตัวแปร env, สำรองข้อมูล): [`docs/DEPLOY.md`](docs/DEPLOY.md)
+- คู่มือครู 1 หน้า: [`docs/TEACHER_GUIDE.md`](docs/TEACHER_GUIDE.md)
 
 ## เริ่มใช้งาน
 
@@ -49,8 +51,11 @@ npm run dev           # server http://localhost:2567 + client http://localhost:5
 
 ## Server และฐานข้อมูล
 
-- ต้นแบบใช้ SQLite ที่ `server/data/ecomon.sqlite` (สร้างเองตอนเริ่ม) · ตัวแปร env ดู [`server/.env.example`](server/.env.example)
-- สร้างห้องเรียนให้นักเรียน: `npm run create-class -w server -- ม6A1 "ม.6/1"` (รหัส A-Z0-9 4–8 ตัว)
+- ต้นแบบใช้ SQLite ที่ `server/data/ecomon.sqlite` (สร้างเองตอนเริ่ม) · ตัวแปร env ตอนพัฒนาดู [`server/.env.example`](server/.env.example)
+  ตอนใช้จริงดู [`.env.example`](.env.example) และ [`docs/DEPLOY.md`](docs/DEPLOY.md)
+- ครูสร้างห้องเรียนเองได้ที่หน้าครู http://localhost:5173/teacher.html (รหัสเชิญตอนพัฒนา `DEVTEACHER`) หรือใช้คำสั่ง
+  `npm run create-class -w server -- M6A1 "ม.6/1"` (รหัส A-Z0-9 4–8 ตัว)
+- สำรองฐานข้อมูล (เปิด server อยู่ก็ได้): `npm run backup -w server`
 - แก้ตารางใน `server/src/db/schema.ts` แล้วรัน `npm run db:generate -w server` เพื่อสร้างไฟล์ migration (รันเองตอน server เริ่ม)
 - client หา server จาก `VITE_SERVER_URL` (http(s):// หรือ ws(s)://) ถ้าไม่ตั้ง ใช้พอร์ต 2567 ของเครื่องเดียวกัน
 

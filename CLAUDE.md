@@ -54,6 +54,7 @@ tools/    validate.ts, make-placeholders.ts, make-test-map.ts (อนาคต: 
 | `npm test` | vitest |
 | `npm run typecheck` | tsc ทุก workspace |
 | `npm run build` | validate แล้ว build client |
+| `npm run backup -w server -- [ไฟล์]` | สำรองฐานข้อมูลขณะ server เปิดอยู่ (ค่าเริ่มต้น `<โฟลเดอร์ DATABASE_PATH>/backups/`) — ดู docs/DEPLOY.md |
 
 **ก่อน commit ทุกครั้ง:** `npm run validate && npm test && npm run typecheck` ต้องผ่าน
 
@@ -245,7 +246,10 @@ tools/    validate.ts, make-placeholders.ts, make-test-map.ts (อนาคต: 
 - [x] เฟส 13 — หน้าครูและนำเข้าคำถาม (ดูหัวข้อ "หน้าครู" ด้านบน)
 - [~] เฟส 14 — ทำแล้ว: `npm run simulate` (บอท 60/80% → docs/BALANCE_REPORT.md พร้อมข้อเสนอ ยังไม่แก้ balance.json รอผู้ออกแบบตัดสิน)
       · `npm run load-test` (40 คน 8 ห้อง ผ่าน) · จำกัด login ต่อ IP ใหม่ (NAT โรงเรียน) · server เสิร์ฟ client/dist เอง (`clientDist`)
-      · Dockerfile + .env.example · ที่เหลือ: docs/DEPLOY.md, คู่มือครู 1 หน้า, deploy จริง (ต้องถามผู้ใช้ก่อน)
+      · Dockerfile + .env.example (docker build + รันจริงผ่านแล้ว) · docs/DEPLOY.md · docs/TEACHER_GUIDE.md
+      · `npm run backup -w server` (สำรอง SQLite ขณะเปิดอยู่ — ฐานข้อมูลเป็น WAL ห้ามคัดลอกไฟล์ตรง ๆ)
+      · ที่เหลือ: deploy จริง (ต้องถามผู้ใช้ก่อน) · ครูอนุมัติคำถาม (ตอนนี้ 0 ข้อ) · ตัดสินข้อเสนอใน BALANCE_REPORT.md
 - [x] เฟส 12 — ภาพจริงครบทุก sheet: มอน/ตัวละคร/tileset/NPC/ไอเท็ม/ไข่/ฉาก/เอฟเฟกต์ (จับได้ `capture_sparkle`, เลเวลอัป
       `level_up`) · ไอคอน UI (S14) ผ่าน `ui/uiIcon.ts` (`uiIcon()`, `elementChip()`, `rarityChip()`, `roleChip()`, `statLabel()`)
-      · ท่าเดินมอนบนแผนที่ `world/stepHop.ts` · validate เตือนถ้า frame ใน atlas ไม่ครบ · ยังไม่มีภาพพื้น eco_island (ต้องมี Python)
+      · ท่าเดินมอนบนแผนที่ `world/stepHop.ts` · validate เตือนถ้า frame ใน atlas ไม่ครบ · ภาพพื้น eco_island วาดแล้ว
+      · S08 (ลายพื้น) แถวสูงไม่เท่ากัน → `split: seams` ใน manifest (ตัดตามรอยต่อระหว่างลาย ไม่ใช่ตารางเท่ากัน)

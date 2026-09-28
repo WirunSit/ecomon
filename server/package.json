@@ -7,7 +7,8 @@
     "dev": "tsx watch src/index.ts",
     "start": "tsx src/index.ts",
     "db:generate": "drizzle-kit generate",
-    "create-class": "tsx src/scripts/create-class.ts"
+    "create-class": "tsx src/scripts/create-class.ts",
+    "backup": "tsx src/scripts/backup.ts"
   },
   "dependencies": {
     "@colyseus/core": "^0.16.0",
