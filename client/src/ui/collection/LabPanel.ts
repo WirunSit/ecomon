@@ -11,6 +11,7 @@ import {
   type RecipeView,
 } from "@ecomon/shared";
 import { eggImageUrl, eggStage, npcImageUrl } from "../../assets";
+import { audio } from "../../audio/engine";
 import { registry, speciesName } from "../../content";
 import { api } from "../../net/api";
 import { profile } from "../../state/profile";
@@ -178,6 +179,7 @@ export class LabPanel {
       return;
     }
     profile.set(r.profile);
+    audio.sfx("evolve");
     // แอนิเมชัน: ไข่สั่น → แตก → มอนตัวใหม่
     card.replaceChildren(img(eggSrc(e), "egg-img shake"), h("b", { text: T.hatching }));
     await new Promise((res) => setTimeout(res, 1300));

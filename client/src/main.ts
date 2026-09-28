@@ -7,6 +7,7 @@ import { LoginScene } from "./scenes/LoginScene";
 import { PreviewScene } from "./scenes/PreviewScene";
 import { StarterScene } from "./scenes/StarterScene";
 import { WorldScene } from "./scenes/WorldScene";
+import { audio } from "./audio/engine";
 import { setThumbnailSource } from "./ui/monsterThumb";
 
 /** ความละเอียดฐาน 960x540 ขยายแบบคงสัดส่วน */
@@ -35,8 +36,10 @@ async function start() {
     scene: [BootScene, LoginScene, StarterScene, LobbyScene, WorldScene, DungeonScene, BattleScene, PreviewScene],
   });
   setThumbnailSource(game);
+  // เสียงเริ่มได้หลังผู้เล่นกด/แตะครั้งแรก (กติกาของเบราว์เซอร์)
+  audio.install();
   // ตอนพัฒนา: เปิดให้เครื่องมือทดสอบเข้าถึงเกมได้ (เช่นเดินเฟรมเองตอนแท็บถูกซ่อน) — ไม่มีใน build จริง
-  if (import.meta.env.DEV) Object.assign(window, { __ecomon: { game } });
+  if (import.meta.env.DEV) Object.assign(window, { __ecomon: { game, audio } });
 }
 
 void start();

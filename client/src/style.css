@@ -864,3 +864,13 @@ button.equip-slot.filled { border-style: solid; }
 /* ลิงก์หน้าครูใต้ฟอร์ม login */
 .teacher-link { display: block; margin-top: 10px; text-align: center; font-size: 13px; color: var(--ui-muted); text-decoration: none; }
 .teacher-link:hover { color: var(--ui-fg); text-decoration: underline; }
+
+/* ตั้งค่าเสียง */
+.settings-audio { display: flex; flex-direction: column; gap: 14px; max-width: 560px; }
+.settings-row { display: grid; grid-template-columns: 220px 1fr 48px auto; align-items: center; gap: 12px; }
+.settings-row input[type=range] { width: 100%; accent-color: var(--ui-accent); }
+.settings-value { text-align: right; color: var(--ui-muted); font-size: 14px; }
+.settings-mute { display: flex; align-items: center; gap: 8px; }
+.settings-mute input { width: 18px; height: 18px; accent-color: var(--ui-accent); }
+.hud-sound { min-width: 44px; justify-content: center; }
+@media (max-width: 720px) { .settings-row { grid-template-columns: 1fr 48px; } .settings-row input[type=range] { grid-column: 1 / -1; grid-row: 2; } }

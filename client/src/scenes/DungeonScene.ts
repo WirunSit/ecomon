@@ -10,6 +10,7 @@ import {
 } from "@ecomon/shared";
 import { backgroundImageUrl, backgroundTextureKey } from "../assets";
 import { BattleLink } from "../battle/BattleLink";
+import { audio } from "../audio/engine";
 import { registry } from "../content";
 import { connection } from "../net/connection";
 import { profile } from "../state/profile";
@@ -76,6 +77,7 @@ export class DungeonScene extends Phaser.Scene {
 
   create() {
     this.cameras.main.setBackgroundColor("#141824");
+    const popScape = audio.push(registry.audio.dungeon);
     this.toast = new Toast();
     const room = this.room;
     room.onMessage(MSG.dungeonState, (s: DungeonStateView) => this.onState(s));
@@ -101,6 +103,7 @@ export class DungeonScene extends Phaser.Scene {
     });
     room.onLeave(() => void this.onDisconnected());
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      popScape();
       room.removeAllListeners();
       this.hud?.remove();
       this.hud = undefined;

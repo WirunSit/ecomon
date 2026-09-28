@@ -2,6 +2,7 @@ import { registry, speciesName } from "../content";
 import { monsterThumb } from "./monsterThumb";
 import { profile } from "../state/profile";
 import { h, uiRoot } from "./overlay";
+import { audio } from "../audio/engine";
 import { UI } from "./strings";
 import { uiIcon } from "./uiIcon";
 
@@ -9,6 +10,7 @@ import { uiIcon } from "./uiIcon";
 export class Hud {
   readonly el: HTMLElement;
   private readonly unsubscribe: () => void;
+  private readonly unsubscribeAudio: () => void;
   private readonly zoneEl = h("span", { className: "hud-zone" });
   private readonly roomEl = h("span", { className: "hud-zone hud-room" });
 
@@ -35,6 +37,14 @@ export class Hud {
     const mapBtn = h("button", { className: "hud-menu-btn interactive" }, [uiIcon("world_map"), UI.worldMap.button]);
     if (opts.onMap) mapBtn.addEventListener("click", opts.onMap);
     else mapBtn.style.display = "none";
+    // ปิด/เปิดเสียงเร็ว ๆ (ปรับละเอียดที่เมนู → ตั้งค่า)
+    const soundBtn = h("button", { className: "hud-menu-btn hud-sound interactive" });
+    soundBtn.type = "button";
+    soundBtn.title = UI.audio.toggle;
+    const showSound = () => (soundBtn.textContent = audio.settings.muted ? UI.audio.off : UI.audio.on);
+    showSound();
+    this.unsubscribeAudio = audio.subscribe(showSound);
+    soundBtn.addEventListener("click", () => audio.toggleMute());
     const chatBtn = h("button", { className: "hud-menu-btn interactive", text: `💬 ${UI.chat}` });
     if (opts.onChat) chatBtn.addEventListener("click", opts.onChat);
     else chatBtn.style.display = "none";
@@ -49,6 +59,7 @@ export class Hud {
       this.roomEl,
       this.zoneEl,
       partnerBtn,
+      soundBtn,
       mapBtn,
       chatBtn,
       menuBtn,
@@ -85,6 +96,7 @@ export class Hud {
 
   destroy() {
     this.unsubscribe();
+    this.unsubscribeAudio();
     this.el.remove();
   }
 }

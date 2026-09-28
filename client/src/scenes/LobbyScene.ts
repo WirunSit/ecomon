@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { ROOM_CODE_PATTERN } from "@ecomon/shared";
+import { audio } from "../audio/engine";
 import { registry } from "../content";
 import { api } from "../net/api";
 import { connection, joinErrorMessage, type WorldRoom } from "../net/connection";
@@ -16,6 +17,7 @@ export class LobbyScene extends Phaser.Scene {
   }
 
   create(data: { notice?: string } = {}) {
+    audio.setBase(registry.audio.title);
     const p = profile.get();
     const error = h("p", { className: "form-error", text: data.notice ?? "" });
     const enter = (join: () => Promise<WorldRoom>) => async () => {

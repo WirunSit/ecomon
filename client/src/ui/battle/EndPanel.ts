@@ -1,6 +1,7 @@
 import type { BattleEndMessage } from "@ecomon/shared";
 import { monsterImageUrl } from "../../assets";
 import { registry, speciesName } from "../../content";
+import { audio } from "../../audio/engine";
 import { h, uiRoot } from "../overlay";
 import { UI } from "../strings";
 
@@ -72,6 +73,8 @@ export function showEndPanel(end: BattleEndMessage): Promise<void> {
   ]);
   uiRoot().append(el);
   setTimeout(() => done.focus(), 50);
+  // เลเวลอัป (มอนหรือผู้เล่น) เล่นเสียงหลังเสียงชนะเล็กน้อย
+  if (end.levelUps.length || end.playerLevelUp) setTimeout(() => audio.sfx("level_up"), 900);
 
   return new Promise((resolve) => {
     let closed = false;

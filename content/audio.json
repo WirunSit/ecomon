@@ -1,0 +1,155 @@
+{
+  "defaults": { "music": 0.45, "ambience": 0.6, "sfx": 0.75 },
+  "scapes": [
+    {
+      "id": "title",
+      "name": "หน้าแรก",
+      "ambience": [
+        { "kind": "birds", "level": 0.25, "rate": 8 },
+        { "kind": "wind", "level": 0.15 }
+      ],
+      "music": { "scale": "major_pentatonic", "root": 62, "tempo": 76, "instrument": "bell", "progression": [0, 3, 4, 0], "density": 0.45, "bass": true, "pad": true, "level": 0.55 }
+    },
+    {
+      "id": "village",
+      "name": "หมู่บ้านต้นกล้า",
+      "ambience": [
+        { "kind": "birds", "level": 0.3, "rate": 10 },
+        { "kind": "stream", "level": 0.15, "pitch": 1.3 },
+        { "kind": "wind", "level": 0.12 }
+      ],
+      "music": { "scale": "thai", "root": 62, "tempo": 92, "instrument": "ranat", "progression": [0, 3, 4, 0, 2, 3, 4, 0], "density": 0.55, "bass": true, "drums": "soft", "level": 0.5 }
+    },
+    {
+      "id": "meadow",
+      "name": "ทุ่งหญ้าลมหวน",
+      "ambience": [
+        { "kind": "wind", "level": 0.3 },
+        { "kind": "rustle", "level": 0.2 },
+        { "kind": "birds", "level": 0.35, "rate": 14, "pitch": 1.1 },
+        { "kind": "insects", "level": 0.12, "pitch": 1.2 }
+      ],
+      "music": { "scale": "major_pentatonic", "root": 64, "tempo": 84, "instrument": "flute", "progression": [0, 4, 3, 0], "density": 0.4, "bass": true, "level": 0.45 }
+    },
+    {
+      "id": "forest",
+      "name": "ป่าเห็ดเรืองแสง",
+      "ambience": [
+        { "kind": "rustle", "level": 0.25 },
+        { "kind": "drips", "level": 0.3, "rate": 8 },
+        { "kind": "insects", "level": 0.2, "pitch": 1.5 },
+        { "kind": "birds", "level": 0.15, "rate": 5, "pitch": 0.75 }
+      ],
+      "music": { "scale": "lydian", "root": 57, "tempo": 68, "instrument": "bell", "progression": [0, 1, 0, 4], "density": 0.3, "bass": true, "pad": true, "level": 0.45 }
+    },
+    {
+      "id": "lake",
+      "name": "บึงบัวและทะเลสาบ",
+      "ambience": [
+        { "kind": "stream", "level": 0.3 },
+        { "kind": "frogs", "level": 0.35, "rate": 12 },
+        { "kind": "insects", "level": 0.18 },
+        { "kind": "birds", "level": 0.15, "rate": 5 }
+      ],
+      "music": { "scale": "major_pentatonic", "root": 60, "tempo": 80, "instrument": "ranat", "progression": [0, 2, 3, 0], "density": 0.4, "bass": true, "pad": true, "level": 0.45 }
+    },
+    {
+      "id": "canyon",
+      "name": "หุบเขาหินและถ้ำ",
+      "ambience": [
+        { "kind": "wind", "level": 0.5, "pitch": 0.8 },
+        { "kind": "drips", "level": 0.2, "rate": 4 },
+        { "kind": "drone", "level": 0.12, "pitch": 0.7 }
+      ],
+      "music": { "scale": "dorian", "root": 55, "tempo": 66, "instrument": "flute", "progression": [0, 3, 0, 6], "density": 0.3, "bass": true, "level": 0.45 }
+    },
+    {
+      "id": "volcano",
+      "name": "ภูเขาไฟ",
+      "ambience": [
+        { "kind": "crackle", "level": 0.4, "rate": 40 },
+        { "kind": "drone", "level": 0.35, "pitch": 0.5 },
+        { "kind": "wind", "level": 0.2, "pitch": 0.6 }
+      ],
+      "music": { "scale": "minor", "root": 52, "tempo": 60, "instrument": "pad", "progression": [0, 5, 3, 4], "density": 0.25, "bass": true, "drums": "soft", "level": 0.45 }
+    },
+    {
+      "id": "coast",
+      "name": "ชายฝั่งและทะเลลึก",
+      "ambience": [
+        { "kind": "waves", "level": 0.55 },
+        { "kind": "wind", "level": 0.25, "pitch": 1.2 },
+        { "kind": "birds", "level": 0.2, "rate": 4, "pitch": 1.6 },
+        { "kind": "bubbles", "level": 0.12, "rate": 10 }
+      ],
+      "music": { "scale": "major_pentatonic", "root": 65, "tempo": 88, "instrument": "pluck", "progression": [0, 3, 4, 3], "density": 0.45, "bass": true, "pad": true, "level": 0.45 }
+    },
+    {
+      "id": "valley",
+      "name": "หุบเขาประชากร",
+      "ambience": [
+        { "kind": "birds", "level": 0.35, "rate": 12 },
+        { "kind": "stream", "level": 0.25 },
+        { "kind": "wind", "level": 0.2 },
+        { "kind": "insects", "level": 0.12 }
+      ],
+      "music": { "scale": "thai", "root": 64, "tempo": 96, "instrument": "ranat", "progression": [0, 4, 3, 0, 5, 4, 3, 0], "density": 0.55, "bass": true, "drums": "soft", "level": 0.5 }
+    },
+    {
+      "id": "battle",
+      "name": "ต่อสู้มอนป่า",
+      "ambience": [],
+      "music": { "scale": "minor_pentatonic", "root": 57, "tempo": 132, "instrument": "pluck", "progression": [0, 0, 3, 4], "density": 0.6, "bass": true, "drums": "battle", "level": 0.5 }
+    },
+    {
+      "id": "dungeon",
+      "name": "ดันเจี้ยน",
+      "ambience": [
+        { "kind": "drips", "level": 0.35, "rate": 12 },
+        { "kind": "drone", "level": 0.3, "pitch": 0.6 },
+        { "kind": "wind", "level": 0.12, "pitch": 0.5 }
+      ],
+      "music": { "scale": "minor", "root": 50, "tempo": 64, "instrument": "pad", "progression": [0, 5, 0, 4], "density": 0.2, "bass": true, "level": 0.4 }
+    },
+    {
+      "id": "boss",
+      "name": "บอสมลพิษ",
+      "ambience": [{ "kind": "drone", "level": 0.3, "pitch": 0.45 }],
+      "music": { "scale": "minor", "root": 52, "tempo": 144, "instrument": "pluck", "progression": [0, 5, 3, 4], "density": 0.65, "bass": true, "pad": true, "drums": "boss", "level": 0.55 }
+    }
+  ],
+  "zones": {
+    "village": "village",
+    "meadow": "meadow",
+    "forest": "forest",
+    "lake": "lake",
+    "canyon": "canyon",
+    "volcano": "volcano",
+    "coast": "coast",
+    "valley": "valley"
+  },
+  "title": "title",
+  "battle": "battle",
+  "dungeon": "dungeon",
+  "boss": "boss",
+  "elements": {
+    "flora": { "attack": "leaves", "pitch": 1, "cry": "purr" },
+    "pyro": { "attack": "fire", "pitch": 1, "cry": "growl" },
+    "terra": { "attack": "rumble", "pitch": 1, "cry": "rumble" },
+    "aero": { "attack": "whoosh", "pitch": 1, "cry": "chirp" },
+    "aqua": { "attack": "splash", "pitch": 1, "cry": "bloop" },
+    "spore": { "attack": "spores", "pitch": 1, "cry": "hum" }
+  },
+  "cries": [
+    { "species": "fungfiw", "voice": "trill", "pitch": 1.2 },
+    { "species": "ngueak", "voice": "chirp", "pitch": 0.85, "syllables": 3 },
+    { "species": "hinghoi", "voice": "trill", "pitch": 1.4 },
+    { "species": "duangpui", "voice": "hum", "pitch": 0.8 },
+    { "species": "kongkang", "voice": "hum", "pitch": 0.7, "syllables": 1 },
+    { "species": "khangkhao", "voice": "chirp", "pitch": 1.6, "syllables": 4 },
+    { "species": "napawan", "voice": "bloop", "pitch": 0.5, "syllables": 2 },
+    { "species": "gaiara", "voice": "rumble", "pitch": 0.6, "syllables": 1 },
+    { "species": "suriya", "voice": "trill", "pitch": 1.1, "syllables": 3 }
+  ],
+  "files": {}
+}

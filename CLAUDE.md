@@ -229,6 +229,21 @@ tools/    validate.ts, make-placeholders.ts, make-test-map.ts (อนาคต: 
 - client ใช้ `import.meta.glob` เฉพาะไฟล์ที่ใช้จริง (glob ทั้งโฟลเดอร์จะพาภาพที่ไม่ใช้ไปอยู่ใน build)
 - ภาพหันขวาทิศเดียว หันซ้ายใช้ `setFlipX` · ท่าเดิน/โจมตี/เงาดำ/บอสมลพิษ ทำด้วยโค้ด (หัวข้อ 14.1)
 
+## เสียง
+
+- **ข้อมูลอยู่ใน `content/audio.json`** (schema `shared/src/schema/audio.ts`): บรรยากาศเสียง (scape) = ชั้นเสียงธรรมชาติ + ดนตรีสร้างสด
+  · `zones` โซน → scape (validate เตือนถ้าโซนไหนไม่มี) · `title/battle/dungeon/boss` · เสียงโจมตี+โทนเสียงร้องต่อธาตุ · `cries` ปรับรายสายพันธุ์
+  · โค้ดรู้จักเฉพาะชนิด: `AMBIENCE_KINDS`, `MUSIC_SCALES` (มีบันไดเสียงไทย 7 ขั้นเท่า), `MUSIC_INSTRUMENTS` (ระนาด ดีด ขลุ่ย ระฆัง แพด),
+  `ATTACK_KINDS`, `CRY_VOICES`, `UI_SOUNDS`
+- เสียงทั้งหมด**สังเคราะห์สดด้วย Web Audio** ใน `client/src/audio/` (ไม่มีไฟล์เสียง) · `files` ใน audio.json ชี้ไฟล์จริงใน `assets/audio/`
+  (คีย์ `music:<scape>` `ambience:<scape>` `sfx:<ชื่อ>` `cry:<species>` `attack:<element>`) แล้วเกมใช้ไฟล์แทนเสียงสังเคราะห์
+- `audio` (engine.ts): ช่องเสียง ดนตรี/บรรยากาศ/เอฟเฟกต์ (ผู้เล่นปรับที่ เมนู → ตั้งค่า · จำใน localStorage) · บรรยากาศแบบซ้อนชั้น
+  `setBase()` = โซนที่ยืน (WorldScene.updateZone) · `push()` คืนฟังก์ชันถอด (BattleScene ต่อสู้/บอส, DungeonScene) · เปิดเสียงหลัง gesture แรก
+  · แท็บซ่อน = พักเสียง · `audio.sfx() / attack(element) / cry(species, form)`
+- `theory.ts` (แต่งทำนอง) กับ `cryParams.ts` (คิดเสียงร้องจากธาตุ รูปแบบ ร่าง ความหายาก) เป็นฟังก์ชันล้วน เทสต์ใน `client/test/`
+- **หน้าทดลองฟัง** (เฉพาะตอนพัฒนา): `http://localhost:5173/audio-lab.html` · `window.__audioCheck()` เรนเดอร์ออฟไลน์ทุกเสียง วัดความดัง/เสียงแตก/เงียบ
+  · `window.__renderWav(scapeId)` ได้ไฟล์ WAV (base64) · แก้ audio.json แล้วรีเฟรชฟังได้ทันที
+
 ## ภาษา
 
 - ข้อความที่ผู้เล่นเห็นเป็นภาษาไทยและมาจาก content · comment ในโค้ดเป็นภาษาไทยได้

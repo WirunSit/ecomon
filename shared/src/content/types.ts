@@ -1,4 +1,5 @@
 import type {
+  AudioFile,
   Balance,
   BreedingRecipes,
   CollectionReward,
@@ -41,6 +42,8 @@ export interface GameContent {
   collectionRewards: CollectionReward[];
   /** แผนที่จาก content/maps/<id>.tmj */
   maps: GameMap[];
+  /** เสียงในเกม (content/audio.json) */
+  audio: AudioFile;
 }
 
 /** ตำแหน่งในไฟล์: ชื่อไฟล์ (สัมพัทธ์กับ content/) + JSON path */

@@ -26,6 +26,7 @@ import {
   unlocksBetween,
   zoneAt,
 } from "@ecomon/shared";
+import { audio } from "../audio/engine";
 import { BattleLink } from "../battle/BattleLink";
 import { balance, loadedMap, registry, type LoadedMap } from "../content";
 import { InputController } from "../input/InputController";
@@ -53,6 +54,7 @@ import { DevPanel } from "../ui/DevPanel";
 import { FullPanel } from "../ui/FullPanel";
 import { Hud } from "../ui/Hud";
 import { MenuPanel } from "../ui/MenuPanel";
+import { SettingsPanel } from "../ui/SettingsPanel";
 import { h, uiRoot } from "../ui/overlay";
 import { chatText, QuickChatPanel } from "../ui/QuickChatPanel";
 import { Toast } from "../ui/Toast";
@@ -205,6 +207,7 @@ export class WorldScene extends Phaser.Scene {
         bag: () => void bag.open(),
         lab: () => void this.lab.open({ atLab: this.nearNpcWith("lab") }),
         quests: () => void this.questLog.open(),
+        settings: () => new SettingsPanel().open(),
       },
     );
     this.chat = new QuickChatPanel((msg) => room.send(MSG.chat, msg));
@@ -337,6 +340,8 @@ export class WorldScene extends Phaser.Scene {
     const zone = zoneAt(this.loaded.game, this.player.tileX, this.player.tileY);
     if (zone === this.currentZone) return;
     this.currentZone = zone;
+    // บรรยากาศเสียงตามระบบนิเวศของโซน (ค่อย ๆ เปลี่ยนเมื่อเดินข้ามเขต)
+    audio.setBase(audio.scapeForZone(zone));
     this.hud.setZone(zone ? registry.zones.find(zone)?.name : undefined);
   }
 
@@ -360,13 +365,17 @@ export class WorldScene extends Phaser.Scene {
     const q = registry.quests.find(m.quest.id);
     const o = q?.objectives[m.objective];
     if (!q || !o) return;
-    if (m.quest.status === "done") this.toast.show(UI.quests.done(q.title), 4000);
+    if (m.quest.status === "done") {
+      this.toast.show(UI.quests.done(q.title), 4000);
+      audio.sfx("quest");
+    }
     else this.toast.show(UI.quests.updated(q.title, objectiveText(o), m.quest.progress[m.objective] ?? 0, m.quest.targets[m.objective] ?? 1), 2500);
   }
 
   /** เลเวลขึ้น: บอกสิ่งที่ปลดล็อก (โซน ดันเจี้ยน การผสม คลังเพิ่ม หัวข้อ 9.3) แล้วโหลดเควสใหม่ */
   private onLevelUp(from: number, to: number) {
     const T = UI.levelUp;
+    audio.sfx("level_up");
     const lines = unlocksBetween(registry, from, to).map((u) =>
       u.kind === "zone" ? T.zone(registry.zones.get(u.id).name) : u.kind === "dungeon" ? T.dungeon(registry.dungeons.get(u.id).name) : T.breeding(UI.lab.tierName[u.id] ?? u.id),
     );
@@ -540,6 +549,8 @@ export class WorldScene extends Phaser.Scene {
     }
     const text = n.text ?? (n.code ? UI.notice[n.code] : undefined);
     if (!text) return;
+    if (n.code === "team_healed") audio.sfx("heal");
+    else if (n.code === "egg_ready") audio.sfx("notice");
     if (this.battle && n.text) this.battle.push({ type: "notice", text });
     else this.toast.show(text, 3000);
   }

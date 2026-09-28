@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { AVATAR_COUNT, type PlayerProfile } from "@ecomon/shared";
 import { characterImageUrl, fallbackUrl, monsterImageUrl } from "../assets";
+import { audio } from "../audio/engine";
 import { registry } from "../content";
 import { api } from "../net/api";
 import { profile } from "../state/profile";
@@ -15,6 +16,7 @@ export class StarterScene extends Phaser.Scene {
   }
 
   create() {
+    audio.setBase(registry.audio.title);
     const error = h("p", { className: "form-error" });
     // รูปลักษณ์ตัวละครนักเรียน 4 แบบ (sheet S06)
     let avatar = 0;

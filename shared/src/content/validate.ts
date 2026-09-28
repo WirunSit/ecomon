@@ -463,6 +463,32 @@ export function validateContent(c: GameContent, origins: ContentOrigins, opts: V
     });
   }
 
+  // ---------- audio ----------
+  const A = "audio.json";
+  const scapeIds = uniqueIds(c.audio.scapes, (i) => [A, ["scapes", i]]);
+  const scapeRef = (path: (string | number)[], id: string) => {
+    if (!scapeIds.has(id)) err(A, path, `ไม่มีบรรยากาศเสียง "${id}" ใน scapes`);
+  };
+  for (const [zone, scape] of Object.entries(c.audio.zones)) {
+    if (!zones.has(zone)) err(A, ["zones", zone], `ไม่มีโซน "${zone}" ใน zones.json`);
+    scapeRef(["zones", zone], scape);
+  }
+  c.zones.forEach((z, i) => {
+    if (!c.audio.zones[z.id]) warn(F.zones, ["zones", i], `โซน "${z.id}" ยังไม่มีบรรยากาศเสียงใน audio.json (zones)`);
+  });
+  for (const key of ["title", "battle", "dungeon", "boss"] as const) scapeRef([key], c.audio[key]);
+  for (const el of Object.keys(c.audio.elements)) if (!elements.has(el)) err(A, ["elements", el], `ไม่มีธาตุ "${el}" ใน elements.json`);
+  c.elements.forEach((e) => {
+    if (!c.audio.elements[e.id]) warn(A, ["elements"], `ธาตุ "${e.id}" ยังไม่มีเสียงโจมตี/เสียงร้อง`);
+  });
+  c.audio.cries.forEach((cry, i) => {
+    if (!species.has(cry.species)) err(A, ["cries", i, "species"], `ไม่มีมอนสเตอร์ "${cry.species}"`);
+  });
+  for (const [key, file] of Object.entries(c.audio.files)) {
+    if (!/\.(ogg|mp3|wav|m4a)$/.test(file)) err(A, ["files", key], "ไฟล์เสียงต้องเป็น .ogg .mp3 .wav หรือ .m4a");
+    else if (opts.assetExists && !opts.assetExists(`audio/${file}`)) err(A, ["files", key], `ไม่มีไฟล์ assets/audio/${file}`);
+  }
+
   // ---------- quick chat ----------
   uniqueIds(c.quickChat.messages, (i) => [F.quickChat, ["messages", i]]);
   uniqueIds(c.quickChat.emotes, (i) => [F.quickChat, ["emotes", i]]);

@@ -1,5 +1,6 @@
 import type { BuyResponse, ShopCurrency, ShopEntry, ShopResponse } from "@ecomon/shared";
 import { npcImageUrl } from "../../assets";
+import { audio } from "../../audio/engine";
 import { registry } from "../../content";
 import { api } from "../../net/api";
 import { profile } from "../../state/profile";
@@ -110,6 +111,7 @@ export class ShopPanel {
     try {
       const r = await api<BuyResponse>(`/shop/${this.data.npc}/buy`, { body: { itemId: e.itemId, qty, currency: e.currency } });
       profile.set(r.profile);
+      audio.sfx("coin");
       this.data = { ...this.data, bag: r.bag };
       this.toast(T.bought(registry.items.get(e.itemId).name, qty));
       this.render();

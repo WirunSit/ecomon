@@ -6,3 +6,4 @@ export * from "./items";
 export * from "./progression";
 export * from "./question";
 export * from "./tiled";
+export * from "./audio";
