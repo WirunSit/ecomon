@@ -26,6 +26,12 @@ import yaml
 from PIL import Image, ImageDraw
 from scipy import ndimage
 
+# Windows ที่ตั้งภาษาไทยใช้ cp874 เป็นค่าเริ่มต้น → บังคับ UTF-8 ให้พิมพ์ข้อความไทย/สัญลักษณ์ได้
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure"):
+        _stream.reconfigure(encoding="utf-8")
+
+
 ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / "asset-src"
 ASSETS = ROOT / "assets"
@@ -98,15 +104,16 @@ def load_sheet(path: Path, bg: str) -> tuple[np.ndarray, str]:
 # ---------- 2. หาเส้นแบ่งช่อง ----------
 
 
-def find_cuts(profile: np.ndarray, n: int) -> tuple[list[int], list[int]]:
-    """ตำแหน่งตัด n ช่องจาก profile (จำนวนพิกเซลที่มีภาพต่อแถว/คอลัมน์) คืน (cuts, ค่าที่ตำแหน่งตัด)"""
+def find_cuts(profile: np.ndarray, n: int, window: float = GUTTER_WINDOW) -> tuple[list[int], list[int]]:
+    """ตำแหน่งตัด n ช่องจาก profile (จำนวนพิกเซลที่มีภาพต่อแถว/คอลัมน์) คืน (cuts, ค่าที่ตำแหน่งตัด)
+    window = ค้นหาเส้นแบ่งในช่วง ±window ของขนาดช่อง (sheet ที่ภาพวางเบี้ยวจากตาราง ตั้ง gutterWindow ใน manifest ให้กว้างขึ้น)"""
     length = len(profile)
     size = length / n
     cuts, residue = [0], []
     for k in range(1, n):
         center = k * size
-        lo = max(1, int(center - GUTTER_WINDOW * size))
-        hi = min(length - 1, int(center + GUTTER_WINDOW * size))
+        lo = max(1, int(center - window * size))
+        hi = min(length - 1, int(center + window * size))
         seg = profile[lo:hi]
         best_val = seg.min()
         idxs = np.where(seg == best_val)[0] + lo
@@ -339,8 +346,9 @@ def slice_sheet(name: str, spec: dict, args: argparse.Namespace) -> tuple[SheetR
         ys = seam_cuts(rgba[..., :3], rows, 0)
         xs_rows = [seam_cuts(rgba[..., :3], cols, 1)] * rows
     else:
-        ys, _ = find_cuts(filled.sum(axis=1), rows)
-        xs_rows = [find_cuts(filled[ys[r] : ys[r + 1]].sum(axis=0), cols)[0] for r in range(rows)]
+        window = float(spec.get("gutterWindow", GUTTER_WINDOW))
+        ys, _ = find_cuts(filled.sum(axis=1), rows, window)
+        xs_rows = [find_cuts(filled[ys[r] : ys[r + 1]].sum(axis=0), cols, window)[0] for r in range(rows)]
     owners = None
     if mode != "none" and split == "gutter":
         owners = assign_components(filled, ys, xs_rows, report)
@@ -469,7 +477,7 @@ def build_atlas(atlas: str, entries: list[tuple[str, Path]], page_size: int = 20
         files.append(ATLAS_DIR / image_name)
         textures.append({"image": image_name, "format": "RGBA8888", "size": {"w": canvas.width, "h": canvas.height}, "scale": 1, "frames": frames})
     meta = ATLAS_DIR / f"{atlas}.json"
-    meta.write_text(json.dumps({"textures": textures, "meta": {"app": "tools/slice_sheets.py", "version": "1"}}, indent=1) + "\n")
+    meta.write_text(json.dumps({"textures": textures, "meta": {"app": "tools/slice_sheets.py", "version": "1"}}, indent=1) + "\n", encoding="utf-8")
     files.append(meta)
     return files
 
@@ -526,23 +534,23 @@ def completeness() -> list[str]:
     missing = []
     content = ROOT / "content"
     for f in sorted((content / "monsters").glob("*.json")):
-        m = json.loads(f.read_text())
+        m = json.loads(f.read_text(encoding="utf-8"))
         for form in m["forms"]:
             for pose in ("idle", "attack"):
                 p = ASSETS / "monsters" / m["id"] / f"f{form['form']}_{pose}.png"
                 if not p.exists():
                     missing.append(str(p.relative_to(ROOT)))
-    for item in json.loads((content / "items.json").read_text())["items"]:
+    for item in json.loads((content / "items.json").read_text(encoding="utf-8"))["items"]:
         p = ASSETS / "items" / f"{item['icon']}.png"
         if not p.exists():
             missing.append(f"{p.relative_to(ROOT)} (ไอเท็ม {item['id']})")
-    for npc in json.loads((content / "npcs.json").read_text())["npcs"]:
+    for npc in json.loads((content / "npcs.json").read_text(encoding="utf-8"))["npcs"]:
         for key in ("sprite", "portrait"):
             p = ASSETS / "npcs" / f"{npc[key]}.png"
             if not p.exists():
                 missing.append(str(p.relative_to(ROOT)))
-    bgs = {z["battleBackground"] for z in json.loads((content / "zones.json").read_text())["zones"]}
-    bgs |= {d["battleBackground"] for d in json.loads((content / "dungeons.json").read_text())["dungeons"]}
+    bgs = {z["battleBackground"] for z in json.loads((content / "zones.json").read_text(encoding="utf-8"))["zones"]}
+    bgs |= {d["battleBackground"] for d in json.loads((content / "dungeons.json").read_text(encoding="utf-8"))["dungeons"]}
     for bg in sorted(bgs):
         p = ASSETS / "backgrounds" / f"{bg}.webp"
         if not p.exists():
@@ -554,10 +562,10 @@ def forget_placeholders(written: list[str]):
     """ไฟล์ที่เป็นภาพจริงแล้ว ห้ามให้ npm run placeholders เขียนทับ"""
     if not PLACEHOLDER_MANIFEST.exists():
         return
-    listed = json.loads(PLACEHOLDER_MANIFEST.read_text())
+    listed = json.loads(PLACEHOLDER_MANIFEST.read_text(encoding="utf-8"))
     real = {str(Path(p).relative_to("assets")) for p in written if p.startswith("assets/")}
     kept = [p for p in listed if p not in real]
-    PLACEHOLDER_MANIFEST.write_text(json.dumps(kept, indent=2) + "\n")
+    PLACEHOLDER_MANIFEST.write_text(json.dumps(kept, indent=2) + "\n", encoding="utf-8")
 
 
 def main() -> int:
@@ -567,7 +575,7 @@ def main() -> int:
     ap.add_argument("--bg", choices=["auto", "alpha", "white", "none"], help="บังคับวิธีแยกพื้นหลัง")
     args = ap.parse_args()
 
-    manifest = yaml.safe_load((SRC / "manifest.yaml").read_text())
+    manifest = yaml.safe_load((SRC / "manifest.yaml").read_text(encoding="utf-8"))
     sheets = [n for n in manifest if not n.startswith("_")]
     if args.sheet:
         if args.sheet not in manifest:

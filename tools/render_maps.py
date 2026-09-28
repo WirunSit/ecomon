@@ -24,6 +24,12 @@ import yaml
 from PIL import Image
 from scipy import ndimage
 
+# Windows ที่ตั้งภาษาไทยใช้ cp874 เป็นค่าเริ่มต้น → บังคับ UTF-8 ให้พิมพ์ข้อความไทย/สัญลักษณ์ได้
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure"):
+        _stream.reconfigure(encoding="utf-8")
+
+
 ROOT = Path(__file__).resolve().parent.parent
 MAPS = ROOT / "content" / "maps"
 TEXTURES = ROOT / "assets" / "tiles" / "src"
@@ -107,7 +113,7 @@ class Texture:
 
 
 def load_map(path: Path):
-    tmj = json.loads(path.read_text())
+    tmj = json.loads(path.read_text(encoding="utf-8"))
     layers = {l["name"]: l for l in tmj["layers"]}
     w, h, t = tmj["width"], tmj["height"], tmj["tilewidth"]
     materials: dict[int, str] = {}
@@ -274,7 +280,7 @@ def save(path: Path, result: dict, cfg: dict) -> list[Path]:
         "chunks": chunks,
         "source": source_hash(path),
     }
-    (out_dir / "ground.json").write_text(json.dumps(meta, indent=1) + "\n")
+    (out_dir / "ground.json").write_text(json.dumps(meta, indent=1) + "\n", encoding="utf-8")
     files.append(out_dir / "ground.json")
     return files
 
@@ -283,7 +289,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--map", help="วาดเฉพาะแผนที่นี้ (id = ชื่อไฟล์ไม่รวม .tmj)")
     args = ap.parse_args()
-    cfg = yaml.safe_load(CONFIG.read_text())
+    cfg = yaml.safe_load(CONFIG.read_text(encoding="utf-8"))
     paths = sorted(MAPS.glob("*.tmj"))
     if args.map:
         paths = [p for p in paths if p.stem == args.map]

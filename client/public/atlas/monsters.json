@@ -1360,7 +1360,7 @@
    "format": "RGBA8888",
    "size": {
     "w": 2048,
-    "h": 1536
+    "h": 2048
    },
    "scale": 1,
    "frames": [
@@ -2272,6 +2272,1025 @@
      "frame": {
       "x": 768,
       "y": 1280,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "ngueak/f1_idle",
+     "frame": {
+      "x": 1024,
+      "y": 1280,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "ngueak/f1_attack",
+     "frame": {
+      "x": 1280,
+      "y": 1280,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "ngueak/f2_idle",
+     "frame": {
+      "x": 1536,
+      "y": 1280,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "ngueak/f2_attack",
+     "frame": {
+      "x": 1792,
+      "y": 1280,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "ngueak/f3_idle",
+     "frame": {
+      "x": 0,
+      "y": 1536,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "ngueak/f3_attack",
+     "frame": {
+      "x": 256,
+      "y": 1536,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "duangpui/f1_idle",
+     "frame": {
+      "x": 512,
+      "y": 1536,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "duangpui/f1_attack",
+     "frame": {
+      "x": 768,
+      "y": 1536,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "duangpui/f2_idle",
+     "frame": {
+      "x": 1024,
+      "y": 1536,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "duangpui/f2_attack",
+     "frame": {
+      "x": 1280,
+      "y": 1536,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "duangpui/f3_idle",
+     "frame": {
+      "x": 1536,
+      "y": 1536,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "duangpui/f3_attack",
+     "frame": {
+      "x": 1792,
+      "y": 1536,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "kongkang/f1_idle",
+     "frame": {
+      "x": 0,
+      "y": 1792,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "kongkang/f1_attack",
+     "frame": {
+      "x": 256,
+      "y": 1792,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "kongkang/f2_idle",
+     "frame": {
+      "x": 512,
+      "y": 1792,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "kongkang/f2_attack",
+     "frame": {
+      "x": 768,
+      "y": 1792,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "kongkang/f3_idle",
+     "frame": {
+      "x": 1024,
+      "y": 1792,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "kongkang/f3_attack",
+     "frame": {
+      "x": 1280,
+      "y": 1792,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "hinghoi/f1_idle",
+     "frame": {
+      "x": 1536,
+      "y": 1792,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "hinghoi/f1_attack",
+     "frame": {
+      "x": 1792,
+      "y": 1792,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    }
+   ]
+  },
+  {
+   "image": "monsters-2.webp",
+   "format": "RGBA8888",
+   "size": {
+    "w": 2048,
+    "h": 1024
+   },
+   "scale": 1,
+   "frames": [
+    {
+     "filename": "hinghoi/f2_idle",
+     "frame": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "hinghoi/f2_attack",
+     "frame": {
+      "x": 256,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "hinghoi/f3_idle",
+     "frame": {
+      "x": 512,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "hinghoi/f3_attack",
+     "frame": {
+      "x": 768,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "parakang/f1_idle",
+     "frame": {
+      "x": 1024,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "parakang/f1_attack",
+     "frame": {
+      "x": 1280,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "parakang/f2_idle",
+     "frame": {
+      "x": 1536,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "parakang/f2_attack",
+     "frame": {
+      "x": 1792,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "parakang/f3_idle",
+     "frame": {
+      "x": 0,
+      "y": 256,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "parakang/f3_attack",
+     "frame": {
+      "x": 256,
+      "y": 256,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "khangkhao/f1_idle",
+     "frame": {
+      "x": 512,
+      "y": 256,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "khangkhao/f1_attack",
+     "frame": {
+      "x": 768,
+      "y": 256,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "khangkhao/f2_idle",
+     "frame": {
+      "x": 1024,
+      "y": 256,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "khangkhao/f2_attack",
+     "frame": {
+      "x": 1280,
+      "y": 256,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "khangkhao/f3_idle",
+     "frame": {
+      "x": 1536,
+      "y": 256,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "khangkhao/f3_attack",
+     "frame": {
+      "x": 1792,
+      "y": 256,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "chingchok/f1_idle",
+     "frame": {
+      "x": 0,
+      "y": 512,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "chingchok/f1_attack",
+     "frame": {
+      "x": 256,
+      "y": 512,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "chingchok/f2_idle",
+     "frame": {
+      "x": 512,
+      "y": 512,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "chingchok/f2_attack",
+     "frame": {
+      "x": 768,
+      "y": 512,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "chingchok/f3_idle",
+     "frame": {
+      "x": 1024,
+      "y": 512,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "chingchok/f3_attack",
+     "frame": {
+      "x": 1280,
+      "y": 512,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "mafueang/f1_idle",
+     "frame": {
+      "x": 1536,
+      "y": 512,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "mafueang/f1_attack",
+     "frame": {
+      "x": 1792,
+      "y": 512,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "mafueang/f2_idle",
+     "frame": {
+      "x": 0,
+      "y": 768,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "mafueang/f2_attack",
+     "frame": {
+      "x": 256,
+      "y": 768,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "mafueang/f3_idle",
+     "frame": {
+      "x": 512,
+      "y": 768,
+      "w": 256,
+      "h": 256
+     },
+     "rotated": false,
+     "trimmed": false,
+     "spriteSourceSize": {
+      "x": 0,
+      "y": 0,
+      "w": 256,
+      "h": 256
+     },
+     "sourceSize": {
+      "w": 256,
+      "h": 256
+     }
+    },
+    {
+     "filename": "mafueang/f3_attack",
+     "frame": {
+      "x": 768,
+      "y": 768,
       "w": 256,
       "h": 256
      },

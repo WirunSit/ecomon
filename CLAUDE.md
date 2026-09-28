@@ -221,6 +221,10 @@ tools/    validate.ts, make-placeholders.ts, make-test-map.ts (อนาคต: 
 ## ภาพ
 
 - ภาพทั้งหมดมาจาก `npm run assets` ห้ามแก้ไฟล์ใน assets/ ด้วยมือ (จะถูกเขียนทับ) — แก้ที่ sheet หรือ manifest
+  · สคริปต์ Python รันผ่าน `tools/py.mjs` (หา Python 3 เอง รองรับ Windows ภาษาไทย) ต้องมี numpy scipy pillow pyyaml
+  · ตัด sheet เดียว: `node tools/py.mjs tools/slice_sheets.py --sheet S18.png` (atlas สร้างใหม่จากภาพทั้งหมดเสมอ) · ดูผลที่ `asset-src/_preview/<sheet>_contact.png`
+  · GPT วางภาพเบี้ยวจากตารางจนตัดผิดช่อง → ตั้ง `gutterWindow` (เช่น 0.45) ให้ sheet นั้นใน manifest
+- มอนสเตอร์ชุดเพิ่ม (หัวข้อ 14.8): S18 = Normal 5 ตัว (dex 19–23) · S19 = Rare 3 ตัว (dex 24–26) · ไฟล์ sheet ต้นฉบับ S18/S19 เป็นภาพย่อ 1125 px
 - มอนสเตอร์ใน Phaser ใช้ atlas `monsters` (frame `<id>/f<form>_<pose>`) ผ่าน `monsterTexture()` ใน client/src/assets.ts
 - client ใช้ `import.meta.glob` เฉพาะไฟล์ที่ใช้จริง (glob ทั้งโฟลเดอร์จะพาภาพที่ไม่ใช้ไปอยู่ใน build)
 - ภาพหันขวาทิศเดียว หันซ้ายใช้ `setFlipX` · ท่าเดิน/โจมตี/เงาดำ/บอสมลพิษ ทำด้วยโค้ด (หัวข้อ 14.1)
