@@ -1,0 +1,36 @@
+{
+  "id": "team_dungeon_party",
+  "type": "team",
+  "title": "ปาร์ตี้ผจญภัย",
+  "description": "พิชิตดันเจี้ยนใดก็ได้พร้อมเพื่อนอย่างน้อย 2 คน",
+  "giver": "npc_temple_elder",
+  "zone": "valley",
+  "requires": {
+    "playerLevel": 10,
+    "quests": []
+  },
+  "minPartySize": 2,
+  "intro": [
+    "บอสมลพิษแข็งแกร่งนัก ไปด้วยกันหลายคนจะตอบคำถามทีมได้ง่ายขึ้น"
+  ],
+  "outro": [
+    "ความสามัคคีคือพลังของระบบนิเวศ"
+  ],
+  "objectives": [
+    {
+      "kind": "dungeon",
+      "filter": {},
+      "count": 1
+    }
+  ],
+  "rewards": {
+    "exp": 400,
+    "coins": 200,
+    "items": [
+      {
+        "id": "treasure_chest",
+        "qty": 1
+      }
+    ]
+  }
+}

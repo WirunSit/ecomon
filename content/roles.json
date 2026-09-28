@@ -1,0 +1,30 @@
+{
+  "roles": [
+    {
+      "id": "producer",
+      "name": "ผู้ผลิต",
+      "description": "สร้างอาหารเองได้จากพลังงานแสง ฟื้น HP 5% ทุกครั้งที่ตอบถูก",
+      "passives": [{ "kind": "heal_on_correct", "percent": 5 }]
+    },
+    {
+      "id": "consumer",
+      "name": "ผู้บริโภค",
+      "description": "ได้พลังงานจากการกินสิ่งมีชีวิตอื่น ดาเมจ +10% เมื่อตอบถูกติดกันตั้งแต่ 2 ข้อ",
+      "passives": [{ "kind": "streak_damage", "minStreak": 2, "bonus": 0.1 }]
+    },
+    {
+      "id": "decomposer",
+      "name": "ผู้ย่อยสลาย",
+      "description": "ย่อยซากสิ่งมีชีวิตคืนธาตุอาหารสู่ระบบนิเวศ ท่าโจมตีติดสถานะ \"ย่อยสลาย\" ลด DEF ศัตรู 10% (ซ้อนได้ 3 ชั้น)",
+      "passives": [{ "kind": "def_down_on_hit", "status": "decompose", "percent": 10, "maxStacks": 3 }]
+    },
+    {
+      "id": "guardian",
+      "name": "ผู้พิทักษ์",
+      "description": "ผู้รักษาสมดุลของเกาะนิเวศา ได้ความสามารถของผู้ผลิต ผู้บริโภค และผู้ย่อยสลายครบทั้ง 3 แบบ",
+      "passives": [],
+      "inherits": ["producer", "consumer", "decomposer"],
+      "legendOnly": true
+    }
+  ]
+}

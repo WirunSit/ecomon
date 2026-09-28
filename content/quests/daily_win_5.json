@@ -1,0 +1,23 @@
+{
+  "id": "daily_win_5",
+  "type": "daily",
+  "title": "นักผจญภัย",
+  "description": "ชนะการต่อสู้ 5 ครั้ง",
+  "giver": "npc_prof_ton",
+  "requires": {
+    "playerLevel": 1,
+    "quests": []
+  },
+  "objectives": [
+    {
+      "kind": "defeat",
+      "filter": {},
+      "count": 5
+    }
+  ],
+  "rewards": {
+    "exp": 120,
+    "coins": 90,
+    "items": []
+  }
+}

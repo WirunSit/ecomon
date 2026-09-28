@@ -1,0 +1,15 @@
+node_modules/
+dist/
+*.log
+.DS_Store
+.env
+.env.*
+coverage/
+asset-src/_preview/
+*.sqlite
+*.db
+*.sqlite-wal
+*.sqlite-shm
+server/data/
+!.env.example
+*-preview.png

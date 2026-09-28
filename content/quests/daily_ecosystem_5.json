@@ -1,0 +1,25 @@
+{
+  "id": "daily_ecosystem_5",
+  "type": "daily",
+  "title": "ระบบนิเวศวันนี้",
+  "description": "ตอบคำถามเรื่ององค์ประกอบของระบบนิเวศให้ถูก 5 ข้อ",
+  "giver": "npc_prof_ton",
+  "requires": {
+    "playerLevel": 1,
+    "quests": []
+  },
+  "objectives": [
+    {
+      "kind": "answer",
+      "filter": {
+        "topic": "eco_components"
+      },
+      "correct": 5
+    }
+  ],
+  "rewards": {
+    "exp": 120,
+    "coins": 60,
+    "items": []
+  }
+}

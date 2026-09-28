@@ -1,0 +1,61 @@
+{
+  "id": "suriya",
+  "dex": 18,
+  "rarity": "legend",
+  "elements": [
+    "pyro",
+    "aero"
+  ],
+  "role": "guardian",
+  "habitat": "land",
+  "archetype": "speedster",
+  "baseStats": {
+    "hp": 65,
+    "atk": 80,
+    "def": 50,
+    "spd": 105
+  },
+  "forms": [
+    {
+      "form": 1,
+      "name": "สุริยาน้อย",
+      "minLevel": 1,
+      "sprite": "suriya_f1"
+    },
+    {
+      "form": 2,
+      "name": "สุริยะปักษา",
+      "minLevel": 16,
+      "sprite": "suriya_f2"
+    },
+    {
+      "form": 3,
+      "name": "สุริยะเทพปักษี",
+      "minLevel": 36,
+      "sprite": "suriya_f3"
+    }
+  ],
+  "learnset": [
+    {
+      "level": 1,
+      "move": "pyro_basic"
+    },
+    {
+      "level": 8,
+      "move": "aero_mid"
+    },
+    {
+      "level": 16,
+      "move": "pyro_adv"
+    },
+    {
+      "level": 36,
+      "move": "sig_solar_transfer"
+    }
+  ],
+  "habitatHint": "ผู้พิทักษ์แห่งพลังงาน หลับใหลอยู่ในวิหารสมดุล",
+  "dexFact": "พลังงานเกือบทั้งหมดในระบบนิเวศมาจากดวงอาทิตย์ และถ่ายทอดไปตามลำดับขั้นการกินได้ประมาณ 10%",
+  "factTopic": "energy_flow",
+  "enabled": true,
+  "addedInVersion": "1.0"
+}

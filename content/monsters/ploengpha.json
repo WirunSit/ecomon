@@ -1,0 +1,61 @@
+{
+  "id": "ploengpha",
+  "dex": 12,
+  "rarity": "rare",
+  "elements": [
+    "pyro",
+    "terra"
+  ],
+  "role": "consumer",
+  "habitat": "land",
+  "archetype": "attacker",
+  "baseStats": {
+    "hp": 75,
+    "atk": 100,
+    "def": 65,
+    "spd": 60
+  },
+  "forms": [
+    {
+      "form": 1,
+      "name": "เพลิงผา",
+      "minLevel": 1,
+      "sprite": "ploengpha_f1"
+    },
+    {
+      "form": 2,
+      "name": "มังกรเพลิงผา",
+      "minLevel": 16,
+      "sprite": "ploengpha_f2"
+    },
+    {
+      "form": 3,
+      "name": "ราชันย์ภูผาเพลิง",
+      "minLevel": 36,
+      "sprite": "ploengpha_f3"
+    }
+  ],
+  "learnset": [
+    {
+      "level": 1,
+      "move": "pyro_basic"
+    },
+    {
+      "level": 8,
+      "move": "terra_mid"
+    },
+    {
+      "level": 16,
+      "move": "pyro_adv"
+    },
+    {
+      "level": 36,
+      "move": "sig_lava_avalanche"
+    }
+  ],
+  "habitatHint": "ตำนานเล่าว่าอาศัยอยู่ที่ปากปล่องภูเขาไฟ",
+  "dexFact": "ลาวาที่เย็นตัวแล้วเกิดการเปลี่ยนแปลงแทนที่แบบปฐมภูมิ โดยมีไลเคนเป็นสิ่งมีชีวิตผู้บุกเบิก",
+  "factTopic": "succession",
+  "enabled": true,
+  "addedInVersion": "1.0"
+}

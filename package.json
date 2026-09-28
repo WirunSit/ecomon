@@ -1,0 +1,39 @@
+{
+  "name": "ecomon",
+  "private": true,
+  "version": "0.0.1",
+  "description": "EcoMon Quest — เกมเว็บ MMORPG ล่ามอนสเตอร์ + ชีววิทยา ม.6",
+  "type": "module",
+  "workspaces": [
+    "shared",
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "dev": "concurrently -k -n server,client -c magenta,cyan \"npm:dev -w server\" \"npm:dev -w client\"",
+    "build": "npm run validate && npm run build -w client",
+    "validate": "tsx tools/validate.ts",
+    "placeholders": "tsx tools/make-placeholders.ts",
+    "typecheck": "tsc -p shared && tsc -p server && tsc -p client && tsc -p tools",
+    "test": "vitest run",
+    "make-test-map": "tsx tools/make-test-map.ts",
+    "make-world-map": "tsx tools/make-world-map.ts",
+    "assets": "python3 tools/slice_sheets.py && python3 tools/render_maps.py",
+    "render-maps": "python3 tools/render_maps.py",
+    "preview-map": "tsx tools/preview-map.ts",
+    "import-questions": "tsx tools/import-questions.ts",
+    "simulate": "tsx tools/simulate.ts",
+    "load-test": "tsx --tsconfig tools/tsconfig.json tools/load-test.ts"
+  },
+  "devDependencies": {
+    "@napi-rs/canvas": "^1.0.0",
+    "@types/node": "^22.0.0",
+    "concurrently": "^9.2.0",
+    "tsx": "^4.20.0",
+    "typescript": "^5.9.0",
+    "vitest": "^3.2.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

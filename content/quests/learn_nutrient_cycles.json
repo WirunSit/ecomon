@@ -1,0 +1,36 @@
+{
+  "id": "learn_nutrient_cycles",
+  "type": "learning",
+  "title": "ทบทวน: วัฏจักรสาร",
+  "description": "ตอบคำถามหัวข้อ \"วัฏจักรสาร\" ให้ถูก 8 ข้อ (จากการต่อสู้ ดันเจี้ยน หรือบททดสอบพัฒนาร่าง)",
+  "giver": "npc_prof_ton",
+  "requires": {
+    "playerLevel": 6,
+    "quests": []
+  },
+  "intro": [
+    "หัวข้อ \"วัฏจักรสาร\" ออกสอบบ่อยนะ ลองทบทวนให้แม่นขึ้น"
+  ],
+  "outro": [
+    "เยี่ยม! ทบทวนบ่อย ๆ แล้วจะจำได้ขึ้นใจ"
+  ],
+  "objectives": [
+    {
+      "kind": "answer",
+      "filter": {
+        "topic": "nutrient_cycles"
+      },
+      "correct": 8
+    }
+  ],
+  "rewards": {
+    "exp": 140,
+    "coins": 70,
+    "items": [
+      {
+        "id": "hint_scroll",
+        "qty": 1
+      }
+    ]
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "id": "side_lab_recipe_hunter",
+  "type": "side",
+  "title": "นักล่าสูตรผสม",
+  "description": "ผสมมอนสเตอร์ต่ออีก 3 ครั้ง ช่วยพี่ฟ้าเก็บข้อมูลสูตรผสมใหม่ ๆ",
+  "giver": "npc_lab_researcher",
+  "zone": "village",
+  "requires": {
+    "playerLevel": 8,
+    "quests": [
+      "side_lab_first_egg"
+    ]
+  },
+  "intro": [
+    "ยิ่งผสมมาก ยิ่งมีโอกาสได้ระดับหายาก แถมมีการันตีด้วยนะ"
+  ],
+  "outro": [
+    "ข้อมูลเยอะมาก! นี่คือสูตรผสมศิลารากกับเพลิงผา ลองดูนะ"
+  ],
+  "objectives": [
+    {
+      "kind": "breed",
+      "filter": {},
+      "count": 3
+    }
+  ],
+  "rewards": {
+    "exp": 300,
+    "coins": 150,
+    "items": [],
+    "unlockRecipes": [
+      "silarak",
+      "ploengpha"
+    ]
+  }
+}

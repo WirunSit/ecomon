@@ -1,0 +1,60 @@
+{
+  "id": "muekoon",
+  "dex": 9,
+  "rarity": "normal",
+  "elements": [
+    "pyro"
+  ],
+  "role": "consumer",
+  "habitat": "water",
+  "archetype": "attacker",
+  "baseStats": {
+    "hp": 75,
+    "atk": 105,
+    "def": 55,
+    "spd": 65
+  },
+  "forms": [
+    {
+      "form": 1,
+      "name": "หมึกอุ่น",
+      "minLevel": 1,
+      "sprite": "muekoon_f1"
+    },
+    {
+      "form": 2,
+      "name": "หมึกไอร้อน",
+      "minLevel": 16,
+      "sprite": "muekoon_f2"
+    },
+    {
+      "form": 3,
+      "name": "คราเคนลาวา",
+      "minLevel": 36,
+      "sprite": "muekoon_f3"
+    }
+  ],
+  "learnset": [
+    {
+      "level": 1,
+      "move": "pyro_basic"
+    },
+    {
+      "level": 8,
+      "move": "pyro_mid"
+    },
+    {
+      "level": 16,
+      "move": "pyro_adv"
+    },
+    {
+      "level": 36,
+      "move": "sig_lava_ink"
+    }
+  ],
+  "habitatHint": "พบใกล้ปล่องน้ำพุร้อนใต้ทะเล",
+  "dexFact": "ที่ปล่องน้ำพุร้อนใต้ทะเลลึกไม่มีแสง แบคทีเรียสร้างอาหารด้วยการสังเคราะห์ทางเคมีแทนการสังเคราะห์ด้วยแสง",
+  "factTopic": "biomes",
+  "enabled": true,
+  "addedInVersion": "1.0"
+}

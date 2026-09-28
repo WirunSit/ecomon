@@ -1,0 +1,31 @@
+{
+  "id": "col_catalog_25",
+  "type": "collection",
+  "title": "นักบันทึกตัวยง",
+  "description": "บันทึกมอนสเตอร์ลงสมุดภาพให้ครบ 25 ช่อง",
+  "giver": "npc_prof_ton",
+  "zone": "village",
+  "requires": {
+    "playerLevel": 10,
+    "quests": [
+      "col_catalog_10"
+    ]
+  },
+  "objectives": [
+    {
+      "kind": "catalog",
+      "filter": {},
+      "count": 25
+    }
+  ],
+  "rewards": {
+    "exp": 400,
+    "coins": 300,
+    "items": [
+      {
+        "id": "golden_honey",
+        "qty": 3
+      }
+    ]
+  }
+}

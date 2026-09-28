@@ -1,0 +1,45 @@
+{
+  "id": "side_fisher_crab_count",
+  "type": "side",
+  "title": "ช่วยชาวประมงนับประชากรปู",
+  "description": "ลุงชลอยากรู้ว่าปูผลึกริมหาดมีกี่ตัว ช่วยประมาณขนาดประชากรด้วยวิธีจับ-ทำเครื่องหมาย-ปล่อย",
+  "giver": "npc_fisherman",
+  "zone": "coast",
+  "requires": {
+    "playerLevel": 14,
+    "quests": []
+  },
+  "intro": [
+    "ปีนี้ปูผลึกดูน้อยลง ลุงไม่แน่ใจว่าจริงไหม",
+    "หลานช่วยประมาณจำนวนประชากรให้ลุงหน่อย"
+  ],
+  "outro": [
+    "ขอบใจหลาน ลุงจะจับปูแต่พอดี ให้ประชากรฟื้นตัวทัน"
+  ],
+  "objectives": [
+    {
+      "kind": "defeat",
+      "filter": {
+        "species": "pupluek"
+      },
+      "count": 3
+    },
+    {
+      "kind": "answer",
+      "filter": {
+        "topic": "pop_estimate"
+      },
+      "correct": 4
+    }
+  ],
+  "rewards": {
+    "exp": 400,
+    "coins": 200,
+    "items": [
+      {
+        "id": "hourglass",
+        "qty": 2
+      }
+    ]
+  }
+}

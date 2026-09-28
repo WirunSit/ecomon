@@ -1,0 +1,35 @@
+{
+  "id": "side_elder_first_evolution",
+  "type": "side",
+  "title": "เติบโตอย่างมั่นคง",
+  "description": "ผู้เฒ่าอยากเห็นมอนสเตอร์ของเจ้าพัฒนาร่าง 2 ครั้ง",
+  "giver": "npc_temple_elder",
+  "zone": "valley",
+  "requires": {
+    "playerLevel": 18,
+    "quests": []
+  },
+  "intro": [
+    "สิ่งมีชีวิตเติบโตเมื่อมีความรู้และความพากเพียร"
+  ],
+  "outro": [
+    "ดีมาก… ความรู้ทำให้คู่หูของเจ้าแข็งแกร่ง"
+  ],
+  "objectives": [
+    {
+      "kind": "evolve",
+      "filter": {},
+      "count": 2
+    }
+  ],
+  "rewards": {
+    "exp": 500,
+    "coins": 250,
+    "items": [
+      {
+        "id": "power_candy",
+        "qty": 3
+      }
+    ]
+  }
+}

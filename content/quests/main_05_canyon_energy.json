@@ -1,0 +1,52 @@
+{
+  "id": "main_05_canyon_energy",
+  "type": "main",
+  "title": "พลังงานที่ส่งต่อ",
+  "description": "ในหุบเขาหิน พลังงานถูกส่งต่อจากผู้ผลิตไปยังผู้บริโภคทีละลำดับขั้น ศึกษาว่าทำไมผู้ล่าชั้นบนจึงมีน้อย",
+  "giver": "npc_prof_ton",
+  "zone": "canyon",
+  "requires": {
+    "playerLevel": 8,
+    "quests": [
+      "main_04_lake_cycles"
+    ]
+  },
+  "intro": [
+    "พลังงานส่งต่อไปแต่ละลำดับขั้นได้ประมาณ 10% เท่านั้น",
+    "ลองไปดูในหุบเขาหินว่ามอนสเตอร์ลำดับบน ๆ มีน้อยกว่าจริงไหม"
+  ],
+  "outro": [
+    "ถูกต้อง! พีระมิดพลังงานจึงไม่มีวันกลับหัว",
+    "ในป่าเห็ดมีถ้ำรากแก้วที่ถูกมลพิษครอบงำ ถ้าเลเวลถึง 10 ลองไปช่วยดู"
+  ],
+  "objectives": [
+    {
+      "kind": "reach",
+      "zone": "canyon"
+    },
+    {
+      "kind": "defeat",
+      "filter": {
+        "zone": "canyon"
+      },
+      "count": 4
+    },
+    {
+      "kind": "answer",
+      "filter": {
+        "topic": "energy_flow"
+      },
+      "correct": 6
+    }
+  ],
+  "rewards": {
+    "exp": 450,
+    "coins": 200,
+    "items": [
+      {
+        "id": "power_candy",
+        "qty": 2
+      }
+    ]
+  }
+}

@@ -1,0 +1,266 @@
+# บอกว่าแต่ละช่องใน sheet คืออะไร (docs/GAME_PLAN.md หัวข้อ 15.1)
+# รัน: npm run assets   (หรือ python3 tools/slice_sheets.py --sheet S02.png)
+#
+# ฟิลด์:
+#   rows, cols      ขนาดตาราง
+#   category        กำหนดขนาดปลายทาง (หัวข้อ 15.2): monster, character, portrait, prop, icon, vfx, tile, background, keyart
+#   rowCategories   (ไม่บังคับ) category ต่อแถว เช่น S07 แถวบนตัวเต็ม แถวล่างภาพหน้าอก
+#   rowIds/colIds   ชื่อแถว/คอลัมน์ ใช้กับ out ที่มี {row} {col}
+#   cellIds         ชื่อทีละช่อง (ซ้ายไปขวา บนลงล่าง) ใช้กับ out ที่มี {id}
+#   bg              auto | alpha | white | none (none = ไม่ลบพื้นหลัง ใช้กับ tile/ฉาก)
+#   split           gutter (หาเส้นช่องว่างระหว่างภาพ ค่าเริ่มต้น) | grid (แบ่งเท่ากัน)
+#                   | seams (ช่องชิดกันไม่มีร่องแต่ขนาดไม่เท่ากัน: ตัดตามรอยต่อระหว่างลาย)
+#   atlas           (ไม่บังคับ) ชื่อ texture atlas ที่จะรวมภาพไว้ให้ Phaser
+
+S02.png:
+  rows: 5
+  cols: 6
+  category: monster
+  bg: alpha
+  rowIds: [puibai, tanmeow, hinnoop, fungfiw, hedtoob]
+  colIds: [f1_idle, f1_attack, f2_idle, f2_attack, f3_idle, f3_attack]
+  out: assets/monsters/{row}/{col}.png
+  atlas: monsters
+
+S03.png:
+  rows: 5
+  cols: 6
+  category: monster
+  bg: alpha
+  rowIds: [joomjim, buaboong, plapoong, muekoon, pupluek]
+  colIds: [f1_idle, f1_attack, f2_idle, f2_attack, f3_idle, f3_attack]
+  out: assets/monsters/{row}/{col}.png
+  atlas: monsters
+
+S04.png:
+  rows: 5
+  cols: 6
+  category: monster
+  bg: alpha
+  rowIds: [praiwan, ploengpha, napawan, mossmoth, silarak]
+  colIds: [f1_idle, f1_attack, f2_idle, f2_attack, f3_idle, f3_attack]
+  out: assets/monsters/{row}/{col}.png
+  atlas: monsters
+
+S05.png:
+  rows: 3
+  cols: 6
+  category: monster
+  bg: alpha
+  rowIds: [gaiara, varithara, suriya]
+  colIds: [f1_idle, f1_attack, f2_idle, f2_attack, f3_idle, f3_attack]
+  out: assets/monsters/{row}/{col}.png
+  atlas: monsters
+
+S06.png:
+  rows: 4
+  cols: 6
+  category: character
+  bg: white
+  rowIds: [student_1, student_2, student_3, student_4]
+  colIds: [down_idle, down_step, up_idle, up_step, right_idle, right_step]
+  out: assets/characters/{row}/{col}.png
+
+S07.png:
+  rows: 2
+  cols: 6
+  category: character
+  rowCategories: [character, portrait]
+  bg: alpha
+  cellIds: [npc_prof_ton, npc_shop_auntie, npc_lab_researcher, npc_fisherman, npc_ranger, npc_temple_elder,
+            npc_prof_ton_portrait, npc_shop_auntie_portrait, npc_lab_researcher_portrait, npc_fisherman_portrait, npc_ranger_portrait, npc_temple_elder_portrait]
+  out: assets/npcs/{id}.png
+
+S08.png:
+  rows: 6
+  cols: 6
+  category: tile
+  bg: none
+  split: seams
+  cellIds: [short_grass, grass_flowers, tall_grass, dirt_path, dry_sand, cobblestone,
+            shallow_water, deep_water, swamp_water, wet_sand, beach_pebbles, wooden_bridge,
+            forest_floor, mossy_ground, glowing_mushroom_soil, cave_floor, dark_cave_rock, crystal_cave_floor,
+            volcanic_ash, cooled_lava_rock, glowing_lava, cracked_hot_rock, gravel, mountain_rock,
+            village_road, brick_plaza, temple_tiles, golden_meadow, flower_field, farmland,
+            coral_reef_floor, seabed_sand, deep_sea_rock, kelp_floor, tundra_moss, mossy_temple_floor]
+  out: assets/tiles/src/{id}.png
+
+S09.png:
+  rows: 5
+  cols: 5
+  category: prop
+  bg: white
+  cellIds: [round_tree, pine_tree, blossom_tree, round_bush, flowering_bush,
+            tall_grass_clump, glowing_mushrooms, giant_mushroom, mossy_rock, boulder,
+            quartz_crystals, cave_entrance, fallen_log, tree_stump, wooden_fence,
+            signpost, village_house, fruit_stall, healing_fountain, greenhouse_lab,
+            stone_well, lamp_post, notice_board, turtle_statue, small_bridge]
+  out: assets/props/{id}.png
+
+S10.png:
+  rows: 5
+  cols: 5
+  category: prop
+  bg: white
+  cellIds: [lily_pads, lotus_flower, reeds, palm_tree, beach_rock,
+            pink_coral, blue_coral, seaweed, seashells, starfish,
+            vent_chimney, volcanic_rock, lava_pool, fumarole, burnt_tree,
+            obsidian_crystal, dungeon_root_cave, dungeon_crater_gate, dungeon_sea_cave, temple_gate,
+            leaf_boat, swim_ring, wooden_dock, lighthouse, pier_post]
+  out: assets/props/{id}.png
+
+S11.png:
+  rows: 2
+  cols: 2
+  category: background
+  bg: none
+  cellIds: [meadow, mushroom_forest, lotus_pond, rocky_canyon]
+  out: assets/backgrounds/{id}.webp
+
+S12.png:
+  rows: 2
+  cols: 2
+  category: background
+  bg: none
+  cellIds: [volcano, beach, deep_sea, temple]
+  out: assets/backgrounds/{id}.webp
+
+S13.png:
+  rows: 5
+  cols: 5
+  category: icon
+  bg: white
+  cellIds: [leaf_crown, mushroom_hat, feather_headband, shell_helmet, moss_vest,
+            silk_scarf, bark_armor, cloud_cloak, element_charm, knowledge_charm,
+            bolt_charm, honey_potion, golden_honey, revival_seed, power_candy,
+            magnifier, hourglass, hint_scroll, explorer_map, swim_ring,
+            leaf_boat, mushroom_flashlight, eco_coin, conservation_badge, chest]
+  out: assets/items/{id}.png
+
+S14.png:
+  rows: 5
+  cols: 6
+  category: icon
+  bg: white
+  cellIds: [element_aqua, element_pyro, element_flora, element_terra, element_aero, element_spore,
+            rarity_normal, rarity_rare, rarity_legend, role_producer, role_consumer, role_decomposer,
+            role_guardian, bag, creature_book, quest_scroll, world_map, egg_nest,
+            settings, team, shop, coin, star, lock,
+            timer, heart, check, cross, attack, defense]
+  out: assets/ui/{id}.png
+
+S15.png:
+  rows: 7
+  cols: 4
+  category: vfx
+  bg: white
+  cellIds: [aqua_1, aqua_2, aqua_3, aqua_4,
+            pyro_1, pyro_2, pyro_3, pyro_4,
+            flora_1, flora_2, flora_3, flora_4,
+            terra_1, terra_2, terra_3, terra_4,
+            aero_1, aero_2, aero_3, aero_4,
+            spore_1, spore_2, spore_3, spore_4,
+            hit_spark, capture_sparkle, level_up, evolution]
+  out: assets/vfx/{id}.png
+
+S16.png:
+  rows: 4
+  cols: 4
+  category: icon
+  bg: white
+  cellIds: [egg_normal_1, egg_normal_2, egg_normal_3, egg_normal_4,
+            egg_rare_1, egg_rare_2, egg_rare_3, egg_rare_4,
+            egg_legend_1, egg_legend_2, egg_legend_3, egg_legend_4,
+            chest_closed, chest_open, life_shard, mystery_egg]
+  out: assets/eggs/{id}.png
+
+S17.png:
+  rows: 1
+  cols: 1
+  category: keyart
+  bg: none
+  split: grid
+  cellIds: [title]
+  out: assets/ui/{id}.webp
+
+# tileset ของแผนที่ ประกอบจากภาพที่ตัดแล้ว — ลำดับ = gid 1..n ตรงกับ TILE ใน tools/make-test-map.ts
+_tilesets:
+  island_tiles:
+    tileSize: 32
+    columns: 4
+    out: assets/tiles/island_tiles.png
+    tiles:
+      - tiles/src/short_grass
+      - tiles/src/grass_flowers
+      - tiles/src/tall_grass
+      - tiles/src/dirt_path
+      - tiles/src/dry_sand
+      - tiles/src/shallow_water
+      - tiles/src/deep_water
+      - tiles/src/wooden_bridge
+      - props/round_tree
+      - props/mossy_rock
+      - props/round_bush
+      - props/village_house
+      - props/healing_fountain
+
+  # แผนที่เกาะนิเวศา (tools/make-world-map.ts) — ลำดับ = gid 1..n ตรงกับ TILES ในสคริปต์
+  world_tiles:
+    tileSize: 32
+    columns: 8
+    out: assets/tiles/world_tiles.png
+    tiles:
+      - tiles/src/short_grass
+      - tiles/src/grass_flowers
+      - tiles/src/tall_grass
+      - tiles/src/dirt_path
+      - tiles/src/dry_sand
+      - tiles/src/shallow_water
+      - tiles/src/deep_water
+      - tiles/src/wooden_bridge
+      - tiles/src/forest_floor
+      - tiles/src/mossy_ground
+      - tiles/src/glowing_mushroom_soil
+      - tiles/src/mountain_rock
+      - tiles/src/gravel
+      - tiles/src/cave_floor
+      - tiles/src/volcanic_ash
+      - tiles/src/cooled_lava_rock
+      - tiles/src/cracked_hot_rock
+      - tiles/src/village_road
+      - tiles/src/brick_plaza
+      - tiles/src/temple_tiles
+      - tiles/src/golden_meadow
+      - tiles/src/wet_sand
+      - tiles/src/coral_reef_floor
+      - tiles/src/swamp_water
+      - tiles/src/farmland
+      - tiles/src/flower_field
+      - tiles/src/mossy_temple_floor
+      - tiles/src/beach_pebbles
+      - props/round_tree
+      - props/pine_tree
+      - props/boulder
+      - props/round_bush
+      - props/village_house
+      - props/healing_fountain
+      - props/giant_mushroom
+      - props/glowing_mushrooms
+      - props/palm_tree
+      - props/volcanic_rock
+      - props/lava_pool
+      - props/quartz_crystals
+      - props/burnt_tree
+      - props/reeds
+      - props/greenhouse_lab
+      - props/fruit_stall
+      - props/lighthouse
+      - props/beach_rock
+      - props/fallen_log
+      - props/stone_well
+      - props/notice_board
+      - props/turtle_statue
+      - props/lamp_post
+      - props/pink_coral
+      - props/wooden_fence
+      - props/signpost

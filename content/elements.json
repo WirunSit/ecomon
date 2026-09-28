@@ -1,0 +1,10 @@
+{
+  "elements": [
+    { "id": "aqua", "name": "วารี", "nameEn": "Aqua", "color": "#3B9BE8", "theme": "แหล่งน้ำ ทะเล", "strongAgainst": ["pyro"], "weakAgainst": ["flora"] },
+    { "id": "pyro", "name": "อัคนี", "nameEn": "Pyro", "color": "#EF6A3A", "theme": "พลังงาน ภูเขาไฟ", "strongAgainst": ["flora"], "weakAgainst": ["aqua"] },
+    { "id": "flora", "name": "พฤกษา", "nameEn": "Flora", "color": "#5DBB4A", "theme": "ผู้ผลิต ป่า ทุ่งหญ้า", "strongAgainst": ["aqua"], "weakAgainst": ["pyro"] },
+    { "id": "terra", "name": "ปฐพี", "nameEn": "Terra", "color": "#B08850", "theme": "ดิน หิน แร่ธาตุ", "strongAgainst": ["aero"], "weakAgainst": ["spore"] },
+    { "id": "aero", "name": "วายุ", "nameEn": "Aero", "color": "#8FD3E0", "theme": "ลม เมฆ การแพร่กระจาย", "strongAgainst": ["spore"], "weakAgainst": ["terra"] },
+    { "id": "spore", "name": "สปอร์", "nameEn": "Spore", "color": "#A46BC9", "theme": "ผู้ย่อยสลาย เห็ด รา", "strongAgainst": ["terra"], "weakAgainst": ["aero"] }
+  ]
+}

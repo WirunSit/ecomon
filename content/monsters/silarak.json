@@ -1,0 +1,61 @@
+{
+  "id": "silarak",
+  "dex": 15,
+  "rarity": "rare",
+  "elements": [
+    "terra",
+    "spore"
+  ],
+  "role": "decomposer",
+  "habitat": "land",
+  "archetype": "tank",
+  "baseStats": {
+    "hp": 95,
+    "atk": 65,
+    "def": 95,
+    "spd": 45
+  },
+  "forms": [
+    {
+      "form": 1,
+      "name": "ศิลาราก",
+      "minLevel": 1,
+      "sprite": "silarak_f1"
+    },
+    {
+      "form": 2,
+      "name": "โกเลมราก",
+      "minLevel": 16,
+      "sprite": "silarak_f2"
+    },
+    {
+      "form": 3,
+      "name": "ผู้พิทักษ์รากแก้ว",
+      "minLevel": 36,
+      "sprite": "silarak_f3"
+    }
+  ],
+  "learnset": [
+    {
+      "level": 1,
+      "move": "terra_basic"
+    },
+    {
+      "level": 8,
+      "move": "spore_mid"
+    },
+    {
+      "level": 16,
+      "move": "terra_adv"
+    },
+    {
+      "level": 36,
+      "move": "sig_mycelium_bind"
+    }
+  ],
+  "habitatHint": "ตำนานเล่าว่าอาศัยอยู่ในถ้ำรากไม้",
+  "dexFact": "ราไมคอร์ไรซาอยู่ร่วมกับรากพืชแบบภาวะพึ่งพากัน ราช่วยดูดน้ำและฟอสฟอรัส พืชให้น้ำตาลแก่รา",
+  "factTopic": "relationships",
+  "enabled": true,
+  "addedInVersion": "1.0"
+}

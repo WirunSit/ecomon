@@ -1,0 +1,16 @@
+{
+ "map": "test_island",
+ "width": 1280,
+ "height": 960,
+ "tileSize": 32,
+ "chunks": [
+  {
+   "x": 0,
+   "y": 0,
+   "w": 1280,
+   "h": 960,
+   "file": "ground_0_0.webp"
+  }
+ ],
+ "source": "8a5014d5cec538d5ef785f360b55fc3f62f6e397"
+}

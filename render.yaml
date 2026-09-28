@@ -1,0 +1,25 @@
+# Render Blueprint — EcoMon Quest บน Render แผนฟรี (ดู docs/DEPLOY.md)
+# Render → New → Blueprint → เลือก repo นี้ → กรอกค่าที่ขึ้น sync: false
+# แผนฟรีไม่มีดิสก์ถาวร: ฐานข้อมูลสำรอง/กู้อัตโนมัติจาก GitHub Release ของ repo ส่วนตัว (BACKUP_GITHUB_*)
+services:
+  - type: web
+    name: ecomon
+    runtime: docker
+    plan: free
+    region: singapore
+    branch: main
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    # deploy เมื่อ GitHub Actions (validate + test + typecheck) ผ่านเท่านั้น
+    autoDeployTrigger: checksPass
+    envVars:
+      - key: TEACHER_INVITE_CODE
+        sync: false
+      - key: BACKUP_GITHUB_REPO
+        sync: false
+      - key: BACKUP_GITHUB_TOKEN
+        sync: false
+      - key: INCLUDE_DRAFT_QUESTIONS
+        value: "1"
+      - key: BACKUP_INTERVAL_MIN
+        value: "5"

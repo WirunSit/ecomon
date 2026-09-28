@@ -1,0 +1,60 @@
+{
+  "id": "puibai",
+  "dex": 1,
+  "rarity": "normal",
+  "elements": [
+    "flora"
+  ],
+  "role": "producer",
+  "habitat": "land",
+  "archetype": "tank",
+  "baseStats": {
+    "hp": 95,
+    "atk": 60,
+    "def": 95,
+    "spd": 50
+  },
+  "forms": [
+    {
+      "form": 1,
+      "name": "ปุยใบ",
+      "minLevel": 1,
+      "sprite": "puibai_f1"
+    },
+    {
+      "form": 2,
+      "name": "ปุยพุ่ม",
+      "minLevel": 16,
+      "sprite": "puibai_f2"
+    },
+    {
+      "form": 3,
+      "name": "ปุยพฤกษา",
+      "minLevel": 36,
+      "sprite": "puibai_f3"
+    }
+  ],
+  "learnset": [
+    {
+      "level": 1,
+      "move": "flora_basic"
+    },
+    {
+      "level": 8,
+      "move": "flora_mid"
+    },
+    {
+      "level": 16,
+      "move": "flora_adv"
+    },
+    {
+      "level": 36,
+      "move": "sig_photosynth_beam"
+    }
+  ],
+  "habitatHint": "พบในทุ่งหญ้าลมหวน",
+  "dexFact": "ผู้ผลิตเปลี่ยนพลังงานแสงเป็นพลังงานเคมีผ่านการสังเคราะห์ด้วยแสง",
+  "factTopic": "eco_components",
+  "enabled": true,
+  "addedInVersion": "1.0"
+}

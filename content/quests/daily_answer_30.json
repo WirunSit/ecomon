@@ -1,0 +1,23 @@
+{
+  "id": "daily_answer_30",
+  "type": "daily",
+  "title": "สุดยอดนักทบทวน",
+  "description": "ตอบคำถามให้ถูก 30 ข้อ",
+  "giver": "npc_prof_ton",
+  "requires": {
+    "playerLevel": 5,
+    "quests": []
+  },
+  "objectives": [
+    {
+      "kind": "answer",
+      "filter": {},
+      "correct": 30
+    }
+  ],
+  "rewards": {
+    "exp": 300,
+    "coins": 150,
+    "items": []
+  }
+}

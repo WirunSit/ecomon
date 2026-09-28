@@ -1,0 +1,24 @@
+{
+  "id": "col_catalog_10",
+  "type": "collection",
+  "title": "สมุดภาพเล่มแรก",
+  "description": "บันทึกมอนสเตอร์ลงสมุดภาพให้ครบ 10 ช่อง (นับแยกทุกร่าง)",
+  "giver": "npc_prof_ton",
+  "zone": "village",
+  "requires": {
+    "playerLevel": 3,
+    "quests": []
+  },
+  "objectives": [
+    {
+      "kind": "catalog",
+      "filter": {},
+      "count": 10
+    }
+  ],
+  "rewards": {
+    "exp": 150,
+    "coins": 150,
+    "items": []
+  }
+}

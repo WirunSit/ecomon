@@ -1,0 +1,23 @@
+{
+  "id": "daily_answer_15",
+  "type": "daily",
+  "title": "นักเรียนขยัน",
+  "description": "ตอบคำถามให้ถูก 15 ข้อ",
+  "giver": "npc_prof_ton",
+  "requires": {
+    "playerLevel": 1,
+    "quests": []
+  },
+  "objectives": [
+    {
+      "kind": "answer",
+      "filter": {},
+      "correct": 15
+    }
+  ],
+  "rewards": {
+    "exp": 150,
+    "coins": 80,
+    "items": []
+  }
+}

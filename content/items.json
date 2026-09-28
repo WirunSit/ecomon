@@ -1,0 +1,772 @@
+{
+  "items": [
+    {
+      "id": "leaf_crown",
+      "name": "มงกุฎใบไม้",
+      "category": "equipment",
+      "slot": "head",
+      "icon": "leaf_crown",
+      "bonus": {
+        "hp": 15
+      },
+      "effects": [],
+      "description": "HP +15",
+      "price": 150
+    },
+    {
+      "id": "mushroom_hat",
+      "name": "หมวกเห็ดจุด",
+      "category": "equipment",
+      "slot": "head",
+      "icon": "mushroom_hat",
+      "bonus": {
+        "atk": 8
+      },
+      "effects": [],
+      "description": "ATK +8",
+      "price": 150
+    },
+    {
+      "id": "feather_headband",
+      "name": "ที่คาดผมขนนก",
+      "category": "equipment",
+      "slot": "head",
+      "icon": "feather_headband",
+      "bonus": {
+        "spd": 8
+      },
+      "effects": [],
+      "description": "SPD +8",
+      "price": 150
+    },
+    {
+      "id": "shell_helmet",
+      "name": "หมวกเปลือกหอย",
+      "category": "equipment",
+      "slot": "head",
+      "icon": "shell_helmet",
+      "bonus": {
+        "def": 8
+      },
+      "effects": [],
+      "description": "DEF +8",
+      "price": 150
+    },
+    {
+      "id": "moss_vest",
+      "name": "เสื้อกั๊กมอส",
+      "category": "equipment",
+      "slot": "body",
+      "icon": "moss_vest",
+      "bonus": {
+        "hp": 25
+      },
+      "effects": [],
+      "description": "HP +25",
+      "price": 200
+    },
+    {
+      "id": "silk_scarf",
+      "name": "ผ้าพันคอใยแมงมุม",
+      "category": "equipment",
+      "slot": "body",
+      "icon": "silk_scarf",
+      "bonus": {
+        "def": 10
+      },
+      "effects": [],
+      "description": "DEF +10",
+      "price": 200
+    },
+    {
+      "id": "bark_armor",
+      "name": "เกราะเปลือกไม้",
+      "category": "equipment",
+      "slot": "body",
+      "icon": "bark_armor",
+      "bonus": {
+        "def": 18,
+        "spd": -5
+      },
+      "effects": [],
+      "description": "DEF +18, SPD −5",
+      "price": 250
+    },
+    {
+      "id": "cloud_cloak",
+      "name": "ผ้าคลุมเมฆ",
+      "category": "equipment",
+      "slot": "body",
+      "icon": "cloud_cloak",
+      "bonus": {
+        "spd": 15
+      },
+      "effects": [],
+      "description": "SPD +15",
+      "price": 250
+    },
+    {
+      "id": "charm_aqua",
+      "name": "เครื่องรางธาตุวารี",
+      "category": "equipment",
+      "slot": "charm",
+      "icon": "element_charm",
+      "bonus": {},
+      "effects": [
+        {
+          "kind": "element_boost",
+          "element": "aqua",
+          "percent": 10
+        }
+      ],
+      "description": "ท่าธาตุวารี แรงขึ้น 10%",
+      "price": 300,
+      "tintElement": "aqua"
+    },
+    {
+      "id": "charm_pyro",
+      "name": "เครื่องรางธาตุอัคนี",
+      "category": "equipment",
+      "slot": "charm",
+      "icon": "element_charm",
+      "bonus": {},
+      "effects": [
+        {
+          "kind": "element_boost",
+          "element": "pyro",
+          "percent": 10
+        }
+      ],
+      "description": "ท่าธาตุอัคนี แรงขึ้น 10%",
+      "price": 300,
+      "tintElement": "pyro"
+    },
+    {
+      "id": "charm_flora",
+      "name": "เครื่องรางธาตุพฤกษา",
+      "category": "equipment",
+      "slot": "charm",
+      "icon": "element_charm",
+      "bonus": {},
+      "effects": [
+        {
+          "kind": "element_boost",
+          "element": "flora",
+          "percent": 10
+        }
+      ],
+      "description": "ท่าธาตุพฤกษา แรงขึ้น 10%",
+      "price": 300,
+      "tintElement": "flora"
+    },
+    {
+      "id": "charm_terra",
+      "name": "เครื่องรางธาตุปฐพี",
+      "category": "equipment",
+      "slot": "charm",
+      "icon": "element_charm",
+      "bonus": {},
+      "effects": [
+        {
+          "kind": "element_boost",
+          "element": "terra",
+          "percent": 10
+        }
+      ],
+      "description": "ท่าธาตุปฐพี แรงขึ้น 10%",
+      "price": 300,
+      "tintElement": "terra"
+    },
+    {
+      "id": "charm_aero",
+      "name": "เครื่องรางธาตุวายุ",
+      "category": "equipment",
+      "slot": "charm",
+      "icon": "element_charm",
+      "bonus": {},
+      "effects": [
+        {
+          "kind": "element_boost",
+          "element": "aero",
+          "percent": 10
+        }
+      ],
+      "description": "ท่าธาตุวายุ แรงขึ้น 10%",
+      "price": 300,
+      "tintElement": "aero"
+    },
+    {
+      "id": "charm_spore",
+      "name": "เครื่องรางธาตุสปอร์",
+      "category": "equipment",
+      "slot": "charm",
+      "icon": "element_charm",
+      "bonus": {},
+      "effects": [
+        {
+          "kind": "element_boost",
+          "element": "spore",
+          "percent": 10
+        }
+      ],
+      "description": "ท่าธาตุสปอร์ แรงขึ้น 10%",
+      "price": 300,
+      "tintElement": "spore"
+    },
+    {
+      "id": "knowledge_charm",
+      "name": "เครื่องรางความรู้",
+      "category": "equipment",
+      "slot": "charm",
+      "icon": "knowledge_charm",
+      "bonus": {},
+      "effects": [
+        {
+          "kind": "exp_boost",
+          "percent": 20
+        }
+      ],
+      "description": "EXP ที่ได้ +20%",
+      "price": 400,
+      "pointsPrice": 12
+    },
+    {
+      "id": "bolt_charm",
+      "name": "เครื่องรางสายฟ้าแลบ",
+      "category": "equipment",
+      "slot": "charm",
+      "icon": "bolt_charm",
+      "bonus": {},
+      "effects": [
+        {
+          "kind": "quick_window",
+          "seconds": 15
+        }
+      ],
+      "description": "ช่วง \"ตอบไว\" ขยายจาก 10 เป็น 15 วินาที",
+      "price": 400,
+      "pointsPrice": 12
+    },
+    {
+      "id": "honey_potion",
+      "name": "ยาน้ำผึ้ง",
+      "category": "consumable",
+      "icon": "honey_potion",
+      "usableIn": [
+        "battle",
+        "field"
+      ],
+      "effect": {
+        "kind": "heal",
+        "percent": 30
+      },
+      "description": "ฟื้น HP 30%",
+      "price": 50
+    },
+    {
+      "id": "golden_honey",
+      "name": "น้ำผึ้งทองคำ",
+      "category": "consumable",
+      "icon": "golden_honey",
+      "usableIn": [
+        "battle",
+        "field"
+      ],
+      "effect": {
+        "kind": "heal",
+        "percent": 100
+      },
+      "description": "ฟื้น HP 100%",
+      "price": 200,
+      "pointsPrice": 3
+    },
+    {
+      "id": "revival_seed",
+      "name": "เมล็ดฟื้นคืน",
+      "category": "consumable",
+      "icon": "revival_seed",
+      "usableIn": [
+        "battle",
+        "field"
+      ],
+      "effect": {
+        "kind": "revive",
+        "percent": 50
+      },
+      "description": "ชุบมอนสเตอร์ที่ HP หมดให้กลับมา 50%",
+      "price": 150,
+      "pointsPrice": 3
+    },
+    {
+      "id": "power_candy",
+      "name": "ขนมเพิ่มพลัง",
+      "category": "consumable",
+      "icon": "power_candy",
+      "usableIn": [
+        "field"
+      ],
+      "effect": {
+        "kind": "give_exp",
+        "amount": 200
+      },
+      "description": "EXP +200 ให้มอนสเตอร์ 1 ตัว",
+      "price": 120
+    },
+    {
+      "id": "magnifier",
+      "name": "แว่นขยายนักวิจัย",
+      "category": "consumable",
+      "icon": "magnifier",
+      "usableIn": [
+        "question"
+      ],
+      "effect": {
+        "kind": "remove_choices",
+        "count": 2
+      },
+      "description": "ตัดตัวเลือกผิด 2 ข้อ",
+      "price": 80
+    },
+    {
+      "id": "hourglass",
+      "name": "นาฬิกาทราย",
+      "category": "consumable",
+      "icon": "hourglass",
+      "usableIn": [
+        "question"
+      ],
+      "effect": {
+        "kind": "add_time",
+        "seconds": 15
+      },
+      "description": "เวลาตอบ +15 วินาที",
+      "price": 60
+    },
+    {
+      "id": "hint_scroll",
+      "name": "คัมภีร์ใบ้",
+      "category": "consumable",
+      "icon": "hint_scroll",
+      "usableIn": [
+        "question"
+      ],
+      "effect": {
+        "kind": "show_hint"
+      },
+      "description": "แสดงคำใบ้ของข้อนั้น",
+      "price": 60
+    },
+    {
+      "id": "explorer_map",
+      "name": "แผนที่นักสำรวจ",
+      "category": "consumable",
+      "icon": "explorer_map",
+      "usableIn": [
+        "field"
+      ],
+      "effect": {
+        "kind": "reveal_spawns",
+        "minutes": 10
+      },
+      "description": "แสดงจุดเกิดมอนสเตอร์บนแผนที่ย่อ 10 นาที",
+      "price": 100
+    },
+    {
+      "id": "treasure_chest",
+      "name": "หีบสมบัติ",
+      "category": "consumable",
+      "icon": "chest",
+      "usableIn": [
+        "field"
+      ],
+      "effect": {
+        "kind": "open_chest",
+        "lootTable": "chest_basic"
+      },
+      "description": "เปิดแล้วสุ่มได้ไอเท็มตามตารางดรอป",
+      "price": null,
+      "pointsPrice": 5
+    },
+    {
+      "id": "dungeon_chest",
+      "name": "หีบสมบัติดันเจี้ยน",
+      "category": "consumable",
+      "icon": "chest",
+      "usableIn": [
+        "field"
+      ],
+      "effect": {
+        "kind": "open_chest",
+        "lootTable": "chest_dungeon"
+      },
+      "description": "หีบรางวัลจากดันเจี้ยน มีโอกาสได้ไอเท็มขั้นดีขึ้นไป",
+      "price": null
+    },
+    {
+      "id": "swim_ring",
+      "name": "ห่วงยางปลาดาว",
+      "category": "key",
+      "icon": "swim_ring",
+      "unlocks": "shallow",
+      "description": "ลงน้ำตื้นได้"
+    },
+    {
+      "id": "leaf_boat",
+      "name": "เรือใบไม้",
+      "category": "key",
+      "icon": "leaf_boat",
+      "unlocks": "deep",
+      "description": "ออกทะเลลึกได้"
+    },
+    {
+      "id": "mushroom_flashlight",
+      "name": "ไฟฉายเห็ด",
+      "category": "key",
+      "icon": "mushroom_flashlight",
+      "unlocks": "cave",
+      "description": "ส่องทางในหุบเขาหินและถ้ำมืดได้ (ต้องมีจึงเข้าโซนหุบเขาหินและถ้ำ)"
+    },
+    {
+      "id": "eco_coin",
+      "name": "เหรียญนิเวศ",
+      "category": "currency",
+      "icon": "eco_coin",
+      "description": "ใช้ซื้อของในร้านค้า"
+    },
+    {
+      "id": "conservation_point",
+      "name": "แต้มอนุรักษ์",
+      "category": "currency",
+      "icon": "conservation_badge",
+      "description": "ได้จากการปล่อยมอนสเตอร์คืนธรรมชาติ ใช้แลกของพิเศษ"
+    }
+  ],
+  "lootTables": [
+    {
+      "id": "chest_basic",
+      "rolls": 2,
+      "entries": [
+        {
+          "item": "honey_potion",
+          "weight": 30,
+          "qty": [
+            1,
+            2
+          ]
+        },
+        {
+          "item": "magnifier",
+          "weight": 15,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "item": "hourglass",
+          "weight": 15,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "item": "hint_scroll",
+          "weight": 15,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "item": "power_candy",
+          "weight": 10,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "item": "leaf_crown",
+          "weight": 2,
+          "qty": [
+            1,
+            1
+          ],
+          "tier": "common"
+        },
+        {
+          "item": "mushroom_hat",
+          "weight": 2,
+          "qty": [
+            1,
+            1
+          ],
+          "tier": "common"
+        },
+        {
+          "item": "feather_headband",
+          "weight": 2,
+          "qty": [
+            1,
+            1
+          ],
+          "tier": "common"
+        },
+        {
+          "item": "shell_helmet",
+          "weight": 2,
+          "qty": [
+            1,
+            1
+          ],
+          "tier": "common"
+        },
+        {
+          "item": "moss_vest",
+          "weight": 2,
+          "qty": [
+            1,
+            1
+          ],
+          "tier": "common"
+        },
+        {
+          "item": "silk_scarf",
+          "weight": 2,
+          "qty": [
+            1,
+            1
+          ],
+          "tier": "common"
+        },
+        {
+          "item": "bark_armor",
+          "weight": 2,
+          "qty": [
+            1,
+            1
+          ],
+          "tier": "common"
+        },
+        {
+          "item": "cloud_cloak",
+          "weight": 2,
+          "qty": [
+            1,
+            1
+          ],
+          "tier": "common"
+        }
+      ]
+    },
+    {
+      "id": "chest_dungeon",
+      "rolls": 3,
+      "entries": [
+        {
+          "item": "golden_honey",
+          "weight": 15,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "item": "revival_seed",
+          "weight": 15,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "item": "power_candy",
+          "weight": 20,
+          "qty": [
+            1,
+            2
+          ]
+        },
+        {
+          "item": "magnifier",
+          "weight": 10,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "item": "explorer_map",
+          "weight": 10,
+          "qty": [
+            1,
+            1
+          ]
+        },
+        {
+          "item": "leaf_crown",
+          "weight": 3,
+          "qty": [
+            1,
+            1
+          ],
+          "tier": "good"
+        },
+        {
+          "item": "mushroom_hat",
+          "weight": 3,
+          "qty": [
+            1,
+            1
+          ],
+          "tier": "good"
+        },
+        {
+          "item": "feather_headband",
+          "weight": 3,
+          "qty": [
+            1,
+            1
+          ],
+          "tier": "good"
+        },
+        {
+          "item": "shell_helmet",
+          "weight": 3,
+          "qty": [
+            1,
+            1
+          ],
+          "tier": "good"
+        },
+        {
+          "item": "moss_vest",
+          "weight": 3,
+          "qty": [
+            1,
+            1
+          ],
+          "tier": "good"
+        },
+        {
+          "item": "silk_scarf",
+          "weight": 3,
+          "qty": [
+            1,
+            1
+          ],
+          "tier": "good"
+        },
+        {
+          "item": "bark_armor",
+          "weight": 3,
+          "qty": [
+            1,
+            1
+          ],
+          "tier": "good"
+        },
+        {
+          "item": "cloud_cloak",
+          "weight": 3,
+          "qty": [
+            1,
+            1
+          ],
+          "tier": "good"
+        },
+        {
+          "item": "leaf_crown",
+          "weight": 1,
+          "qty": [
+            1,
+            1
+          ],
+          "tier": "rare"
+        },
+        {
+          "item": "mushroom_hat",
+          "weight": 1,
+          "qty": [
+            1,
+            1
+          ],
+          "tier": "rare"
+        },
+        {
+          "item": "feather_headband",
+          "weight": 1,
+          "qty": [
+            1,
+            1
+          ],
+          "tier": "rare"
+        },
+        {
+          "item": "shell_helmet",
+          "weight": 1,
+          "qty": [
+            1,
+            1
+          ],
+          "tier": "rare"
+        },
+        {
+          "item": "moss_vest",
+          "weight": 1,
+          "qty": [
+            1,
+            1
+          ],
+          "tier": "rare"
+        },
+        {
+          "item": "silk_scarf",
+          "weight": 1,
+          "qty": [
+            1,
+            1
+          ],
+          "tier": "rare"
+        },
+        {
+          "item": "bark_armor",
+          "weight": 1,
+          "qty": [
+            1,
+            1
+          ],
+          "tier": "rare"
+        },
+        {
+          "item": "cloud_cloak",
+          "weight": 1,
+          "qty": [
+            1,
+            1
+          ],
+          "tier": "rare"
+        },
+        {
+          "item": "knowledge_charm",
+          "weight": 2,
+          "qty": [
+            1,
+            1
+          ],
+          "tier": "common"
+        },
+        {
+          "item": "bolt_charm",
+          "weight": 2,
+          "qty": [
+            1,
+            1
+          ],
+          "tier": "common"
+        }
+      ]
+    }
+  ]
+}

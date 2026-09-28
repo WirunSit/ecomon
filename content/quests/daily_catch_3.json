@@ -1,0 +1,23 @@
+{
+  "id": "daily_catch_3",
+  "type": "daily",
+  "title": "นักสะสม",
+  "description": "ได้มอนสเตอร์ใหม่ 3 ตัว",
+  "giver": "npc_prof_ton",
+  "requires": {
+    "playerLevel": 1,
+    "quests": []
+  },
+  "objectives": [
+    {
+      "kind": "catch",
+      "filter": {},
+      "count": 3
+    }
+  ],
+  "rewards": {
+    "exp": 120,
+    "coins": 70,
+    "items": []
+  }
+}

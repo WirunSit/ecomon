@@ -1,0 +1,36 @@
+{
+  "id": "learn_pop_growth",
+  "type": "learning",
+  "title": "ทบทวน: การเพิ่มของประชากร",
+  "description": "ตอบคำถามหัวข้อ \"การเพิ่มของประชากร\" ให้ถูก 8 ข้อ (จากการต่อสู้ ดันเจี้ยน หรือบททดสอบพัฒนาร่าง)",
+  "giver": "npc_prof_ton",
+  "requires": {
+    "playerLevel": 18,
+    "quests": []
+  },
+  "intro": [
+    "หัวข้อ \"การเพิ่มของประชากร\" ออกสอบบ่อยนะ ลองทบทวนให้แม่นขึ้น"
+  ],
+  "outro": [
+    "เยี่ยม! ทบทวนบ่อย ๆ แล้วจะจำได้ขึ้นใจ"
+  ],
+  "objectives": [
+    {
+      "kind": "answer",
+      "filter": {
+        "topic": "pop_growth"
+      },
+      "correct": 8
+    }
+  ],
+  "rewards": {
+    "exp": 260,
+    "coins": 130,
+    "items": [
+      {
+        "id": "hint_scroll",
+        "qty": 1
+      }
+    ]
+  }
+}

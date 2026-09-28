@@ -1,0 +1,191 @@
+{
+  "zones": [
+    {
+      "id": "village",
+      "name": "หมู่บ้านต้นกล้า",
+      "direction": "กลาง",
+      "terrain": [
+        "land"
+      ],
+      "unlockLevel": 1,
+      "monsterLevel": null,
+      "spawnTables": [],
+      "topics": [],
+      "battleBackground": "meadow",
+      "mapColor": "#d9b77e"
+    },
+    {
+      "id": "meadow",
+      "name": "ทุ่งหญ้าลมหวน",
+      "direction": "ใต้, ตะวันออก",
+      "terrain": [
+        "land"
+      ],
+      "unlockLevel": 1,
+      "monsterLevel": [
+        2,
+        8
+      ],
+      "spawnTables": [
+        "meadow_land"
+      ],
+      "topics": [
+        "eco_components",
+        "food_chain"
+      ],
+      "battleBackground": "meadow",
+      "mapColor": "#8fd16a"
+    },
+    {
+      "id": "forest",
+      "name": "ป่าเห็ดเรืองแสง",
+      "direction": "ตะวันตก",
+      "terrain": [
+        "land"
+      ],
+      "unlockLevel": 3,
+      "monsterLevel": [
+        5,
+        12
+      ],
+      "spawnTables": [
+        "forest_land"
+      ],
+      "topics": [
+        "relationships",
+        "eco_components"
+      ],
+      "dungeons": [
+        "root_cave"
+      ],
+      "battleBackground": "mushroom_forest",
+      "mapColor": "#3f7f45"
+    },
+    {
+      "id": "lake",
+      "name": "บึงบัวและทะเลสาบ",
+      "direction": "ตะวันตกเฉียงเหนือ",
+      "terrain": [
+        "land",
+        "shallow"
+      ],
+      "unlockLevel": 6,
+      "monsterLevel": [
+        8,
+        15
+      ],
+      "spawnTables": [
+        "lake_shallow"
+      ],
+      "topics": [
+        "nutrient_cycles"
+      ],
+      "battleBackground": "lotus_pond",
+      "mapColor": "#6fc6d9"
+    },
+    {
+      "id": "canyon",
+      "name": "หุบเขาหินและถ้ำ",
+      "direction": "เหนือ",
+      "terrain": [
+        "land"
+      ],
+      "unlockLevel": 8,
+      "monsterLevel": [
+        10,
+        18
+      ],
+      "spawnTables": [
+        "canyon_land"
+      ],
+      "topics": [
+        "energy_flow"
+      ],
+      "requiresItem": "mushroom_flashlight",
+      "battleBackground": "rocky_canyon",
+      "mapColor": "#9a948a"
+    },
+    {
+      "id": "volcano",
+      "name": "ภูเขาไฟ",
+      "direction": "ตะวันออกเฉียงเหนือ",
+      "terrain": [
+        "land"
+      ],
+      "unlockLevel": 12,
+      "monsterLevel": [
+        14,
+        22
+      ],
+      "spawnTables": [
+        "volcano_land"
+      ],
+      "topics": [
+        "succession"
+      ],
+      "dungeons": [
+        "dormant_crater"
+      ],
+      "battleBackground": "volcano",
+      "mapColor": "#b0503a"
+    },
+    {
+      "id": "coast",
+      "name": "ชายฝั่งและทะเลลึก",
+      "direction": "ตะวันออกเฉียงใต้",
+      "terrain": [
+        "land",
+        "shallow",
+        "deep"
+      ],
+      "unlockLevel": 14,
+      "monsterLevel": [
+        16,
+        26
+      ],
+      "spawnTables": [
+        "coast_beach",
+        "coast_reef",
+        "coast_vent"
+      ],
+      "topics": [
+        "biomes"
+      ],
+      "dungeons": [
+        "cloud_bay"
+      ],
+      "battleBackground": "beach",
+      "mapColor": "#f2dfa7"
+    },
+    {
+      "id": "valley",
+      "name": "หุบเขาประชากร",
+      "direction": "เหนือสุด",
+      "terrain": [
+        "land",
+        "shallow"
+      ],
+      "unlockLevel": 18,
+      "monsterLevel": [
+        20,
+        30
+      ],
+      "spawnTables": [
+        "valley_land",
+        "valley_pond"
+      ],
+      "topics": [
+        "pop_traits",
+        "pop_estimate",
+        "pop_growth",
+        "human_pop",
+        "conservation"
+      ],
+      "dungeons": [
+        "balance_temple"
+      ],
+      "battleBackground": "meadow",
+      "mapColor": "#e2c65a"
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "id": "tanmeow",
+  "dex": 2,
+  "rarity": "normal",
+  "elements": [
+    "pyro"
+  ],
+  "role": "consumer",
+  "habitat": "land",
+  "archetype": "attacker",
+  "baseStats": {
+    "hp": 65,
+    "atk": 100,
+    "def": 55,
+    "spd": 80
+  },
+  "forms": [
+    {
+      "form": 1,
+      "name": "ถ่านเหมียว",
+      "minLevel": 1,
+      "sprite": "tanmeow_f1"
+    },
+    {
+      "form": 2,
+      "name": "ถ่านเสือ",
+      "minLevel": 16,
+      "sprite": "tanmeow_f2"
+    },
+    {
+      "form": 3,
+      "name": "อัคคีพยัคฆ์",
+      "minLevel": 36,
+      "sprite": "tanmeow_f3"
+    }
+  ],
+  "learnset": [
+    {
+      "level": 1,
+      "move": "pyro_basic"
+    },
+    {
+      "level": 8,
+      "move": "pyro_mid"
+    },
+    {
+      "level": 16,
+      "move": "pyro_adv"
+    },
+    {
+      "level": 36,
+      "move": "sig_flame_tail_spin"
+    }
+  ],
+  "habitatHint": "พบที่เชิงภูเขาไฟ",
+  "dexFact": "ผู้บริโภคลำดับสูงได้รับพลังงานเพียงส่วนน้อยจากผู้ผลิต เพราะพลังงานสูญเสียไปราว 90% ในแต่ละลำดับขั้น",
+  "factTopic": "energy_flow",
+  "enabled": true,
+  "addedInVersion": "1.0"
+}

@@ -1,0 +1,56 @@
+{
+  "id": "main_04_lake_cycles",
+  "type": "main",
+  "title": "วัฏจักรใต้บึงบัว",
+  "description": "น้ำในบึงบัวเริ่มขุ่น ศึกษาวัฏจักรของน้ำ คาร์บอน ไนโตรเจน และฟอสฟอรัส เพื่อหาสาเหตุ",
+  "giver": "npc_ranger",
+  "zone": "lake",
+  "requires": {
+    "playerLevel": 6,
+    "quests": [
+      "main_03_forest_partners"
+    ]
+  },
+  "intro": [
+    "บึงบัวเริ่มมีสาหร่ายเต็มผิวน้ำ อาจเป็นเพราะธาตุอาหารมากเกินไป",
+    "สวมห่วงยางแล้วลงไปสำรวจมอนสเตอร์ในน้ำ พร้อมทบทวนวัฏจักรสารนะ"
+  ],
+  "outro": [
+    "วัฏจักรสารหมุนเวียนสารระหว่างสิ่งมีชีวิตกับสิ่งแวดล้อมไม่รู้จบ",
+    "นี่คือไฟฉายเห็ด ใช้ส่องทางในหุบเขาหินทางเหนือ และฉันบันทึกสูตรผสมของไพรวัลย์ให้แล้ว"
+  ],
+  "objectives": [
+    {
+      "kind": "reach",
+      "zone": "lake"
+    },
+    {
+      "kind": "catch",
+      "filter": {
+        "zone": "lake",
+        "habitat": "water"
+      },
+      "count": 2
+    },
+    {
+      "kind": "answer",
+      "filter": {
+        "topic": "nutrient_cycles"
+      },
+      "correct": 6
+    }
+  ],
+  "rewards": {
+    "exp": 350,
+    "coins": 150,
+    "items": [
+      {
+        "id": "mushroom_flashlight",
+        "qty": 1
+      }
+    ],
+    "unlockRecipes": [
+      "praiwan"
+    ]
+  }
+}

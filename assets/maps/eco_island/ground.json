@@ -1,0 +1,51 @@
+{
+ "map": "eco_island",
+ "width": 5120,
+ "height": 3840,
+ "tileSize": 32,
+ "chunks": [
+  {
+   "x": 0,
+   "y": 0,
+   "w": 2048,
+   "h": 2048,
+   "file": "ground_0_0.webp"
+  },
+  {
+   "x": 2048,
+   "y": 0,
+   "w": 2048,
+   "h": 2048,
+   "file": "ground_1_0.webp"
+  },
+  {
+   "x": 4096,
+   "y": 0,
+   "w": 1024,
+   "h": 2048,
+   "file": "ground_2_0.webp"
+  },
+  {
+   "x": 0,
+   "y": 2048,
+   "w": 2048,
+   "h": 1792,
+   "file": "ground_0_1.webp"
+  },
+  {
+   "x": 2048,
+   "y": 2048,
+   "w": 2048,
+   "h": 1792,
+   "file": "ground_1_1.webp"
+  },
+  {
+   "x": 4096,
+   "y": 2048,
+   "w": 1024,
+   "h": 1792,
+   "file": "ground_2_1.webp"
+  }
+ ],
+ "source": "dd83cfc2498928479f81bf5ca8da8a808a7358be"
+}

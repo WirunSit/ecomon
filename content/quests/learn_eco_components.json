@@ -1,0 +1,36 @@
+{
+  "id": "learn_eco_components",
+  "type": "learning",
+  "title": "ทบทวน: องค์ประกอบของระบบนิเวศ",
+  "description": "ตอบคำถามหัวข้อ \"องค์ประกอบของระบบนิเวศ\" ให้ถูก 8 ข้อ (จากการต่อสู้ ดันเจี้ยน หรือบททดสอบพัฒนาร่าง)",
+  "giver": "npc_prof_ton",
+  "requires": {
+    "playerLevel": 1,
+    "quests": []
+  },
+  "intro": [
+    "หัวข้อ \"องค์ประกอบของระบบนิเวศ\" ออกสอบบ่อยนะ ลองทบทวนให้แม่นขึ้น"
+  ],
+  "outro": [
+    "เยี่ยม! ทบทวนบ่อย ๆ แล้วจะจำได้ขึ้นใจ"
+  ],
+  "objectives": [
+    {
+      "kind": "answer",
+      "filter": {
+        "topic": "eco_components"
+      },
+      "correct": 8
+    }
+  ],
+  "rewards": {
+    "exp": 90,
+    "coins": 45,
+    "items": [
+      {
+        "id": "hint_scroll",
+        "qty": 1
+      }
+    ]
+  }
+}

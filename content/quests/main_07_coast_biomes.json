@@ -1,0 +1,56 @@
+{
+  "id": "main_07_coast_biomes",
+  "type": "main",
+  "title": "ทะเลที่หลากหลาย",
+  "description": "ชายฝั่งและทะเลลึกมีระบบนิเวศต่างกันมาก สำรวจไบโอมและระบบนิเวศแหล่งน้ำกับลุงชล",
+  "giver": "npc_fisherman",
+  "zone": "coast",
+  "requires": {
+    "playerLevel": 14,
+    "quests": [
+      "main_06_volcano_succession"
+    ]
+  },
+  "intro": [
+    "ทะเลแถวนี้มีทั้งหาดทราย แนวปะการัง และปล่องน้ำร้อนใต้ทะเล",
+    "แต่ละที่มีสิ่งมีชีวิตไม่เหมือนกันเลย ช่วยลุงสำรวจหน่อยนะหลาน"
+  ],
+  "outro": [
+    "เก่งจริง ๆ! ระบบนิเวศแหล่งน้ำก็หลากหลายไม่แพ้บนบก",
+    "ลุงให้สูตรผสมนภาวาฬไว้ ผู้เฒ่าที่วิหารสมดุลทางเหนือสุดอยากพบหลานแล้ว"
+  ],
+  "objectives": [
+    {
+      "kind": "reach",
+      "zone": "coast"
+    },
+    {
+      "kind": "catch",
+      "filter": {
+        "habitat": "water",
+        "distinctSpecies": true
+      },
+      "count": 3
+    },
+    {
+      "kind": "answer",
+      "filter": {
+        "topic": "biomes"
+      },
+      "correct": 6
+    }
+  ],
+  "rewards": {
+    "exp": 800,
+    "coins": 300,
+    "items": [
+      {
+        "id": "golden_honey",
+        "qty": 2
+      }
+    ],
+    "unlockRecipes": [
+      "napawan"
+    ]
+  }
+}

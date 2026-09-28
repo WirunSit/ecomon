@@ -1,0 +1,16 @@
+.git
+node_modules
+**/node_modules
+client/dist
+server/data
+*.sqlite
+*.sqlite-*
+.env
+.env.*
+!.env.example
+# sheet ดิบจาก GPT ใหญ่และไม่ใช้ตอนรัน (ภาพที่ตัดแล้วอยู่ใน assets/) — เก็บ terrain.yaml/manifest.yaml ไว้ให้ validate
+asset-src/*.png
+asset-src/*.webp
+asset-src/_preview
+coverage
+*.log

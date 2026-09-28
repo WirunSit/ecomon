@@ -1,0 +1,36 @@
+{
+  "id": "learn_food_chain",
+  "type": "learning",
+  "title": "ทบทวน: ห่วงโซ่และสายใยอาหาร",
+  "description": "ตอบคำถามหัวข้อ \"ห่วงโซ่และสายใยอาหาร\" ให้ถูก 8 ข้อ (จากการต่อสู้ ดันเจี้ยน หรือบททดสอบพัฒนาร่าง)",
+  "giver": "npc_prof_ton",
+  "requires": {
+    "playerLevel": 1,
+    "quests": []
+  },
+  "intro": [
+    "หัวข้อ \"ห่วงโซ่และสายใยอาหาร\" ออกสอบบ่อยนะ ลองทบทวนให้แม่นขึ้น"
+  ],
+  "outro": [
+    "เยี่ยม! ทบทวนบ่อย ๆ แล้วจะจำได้ขึ้นใจ"
+  ],
+  "objectives": [
+    {
+      "kind": "answer",
+      "filter": {
+        "topic": "food_chain"
+      },
+      "correct": 8
+    }
+  ],
+  "rewards": {
+    "exp": 90,
+    "coins": 45,
+    "items": [
+      {
+        "id": "hint_scroll",
+        "qty": 1
+      }
+    ]
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "id": "col_six_elements",
+  "type": "collection",
+  "title": "ครบหกธาตุ",
+  "description": "จับมอนสเตอร์ให้ครบทั้ง 6 ธาตุ อย่างละ 1 ตัว",
+  "giver": "npc_prof_ton",
+  "zone": "village",
+  "requires": {
+    "playerLevel": 10,
+    "quests": []
+  },
+  "objectives": [
+    {
+      "kind": "catch",
+      "filter": {
+        "element": "aqua"
+      },
+      "count": 1
+    },
+    {
+      "kind": "catch",
+      "filter": {
+        "element": "pyro"
+      },
+      "count": 1
+    },
+    {
+      "kind": "catch",
+      "filter": {
+        "element": "flora"
+      },
+      "count": 1
+    },
+    {
+      "kind": "catch",
+      "filter": {
+        "element": "terra"
+      },
+      "count": 1
+    },
+    {
+      "kind": "catch",
+      "filter": {
+        "element": "aero"
+      },
+      "count": 1
+    },
+    {
+      "kind": "catch",
+      "filter": {
+        "element": "spore"
+      },
+      "count": 1
+    }
+  ],
+  "rewards": {
+    "exp": 500,
+    "coins": 250,
+    "items": [
+      {
+        "id": "treasure_chest",
+        "qty": 1
+      }
+    ]
+  }
+}

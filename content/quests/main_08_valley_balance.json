@@ -1,0 +1,72 @@
+{
+  "id": "main_08_valley_balance",
+  "type": "main",
+  "title": "ปลุกผู้พิทักษ์แห่งสมดุล",
+  "description": "หุบเขาประชากรคือที่ตั้งของวิหารสมดุล เข้าใจประชากรและการอนุรักษ์ แล้วปลุกผู้พิทักษ์ให้ตื่นขึ้น",
+  "giver": "npc_temple_elder",
+  "zone": "valley",
+  "requires": {
+    "playerLevel": 18,
+    "quests": [
+      "main_07_coast_biomes"
+    ]
+  },
+  "intro": [
+    "เจ้ามาถึงแล้ว นักนิเวศ… ผู้พิทักษ์ทั้งสามหลับใหลอยู่ในวิหารสมดุล",
+    "จะปลุกพวกเขาได้ ต้องเข้าใจประชากร การเพิ่มของประชากร และการอนุรักษ์",
+    "เมื่อพร้อม (เลเวล 25) จงเข้าวิหารพร้อมเพื่อน แล้วปลดปล่อยผู้พิทักษ์จากมลพิษ"
+  ],
+  "outro": [
+    "ผู้พิทักษ์ตื่นแล้ว… เกาะนิเวศากลับมาสมดุลอีกครั้ง",
+    "ข้าบันทึกสูตรผสมของผู้พิทักษ์ทั้งสามไว้ให้เจ้า จงดูแลเกาะนี้ต่อไป"
+  ],
+  "objectives": [
+    {
+      "kind": "reach",
+      "zone": "valley"
+    },
+    {
+      "kind": "answer",
+      "filter": {
+        "topic": "pop_estimate"
+      },
+      "correct": 5
+    },
+    {
+      "kind": "answer",
+      "filter": {
+        "topic": "pop_growth"
+      },
+      "correct": 5
+    },
+    {
+      "kind": "answer",
+      "filter": {
+        "topic": "conservation"
+      },
+      "correct": 5
+    },
+    {
+      "kind": "dungeon",
+      "filter": {
+        "dungeon": "balance_temple"
+      },
+      "count": 1
+    }
+  ],
+  "rewards": {
+    "exp": 1500,
+    "coins": 600,
+    "items": [
+      {
+        "id": "treasure_chest",
+        "qty": 2
+      }
+    ],
+    "unlockRecipes": [
+      "gaiara",
+      "varithara",
+      "suriya"
+    ]
+  }
+}

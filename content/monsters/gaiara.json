@@ -1,0 +1,61 @@
+{
+  "id": "gaiara",
+  "dex": 16,
+  "rarity": "legend",
+  "elements": [
+    "flora",
+    "terra"
+  ],
+  "role": "guardian",
+  "habitat": "land",
+  "archetype": "tank",
+  "baseStats": {
+    "hp": 100,
+    "atk": 60,
+    "def": 95,
+    "spd": 45
+  },
+  "forms": [
+    {
+      "form": 1,
+      "name": "ไกอาน้อย",
+      "minLevel": 1,
+      "sprite": "gaiara_f1"
+    },
+    {
+      "form": 2,
+      "name": "ไกอาร่า",
+      "minLevel": 16,
+      "sprite": "gaiara_f2"
+    },
+    {
+      "form": 3,
+      "name": "ไกอาร่าผืนพงไพร",
+      "minLevel": 36,
+      "sprite": "gaiara_f3"
+    }
+  ],
+  "learnset": [
+    {
+      "level": 1,
+      "move": "flora_basic"
+    },
+    {
+      "level": 8,
+      "move": "terra_mid"
+    },
+    {
+      "level": 16,
+      "move": "flora_adv"
+    },
+    {
+      "level": 36,
+      "move": "sig_forest_rebirth"
+    }
+  ],
+  "habitatHint": "ผู้พิทักษ์แห่งชีวิต หลับใหลอยู่ในวิหารสมดุล",
+  "dexFact": "สังคมสมบูรณ์ (climax community) คือระยะสุดท้ายของการเปลี่ยนแปลงแทนที่ ที่ระบบนิเวศค่อนข้างคงที่",
+  "factTopic": "succession",
+  "enabled": true,
+  "addedInVersion": "1.0"
+}

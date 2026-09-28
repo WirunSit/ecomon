@@ -1,0 +1,25 @@
+{
+  "id": "daily_food_web_5",
+  "type": "daily",
+  "title": "สายใยอาหารวันนี้",
+  "description": "ตอบคำถามเรื่องห่วงโซ่และสายใยอาหารให้ถูก 5 ข้อ",
+  "giver": "npc_prof_ton",
+  "requires": {
+    "playerLevel": 1,
+    "quests": []
+  },
+  "objectives": [
+    {
+      "kind": "answer",
+      "filter": {
+        "topic": "food_chain"
+      },
+      "correct": 5
+    }
+  ],
+  "rewards": {
+    "exp": 120,
+    "coins": 60,
+    "items": []
+  }
+}
